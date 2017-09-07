@@ -31,6 +31,12 @@ import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.MultiProcessor;
 import com.google.android.gms.vision.Tracker;
@@ -45,7 +51,7 @@ import au.edu.unimelb.mc.trippal.R;
  * Activity for the face tracker app.  This app detects faces with the rear facing camera, and draws
  * overlay graphics to indicate the position, size, and ID of each face.
  */
-public final class FaceTrackerActivity extends AppCompatActivity {
+public final class FaceTrackerActivity extends AppCompatActivity implements OnMapReadyCallback {
     private static final String TAG = "FaceTracker";
     private static final int RC_HANDLE_GMS = 9001;
     // permission request codes need to be < 256
@@ -56,6 +62,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
     private TextView blinkText;
     private TextView eyeStatus;
     private int blinkCount = 0;
+    private GoogleMap mMap;
 
     //==============================================================================================
     // Activity Methods
@@ -73,6 +80,10 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         mGraphicOverlay = (GraphicOverlay) findViewById(R.id.faceOverlay);*/
         blinkText = (TextView) findViewById(R.id.blinkText);
         eyeStatus = (TextView) findViewById(R.id.eyeStatus);
+
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
 
         // Check for the camera permission before accessing the camera.  If the
         // permission is not granted yet, request permission.
@@ -281,6 +292,17 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             mCameraSource.release();
             mCameraSource = null;
         }
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+
+        // Add a marker in Sydney and move the camera
+        LatLng sydney = new LatLng(-34, 151);
+        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(10f));
     }
 
     //==============================================================================================
