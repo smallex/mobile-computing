@@ -85,6 +85,9 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        // test azure api
+        AzureExample test = new AzureExample(this);
+        test.sendRequest();
         // Check for the camera permission before accessing the camera.  If the
         // permission is not granted yet, request permission.
         int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
