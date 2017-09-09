@@ -21,6 +21,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -46,6 +47,7 @@ import com.google.android.gms.vision.face.FaceDetector;
 import java.io.IOException;
 
 import au.edu.unimelb.mc.trippal.R;
+import au.edu.unimelb.mc.trippal.recommendations.Recommendations;
 
 /**
  * Activity for the face tracker app.  This app detects faces with the rear facing camera, and draws
@@ -189,6 +191,7 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
     protected void onPause() {
         super.onPause();
         //mPreview.stop();
+        mCameraSource.release();
     }
 
     /**
@@ -251,6 +254,11 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
                 .setPositiveButton(R
                         .string.ok, listener)
                 .show();
+    }
+
+    public void openRecommendations(View view) {
+        Intent intent = new Intent(FaceTrackerActivity.this, Recommendations.class);
+        startActivity(intent);
     }
 
     //==============================================================================================
