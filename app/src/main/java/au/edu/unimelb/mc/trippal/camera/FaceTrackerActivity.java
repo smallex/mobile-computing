@@ -170,7 +170,6 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
             mCameraSource.start();
         } catch (IOException e) {
             mCameraSource.release();
-            mCameraSource = null;
         }
     }
 
@@ -191,7 +190,7 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
     protected void onPause() {
         super.onPause();
         //mPreview.stop();
-        mCameraSource.release();
+        mCameraSource.stop();
     }
 
     /**
