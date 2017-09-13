@@ -6,4 +6,5 @@
     <string name="low_storage_error">Face detector dependencies cannot be downloaded due to low device storage</string>
     <string name="title_activity_maps">Map</string>
     <string name="title_activity_recommendations">Recommendations</string>
+    <string name="title_activity_new_trip">New Trip</string>
 </resources>

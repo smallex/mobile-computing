@@ -65,6 +65,7 @@
                     android:drawablePadding="7dp"
                     android:layout_gravity="fill_horizontal"
                     android:padding="3dp"
+                    android:layout_marginLeft="10dp"
                     android:text="Fatigue"
                     android:textSize="18sp"/>
 
@@ -87,6 +88,7 @@
                     android:drawablePadding="7dp"
                     android:layout_gravity="fill_horizontal"
                     android:padding="3dp"
+                    android:layout_marginLeft="10dp"
                     android:text="200 km"
                     android:textSize="18sp"/>
             </GridLayout>
