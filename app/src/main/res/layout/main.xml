@@ -8,45 +8,81 @@
     android:keepScreenOn="true"
     android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/blinkText"
+    <android.support.v7.widget.CardView
+        android:id="@+id/cv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Blinking count:"
-        android:textSize="30dp"
-        android:padding="10dp"
-        android:gravity="center"/>
-    <TextView
-        android:id="@+id/currentTime"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Driving Time: 00:00:00"
-        android:textSize="30dp"
-        android:padding="10dp"
-        android:gravity="center"/>
+        android:layout_margin="5dp"
+        >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="5dp">
+
+            <GridLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:columnCount="2"
+                android:rowCount="1">
+
+                <TextView
+                    android:id="@+id/currentTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableLeft="@drawable/time"
+                    android:gravity="center"
+                    android:padding="10dp"
+                    android:text="4 hours 2 minutes"
+                    android:drawablePadding="4dp"
+                    android:textSize="18sp"/>
+
+                <TextView
+                    android:id="@+id/blinkText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:padding="10dp"
+                    android:drawableLeft="@drawable/head"
+                    android:text="Fatigue"
+                    android:layout_gravity="center_horizontal"
+                    android:drawablePadding="4dp"
+                    android:textSize="18sp"/>
+            </GridLayout>
+
+        </LinearLayout>
+
+    </android.support.v7.widget.CardView>
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+
         <fragment xmlns:android="http://schemas.android.com/apk/res/android"
                   android:id="@+id/map"
                   android:name="com.google.android.gms.maps.SupportMapFragment"
                   android:layout_width="match_parent"
                   android:layout_height="match_parent"/>
+
         <Button
             android:id="@+id/button2"
+            style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:onClick="openRecommendations"
-            android:text="Take A Break"/>
+            android:text="Take A Break"
+            android:theme="@style/MyTheme"/>
     </RelativeLayout>
+
     <TextView
         android:id="@+id/eyeStatus"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center"
         android:text="Eye status"
         android:textSize="30dp"
-        android:gravity="center"
         android:visibility="gone"/>
 
     <!--<au.edu.unimelb.mc.trippal.camera.CameraSourcePreview

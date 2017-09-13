@@ -26,7 +26,7 @@
         android:hardwareAccelerated="true"
         android:icon="@drawable/icon"
         android:label="TripPal"
-        android:theme="@style/Theme.AppCompat">
+        android:theme="@style/MyTheme">
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
@@ -38,8 +38,7 @@
             android:name=".camera.FaceTrackerActivity"
             android:icon="@drawable/icon"
             android:label="TripPal"
-            android:screenOrientation="fullSensor"
-            android:theme="@style/Theme.AppCompat.Light">
+            android:screenOrientation="fullSensor">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

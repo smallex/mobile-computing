@@ -369,7 +369,8 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
             FaceTrackerActivity.this.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    blinkText.setText("Blinking Count: " + blinkCount);
+                    String text = blinkCount > 10 ? "HIGH" : "LOW";
+                    blinkText.setText(text);
                     eyeStatus.setText("Left eye: " + leftProb + " Right eye: " + rightProb);
                 }
             });
