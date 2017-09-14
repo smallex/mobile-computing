@@ -115,13 +115,14 @@
         android:layout_height="wrap_content">
 
         <Button
-            android:id="@+id/createTripButton"
+            android:id="@+id/startNewTripButton"
             style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:onClick="startNewTrip"
             android:text="Start New Trip"
+            android:enabled="false"
             android:theme="@style/MyTheme"/>
     </RelativeLayout>
 </LinearLayout>

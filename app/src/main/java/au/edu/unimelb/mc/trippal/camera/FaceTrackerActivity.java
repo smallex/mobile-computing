@@ -23,6 +23,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -38,6 +42,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.MultiProcessor;
 import com.google.android.gms.vision.Tracker;
@@ -58,6 +63,7 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
     private static final int RC_HANDLE_GMS = 9001;
     // permission request codes need to be < 256
     private static final int RC_HANDLE_CAMERA_PERM = 2;
+    private static final int MY_PERMISSIONS_REQUEST_LOCATION = 1;
     private CameraSource mCameraSource = null;
     /*private CameraSourcePreview mPreview;
     private GraphicOverlay mGraphicOverlay;*/
@@ -65,6 +71,10 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
     private TextView eyeStatus;
     private int blinkCount = 0;
     private GoogleMap mMap;
+    private LatLng destinationLatLng;
+    private String destinationName;
+    private LatLng startingLatLng;
+    private LocationManager locationManager;
 
     //==============================================================================================
     // Activity Methods
@@ -83,6 +93,16 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
         blinkText = (TextView) findViewById(R.id.blinkText);
         eyeStatus = (TextView) findViewById(R.id.eyeStatus);
 
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            this.destinationName = extras.getString("destinationName");
+            setTitle("Trip to " + this.destinationName);
+            double lat = extras.getDouble("destinationLat");
+            double lng = extras.getDouble("destinationLng");
+            this.destinationLatLng = new LatLng(lat, lng);
+        }
+        requestCurrentLocation();
+
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -95,6 +115,23 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
         } else {
             requestCameraPermission();
         }
+    }
+
+    private void requestCurrentLocation() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) !=
+                PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission
+                    .ACCESS_FINE_LOCATION}, MY_PERMISSIONS_REQUEST_LOCATION);
+            return;
+        }
+        locationManager = (LocationManager) this.getSystemService(Context
+                .LOCATION_SERVICE);
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, new
+                MyLocationListenerGPS());
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, new
+                MyLocationListenerGPS());
+        Log.d("TripPal", "Requesting current location");
     }
 
     /**
@@ -224,6 +261,23 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[]
             grantResults) {
+        Log.d("TripPal", "requestCode == " + requestCode);
+        if (requestCode == MY_PERMISSIONS_REQUEST_LOCATION) {
+            Log.d("TripPal", "requestCode == 1");
+
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission
+                    .ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat
+                    .checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) !=
+                    PackageManager.PERMISSION_GRANTED) {
+                Log.d("TripPal", "Location permission not granted");
+                return;
+            }
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 400, 0, new
+                    MyLocationListenerGPS());
+            Log.d("TripPal", "requestLocationUpdates");
+            return;
+        }
+
         if (requestCode != RC_HANDLE_CAMERA_PERM) {
             Log.d(TAG, "Got unexpected permission result: " + requestCode);
             super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -259,10 +313,6 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
         Intent intent = new Intent(FaceTrackerActivity.this, Recommendations.class);
         startActivity(intent);
     }
-
-    //==============================================================================================
-    // Camera Source Preview
-    //==============================================================================================
 
     /**
      * Starts or restarts the camera source, if it exists.  If the camera source doesn't exist yet
@@ -301,15 +351,59 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
         }
     }
 
+    //==============================================================================================
+    // Camera Source Preview
+    //==============================================================================================
+
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        mMap.addMarker(new MarkerOptions().position(this.destinationLatLng).title(this
+                .destinationName));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(this.destinationLatLng));
         mMap.animateCamera(CameraUpdateFactory.zoomTo(10f));
+        mMap.setPadding(0, 0, 0, 120);
+
+        if (this.startingLatLng != null) {
+            mMap.addMarker(new MarkerOptions().position(FaceTrackerActivity.this
+                    .startingLatLng).title("Start"));
+            mMap.addPolyline(new PolylineOptions().add(FaceTrackerActivity.this
+                    .startingLatLng, FaceTrackerActivity.this.destinationLatLng)
+                    .width(5).color(Color.RED));
+        }
+    }
+
+    private class MyLocationListenerGPS implements LocationListener {
+        @Override
+        public void onLocationChanged(Location location) {
+            FaceTrackerActivity.this.startingLatLng = new LatLng(location.getLatitude(),
+                    location.getLongitude());
+            if (mMap != null) {
+                mMap.addMarker(new MarkerOptions().position(FaceTrackerActivity.this
+                        .startingLatLng).title("Start"));
+                mMap.addPolyline(new PolylineOptions().add(FaceTrackerActivity.this
+                        .startingLatLng, FaceTrackerActivity.this.destinationLatLng)
+                .width(5).color(Color.RED));
+            }
+            Log.d("TripPal", "Location: " + FaceTrackerActivity.this.startingLatLng);
+            locationManager.removeUpdates(this);
+        }
+
+        @Override
+        public void onStatusChanged(String s, int i, Bundle bundle) {
+
+        }
+
+        @Override
+        public void onProviderEnabled(String s) {
+
+        }
+
+        @Override
+        public void onProviderDisabled(String s) {
+
+        }
     }
 
     //==============================================================================================

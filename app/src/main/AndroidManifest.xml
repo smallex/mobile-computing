@@ -59,8 +59,8 @@
 
         <activity
             android:name=".NewTripActivity"
-            android:label="@string/title_activity_new_trip">
-            <intent-filter>
+            android:label="TripPal">
+            <intent-filter android:label="TripPal">
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
