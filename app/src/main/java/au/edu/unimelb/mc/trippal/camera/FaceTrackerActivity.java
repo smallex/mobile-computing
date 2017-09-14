@@ -55,10 +55,6 @@ import java.io.IOException;
 import au.edu.unimelb.mc.trippal.R;
 import au.edu.unimelb.mc.trippal.recommendations.Recommendations;
 
-/**
- * Activity for the face tracker app.  This app detects faces with the rear facing camera, and draws
- * overlay graphics to indicate the position, size, and ID of each face.
- */
 public final class FaceTrackerActivity extends AppCompatActivity implements OnMapReadyCallback {
     private static final String TAG = "FaceTracker";
     private static final int RC_HANDLE_GMS = 9001;
@@ -66,16 +62,17 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
     private static final int RC_HANDLE_CAMERA_PERM = 2;
     private static final int MY_PERMISSIONS_REQUEST_LOCATION = 1;
     private CameraSource mCameraSource = null;
-    /*private CameraSourcePreview mPreview;
-    private GraphicOverlay mGraphicOverlay;*/
+
+    private GoogleMap mMap;
+    private LocationManager locationManager;
+
     private TextView blinkText;
     private TextView eyeStatus;
+
     private int blinkCount = 0;
-    private GoogleMap mMap;
     private LatLng destinationLatLng;
     private String destinationName;
     private LatLng startingLatLng;
-    private LocationManager locationManager;
     private LatLng currentLocation;
 
     //==============================================================================================
@@ -90,8 +87,6 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
         super.onCreate(icicle);
         setContentView(R.layout.main);
 
-        /*mPreview = (CameraSourcePreview) findViewById(R.id.preview);
-        mGraphicOverlay = (GraphicOverlay) findViewById(R.id.faceOverlay);*/
         blinkText = (TextView) findViewById(R.id.blinkText);
         eyeStatus = (TextView) findViewById(R.id.eyeStatus);
 
@@ -161,11 +156,6 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
                         RC_HANDLE_CAMERA_PERM);
             }
         };
-
-        /*Snackbar.make(mGraphicOverlay, R.string.permission_camera_rationale,
-                Snackbar.LENGTH_INDEFINITE)
-                .setAction(R.string.ok, listener)
-                .show();*/
     }
 
     /**
@@ -332,15 +322,6 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
             dlg.show();
         }
 
-        /*if (mCameraSource != null) {
-            try {
-                mPreview.start(mCameraSource, mGraphicOverlay);
-            } catch (IOException e) {
-                Log.e(TAG, "Unable to start camera source.", e);
-                mCameraSource.release();
-                mCameraSource = null;
-            }
-        }*/
         try {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) !=
                     PackageManager.PERMISSION_GRANTED) {
@@ -449,7 +430,6 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
 
         GraphicFaceTracker(GraphicOverlay overlay, TextView blinkText) {
             mOverlay = overlay;
-            //mFaceGraphic = new FaceGraphic(overlay);
             this.blinkText = blinkText;
         }
 
@@ -458,7 +438,6 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
          */
         @Override
         public void onNewItem(int faceId, Face item) {
-            //mFaceGraphic.setId(faceId);
         }
 
         /**
@@ -493,7 +472,6 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
          */
         @Override
         public void onMissing(FaceDetector.Detections<Face> detectionResults) {
-            //mOverlay.remove(mFaceGraphic);
         }
 
         /**
@@ -502,7 +480,6 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
          */
         @Override
         public void onDone() {
-            //mOverlay.remove(mFaceGraphic);
         }
     }
 }
