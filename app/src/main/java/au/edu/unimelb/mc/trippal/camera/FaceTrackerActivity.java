@@ -40,6 +40,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -75,6 +76,7 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
     private String destinationName;
     private LatLng startingLatLng;
     private LocationManager locationManager;
+    private LatLng currentLocation;
 
     //==============================================================================================
     // Activity Methods
@@ -127,9 +129,9 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
         }
         locationManager = (LocationManager) this.getSystemService(Context
                 .LOCATION_SERVICE);
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, new
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 500, 0, new
                 MyLocationListenerGPS());
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, new
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 500, 0, new
                 MyLocationListenerGPS());
         Log.d("TripPal", "Requesting current location");
     }
@@ -360,34 +362,48 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
         mMap = googleMap;
 
         mMap.addMarker(new MarkerOptions().position(this.destinationLatLng).title(this
-                .destinationName));
+                .destinationName).icon(BitmapDescriptorFactory.fromResource(R.drawable
+                .blue_marker)));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(this.destinationLatLng));
         mMap.animateCamera(CameraUpdateFactory.zoomTo(10f));
         mMap.setPadding(0, 0, 0, 120);
 
         if (this.startingLatLng != null) {
-            mMap.addMarker(new MarkerOptions().position(FaceTrackerActivity.this
-                    .startingLatLng).title("Start"));
-            mMap.addPolyline(new PolylineOptions().add(FaceTrackerActivity.this
-                    .startingLatLng, FaceTrackerActivity.this.destinationLatLng)
-                    .width(5).color(Color.RED));
+            createStartToDestinationMarkers();
+        }
+    }
+
+    private void createStartToDestinationMarkers() {
+        mMap.addMarker(new MarkerOptions().position(FaceTrackerActivity.this
+                .startingLatLng).title("Start").icon(BitmapDescriptorFactory.fromResource(R
+                .drawable.red_marker)));
+        mMap.addPolyline(new PolylineOptions().add(FaceTrackerActivity.this
+                .startingLatLng, FaceTrackerActivity.this.destinationLatLng)
+                .width(5).color(Color.RED));
+    }
+
+    private void updateCurrentLocationMarker() {
+        if (mMap != null) {
+            mMap.addMarker(new MarkerOptions().position(this.currentLocation).title("Current " +
+                    "Location").icon(BitmapDescriptorFactory.fromResource(R.drawable.car)));
         }
     }
 
     private class MyLocationListenerGPS implements LocationListener {
         @Override
         public void onLocationChanged(Location location) {
-            FaceTrackerActivity.this.startingLatLng = new LatLng(location.getLatitude(),
-                    location.getLongitude());
-            if (mMap != null) {
-                mMap.addMarker(new MarkerOptions().position(FaceTrackerActivity.this
-                        .startingLatLng).title("Start"));
-                mMap.addPolyline(new PolylineOptions().add(FaceTrackerActivity.this
-                        .startingLatLng, FaceTrackerActivity.this.destinationLatLng)
-                .width(5).color(Color.RED));
+            if (startingLatLng == null) {
+                FaceTrackerActivity.this.startingLatLng = new LatLng(location.getLatitude(),
+                        location.getLongitude());
+                if (mMap != null) {
+                    createStartToDestinationMarkers();
+                }
+                Log.d("TripPal", "Location: " + FaceTrackerActivity.this.startingLatLng);
+            } else {
+                FaceTrackerActivity.this.currentLocation = new LatLng(location.getLatitude(),
+                        location.getLongitude());
+                updateCurrentLocationMarker();
             }
-            Log.d("TripPal", "Location: " + FaceTrackerActivity.this.startingLatLng);
-            locationManager.removeUpdates(this);
         }
 
         @Override
