@@ -40,6 +40,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -54,10 +55,6 @@ import java.io.IOException;
 import au.edu.unimelb.mc.trippal.R;
 import au.edu.unimelb.mc.trippal.recommendations.Recommendations;
 
-/**
- * Activity for the face tracker app.  This app detects faces with the rear facing camera, and draws
- * overlay graphics to indicate the position, size, and ID of each face.
- */
 public final class FaceTrackerActivity extends AppCompatActivity implements OnMapReadyCallback {
     private static final String TAG = "FaceTracker";
     private static final int RC_HANDLE_GMS = 9001;
@@ -65,16 +62,18 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
     private static final int RC_HANDLE_CAMERA_PERM = 2;
     private static final int MY_PERMISSIONS_REQUEST_LOCATION = 1;
     private CameraSource mCameraSource = null;
-    /*private CameraSourcePreview mPreview;
-    private GraphicOverlay mGraphicOverlay;*/
+
+    private GoogleMap mMap;
+    private LocationManager locationManager;
+
     private TextView blinkText;
     private TextView eyeStatus;
+
     private int blinkCount = 0;
-    private GoogleMap mMap;
     private LatLng destinationLatLng;
     private String destinationName;
     private LatLng startingLatLng;
-    private LocationManager locationManager;
+    private LatLng currentLocation;
 
     //==============================================================================================
     // Activity Methods
@@ -88,8 +87,6 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
         super.onCreate(icicle);
         setContentView(R.layout.main);
 
-        /*mPreview = (CameraSourcePreview) findViewById(R.id.preview);
-        mGraphicOverlay = (GraphicOverlay) findViewById(R.id.faceOverlay);*/
         blinkText = (TextView) findViewById(R.id.blinkText);
         eyeStatus = (TextView) findViewById(R.id.eyeStatus);
 
@@ -127,9 +124,9 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
         }
         locationManager = (LocationManager) this.getSystemService(Context
                 .LOCATION_SERVICE);
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, new
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 500, 0, new
                 MyLocationListenerGPS());
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, new
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 500, 0, new
                 MyLocationListenerGPS());
         Log.d("TripPal", "Requesting current location");
     }
@@ -159,11 +156,6 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
                         RC_HANDLE_CAMERA_PERM);
             }
         };
-
-        /*Snackbar.make(mGraphicOverlay, R.string.permission_camera_rationale,
-                Snackbar.LENGTH_INDEFINITE)
-                .setAction(R.string.ok, listener)
-                .show();*/
     }
 
     /**
@@ -330,15 +322,6 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
             dlg.show();
         }
 
-        /*if (mCameraSource != null) {
-            try {
-                mPreview.start(mCameraSource, mGraphicOverlay);
-            } catch (IOException e) {
-                Log.e(TAG, "Unable to start camera source.", e);
-                mCameraSource.release();
-                mCameraSource = null;
-            }
-        }*/
         try {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) !=
                     PackageManager.PERMISSION_GRANTED) {
@@ -360,34 +343,48 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
         mMap = googleMap;
 
         mMap.addMarker(new MarkerOptions().position(this.destinationLatLng).title(this
-                .destinationName));
+                .destinationName).icon(BitmapDescriptorFactory.fromResource(R.drawable
+                .blue_marker)));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(this.destinationLatLng));
         mMap.animateCamera(CameraUpdateFactory.zoomTo(10f));
         mMap.setPadding(0, 0, 0, 120);
 
         if (this.startingLatLng != null) {
-            mMap.addMarker(new MarkerOptions().position(FaceTrackerActivity.this
-                    .startingLatLng).title("Start"));
-            mMap.addPolyline(new PolylineOptions().add(FaceTrackerActivity.this
-                    .startingLatLng, FaceTrackerActivity.this.destinationLatLng)
-                    .width(5).color(Color.RED));
+            createStartToDestinationMarkers();
+        }
+    }
+
+    private void createStartToDestinationMarkers() {
+        mMap.addMarker(new MarkerOptions().position(FaceTrackerActivity.this
+                .startingLatLng).title("Start").icon(BitmapDescriptorFactory.fromResource(R
+                .drawable.red_marker)));
+        mMap.addPolyline(new PolylineOptions().add(FaceTrackerActivity.this
+                .startingLatLng, FaceTrackerActivity.this.destinationLatLng)
+                .width(5).color(Color.RED));
+    }
+
+    private void updateCurrentLocationMarker() {
+        if (mMap != null) {
+            mMap.addMarker(new MarkerOptions().position(this.currentLocation).title("Current " +
+                    "Location").icon(BitmapDescriptorFactory.fromResource(R.drawable.car)));
         }
     }
 
     private class MyLocationListenerGPS implements LocationListener {
         @Override
         public void onLocationChanged(Location location) {
-            FaceTrackerActivity.this.startingLatLng = new LatLng(location.getLatitude(),
-                    location.getLongitude());
-            if (mMap != null) {
-                mMap.addMarker(new MarkerOptions().position(FaceTrackerActivity.this
-                        .startingLatLng).title("Start"));
-                mMap.addPolyline(new PolylineOptions().add(FaceTrackerActivity.this
-                        .startingLatLng, FaceTrackerActivity.this.destinationLatLng)
-                .width(5).color(Color.RED));
+            if (startingLatLng == null) {
+                FaceTrackerActivity.this.startingLatLng = new LatLng(location.getLatitude(),
+                        location.getLongitude());
+                if (mMap != null) {
+                    createStartToDestinationMarkers();
+                }
+                Log.d("TripPal", "Location: " + FaceTrackerActivity.this.startingLatLng);
+            } else {
+                FaceTrackerActivity.this.currentLocation = new LatLng(location.getLatitude(),
+                        location.getLongitude());
+                updateCurrentLocationMarker();
             }
-            Log.d("TripPal", "Location: " + FaceTrackerActivity.this.startingLatLng);
-            locationManager.removeUpdates(this);
         }
 
         @Override
@@ -433,7 +430,6 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
 
         GraphicFaceTracker(GraphicOverlay overlay, TextView blinkText) {
             mOverlay = overlay;
-            //mFaceGraphic = new FaceGraphic(overlay);
             this.blinkText = blinkText;
         }
 
@@ -442,7 +438,6 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
          */
         @Override
         public void onNewItem(int faceId, Face item) {
-            //mFaceGraphic.setId(faceId);
         }
 
         /**
@@ -477,7 +472,6 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
          */
         @Override
         public void onMissing(FaceDetector.Detections<Face> detectionResults) {
-            //mOverlay.remove(mFaceGraphic);
         }
 
         /**
@@ -486,7 +480,6 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
          */
         @Override
         public void onDone() {
-            //mOverlay.remove(mFaceGraphic);
         }
     }
 }

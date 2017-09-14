@@ -38,11 +38,11 @@ public class NewTripActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 try {
-                    Intent pintent =
+                    Intent intent =
                             new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_FULLSCREEN)
                                     .zzlf(destinationText.getText().toString())
                                     .build(NewTripActivity.this);
-                    startActivityForResult(pintent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
+                    startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
                 } catch (GooglePlayServicesRepairableException e) {
                     // TODO: Handle the error.
                 } catch (GooglePlayServicesNotAvailableException e) {
@@ -54,6 +54,7 @@ public class NewTripActivity extends AppCompatActivity {
 
     public void startNewTrip(View view) {
         Intent intent = new Intent(this, FaceTrackerActivity.class);
+
         String destinationName = selectedPlace.getName().toString();
         LatLng latLng = selectedPlace.getLatLng();
         intent.putExtra("destinationName", destinationName);
