@@ -43,7 +43,20 @@
         </activity>
         <activity
             android:name=".recommendations.Recommendations"
-            android:label="@string/title_activity_recommendations">
+            android:label="@string/title_activity_recommendations"
+            android:parentActivityName=".camera.FaceTrackerActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".camera.FaceTrackerActivity" />
+        </activity>
+
+        <activity
+            android:name=".recommendations.RecommendationsDetail"
+            android:label="@string/title_activity_recommendations_detail"
+            android:parentActivityName=".recommendations.Recommendations">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".recommendations.Recommendations" />
         </activity>
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -62,7 +75,6 @@
             android:label="@string/title_activity_new_trip">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
-
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>

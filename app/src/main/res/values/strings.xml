@@ -7,4 +7,5 @@
     <string name="title_activity_maps">Map</string>
     <string name="title_activity_recommendations">Recommendations</string>
     <string name="title_activity_new_trip">New Trip</string>
+    <string name="title_activity_recommendations_detail">Recommendations Detail</string>
 </resources>
