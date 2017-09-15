@@ -41,41 +41,42 @@
             <GridLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:alignmentMode="alignBounds"
                 android:columnCount="2"
-                android:rowCount="2"
-                android:alignmentMode="alignBounds">
+                android:rowCount="2">
 
                 <TextView
-                    android:id="@+id/currentTime"
+                    android:id="@+id/tripDuration"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="fill_horizontal"
                     android:drawableLeft="@drawable/time"
                     android:drawablePadding="7dp"
                     android:gravity="center"
                     android:padding="3dp"
-                    android:text="4 hours 2 minutes"
-                    android:layout_gravity="fill_horizontal"
+                    android:text="0 hours 0 minutes"
                     android:textSize="18sp"/>
 
                 <TextView
                     android:id="@+id/blinkText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="fill_horizontal"
+                    android:layout_marginLeft="15dp"
                     android:drawableLeft="@drawable/head"
                     android:drawablePadding="7dp"
-                    android:layout_gravity="fill_horizontal"
                     android:padding="3dp"
-                    android:layout_marginLeft="10dp"
-                    android:text="Fatigue"
+                    android:text=""
                     android:textSize="18sp"/>
 
                 <TextView
                     android:id="@+id/stopsCount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="fill_horizontal"
                     android:drawableLeft="@drawable/bench"
                     android:drawablePadding="7dp"
-                    android:gravity="center"
+                    android:gravity="start"
                     android:padding="3dp"
                     android:text="0 stops"
                     android:textSize="18sp"/>
@@ -84,11 +85,11 @@
                     android:id="@+id/distanceText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="fill_horizontal"
+                    android:layout_marginLeft="15dp"
                     android:drawableLeft="@drawable/distance"
                     android:drawablePadding="7dp"
-                    android:layout_gravity="fill_horizontal"
                     android:padding="3dp"
-                    android:layout_marginLeft="10dp"
                     android:text="200 km"
                     android:textSize="18sp"/>
             </GridLayout>

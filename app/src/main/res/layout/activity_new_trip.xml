@@ -67,9 +67,14 @@
                 android:text="How tired are you feeling?"
                 android:paddingBottom="5dp"
                 android:paddingLeft="15dp"/>
+
             <SeekBar
+                android:id="@+id/drowsinessSeekBar"
+                style="@style/Widget.AppCompat.SeekBar.Discrete"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:max="4"
+                android:progress="1"/>
 
             <GridLayout
                 android:layout_width="match_parent"

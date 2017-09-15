@@ -28,6 +28,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -42,6 +43,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.vision.CameraSource;
@@ -51,6 +53,8 @@ import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
 
 import java.io.IOException;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import au.edu.unimelb.mc.trippal.R;
 import au.edu.unimelb.mc.trippal.recommendations.Recommendations;
@@ -68,12 +72,17 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
 
     private TextView blinkText;
     private TextView eyeStatus;
+    private TextView tripDurationText;
 
     private int blinkCount = 0;
     private LatLng destinationLatLng;
     private String destinationName;
     private LatLng startingLatLng;
     private LatLng currentLocation;
+    private long tripStartingTime;
+    private Marker currentLocationMarker;
+    private long lastEyesOpenTime = -1;
+    private boolean closedEyesAlertOpen = false;
 
     //==============================================================================================
     // Activity Methods
@@ -89,6 +98,7 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
 
         blinkText = (TextView) findViewById(R.id.blinkText);
         eyeStatus = (TextView) findViewById(R.id.eyeStatus);
+        tripDurationText = (TextView) findViewById(R.id.tripDuration);
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
@@ -97,6 +107,11 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
             double lat = extras.getDouble("destinationLat");
             double lng = extras.getDouble("destinationLng");
             this.destinationLatLng = new LatLng(lat, lng);
+            this.tripStartingTime = extras.getLong("tripStartingTime");
+
+            final Handler timerHandler = new Handler();
+            final Runnable timeUpdater = new TimeUpdater(timerHandler);
+            timerHandler.post(timeUpdater);
         }
         requestCurrentLocation();
 
@@ -218,8 +233,9 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
     @Override
     protected void onPause() {
         super.onPause();
-        //mPreview.stop();
-        mCameraSource.stop();
+        if (mCameraSource != null) {
+            mCameraSource.stop();
+        }
     }
 
     /**
@@ -365,8 +381,15 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
 
     private void updateCurrentLocationMarker() {
         if (mMap != null) {
-            mMap.addMarker(new MarkerOptions().position(this.currentLocation).title("Current " +
-                    "Location").icon(BitmapDescriptorFactory.fromResource(R.drawable.car)));
+            if (currentLocationMarker == null) {
+                currentLocationMarker = mMap.addMarker(new MarkerOptions().position(this
+                        .currentLocation)
+                        .title("Current " +
+                                "Location").icon(BitmapDescriptorFactory.fromResource(R.drawable
+                                .car)));
+            } else {
+                currentLocationMarker.setPosition((this.currentLocation));
+            }
         }
     }
 
@@ -445,14 +468,39 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
          */
         @Override
         public void onUpdate(FaceDetector.Detections<Face> detectionResults, Face face) {
-            //mOverlay.add(mFaceGraphic);
-            //mFaceGraphic.updateFace(face);
             final float leftProb = face.getIsLeftEyeOpenProbability();
             final float rightProb = face.getIsRightEyeOpenProbability();
             final boolean closed = leftProb > 0 && rightProb > 0 && leftProb < 0.5 && rightProb <
                     0.5;
             if (closed && lastOpen) {
                 blinkCount++;
+            }
+            if (!closed) {
+                FaceTrackerActivity.this.lastEyesOpenTime = new Date().getTime();
+            }
+            if (FaceTrackerActivity.this.lastEyesOpenTime != -1 && new Date().getTime() -
+                    FaceTrackerActivity.this.lastEyesOpenTime > TimeUnit
+                    .SECONDS.toMillis(2) && !closedEyesAlertOpen) {
+                closedEyesAlertOpen = true;
+                FaceTrackerActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        DialogInterface.OnClickListener listener = new DialogInterface
+                                .OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                closedEyesAlertOpen = false;
+                            }
+                        };
+
+                        AlertDialog.Builder builder = new AlertDialog.Builder(FaceTrackerActivity
+                                .this);
+                        builder.setTitle("Attention")
+                                .setMessage("Attention! Please wake up!")
+                                .setPositiveButton(R
+                                        .string.ok, listener)
+                                .show();
+                    }
+                });
             }
             FaceTrackerActivity.this.runOnUiThread(new Runnable() {
                 @Override
@@ -480,6 +528,26 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
          */
         @Override
         public void onDone() {
+        }
+    }
+
+    private class TimeUpdater implements Runnable {
+        private final Handler timerHandler;
+
+        public TimeUpdater(Handler timerHandler) {
+            this.timerHandler = timerHandler;
+        }
+
+        @Override
+        public void run() {
+            long elapsed = new Date().getTime() - FaceTrackerActivity.this
+                    .tripStartingTime;
+            long hours = TimeUnit.MILLISECONDS.toHours(elapsed);
+            long minutes = TimeUnit.MILLISECONDS.toMinutes(elapsed) % 60;
+            if (tripDurationText != null) {
+                tripDurationText.setText(hours + " hours " + minutes + " minutes");
+            }
+            timerHandler.postDelayed(this, TimeUnit.MINUTES.toMillis(1));
         }
     }
 }
