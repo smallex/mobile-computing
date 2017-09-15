@@ -16,6 +16,8 @@ import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.maps.model.LatLng;
 
+import java.util.Date;
+
 import au.edu.unimelb.mc.trippal.camera.FaceTrackerActivity;
 
 public class NewTripActivity extends AppCompatActivity {
@@ -60,6 +62,7 @@ public class NewTripActivity extends AppCompatActivity {
         intent.putExtra("destinationName", destinationName);
         intent.putExtra("destinationLat", latLng.latitude);
         intent.putExtra("destinationLng", latLng.longitude);
+        intent.putExtra("tripStartingTime", new Date().getTime());
 
         startActivity(intent);
     }
