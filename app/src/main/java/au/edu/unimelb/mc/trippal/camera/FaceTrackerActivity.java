@@ -81,6 +81,8 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
     private LatLng currentLocation;
     private long tripStartingTime;
     private Marker currentLocationMarker;
+    private long lastEyesOpenTime = -1;
+    private boolean closedEyesAlertOpen = false;
 
     //==============================================================================================
     // Activity Methods
@@ -231,8 +233,9 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
     @Override
     protected void onPause() {
         super.onPause();
-        //mPreview.stop();
-        mCameraSource.stop();
+        if (mCameraSource != null) {
+            mCameraSource.stop();
+        }
     }
 
     /**
@@ -465,14 +468,39 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
          */
         @Override
         public void onUpdate(FaceDetector.Detections<Face> detectionResults, Face face) {
-            //mOverlay.add(mFaceGraphic);
-            //mFaceGraphic.updateFace(face);
             final float leftProb = face.getIsLeftEyeOpenProbability();
             final float rightProb = face.getIsRightEyeOpenProbability();
             final boolean closed = leftProb > 0 && rightProb > 0 && leftProb < 0.5 && rightProb <
                     0.5;
             if (closed && lastOpen) {
                 blinkCount++;
+            }
+            if (!closed) {
+                FaceTrackerActivity.this.lastEyesOpenTime = new Date().getTime();
+            }
+            if (FaceTrackerActivity.this.lastEyesOpenTime != -1 && new Date().getTime() -
+                    FaceTrackerActivity.this.lastEyesOpenTime > TimeUnit
+                    .SECONDS.toMillis(2) && !closedEyesAlertOpen) {
+                closedEyesAlertOpen = true;
+                FaceTrackerActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        DialogInterface.OnClickListener listener = new DialogInterface
+                                .OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                closedEyesAlertOpen = false;
+                            }
+                        };
+
+                        AlertDialog.Builder builder = new AlertDialog.Builder(FaceTrackerActivity
+                                .this);
+                        builder.setTitle("Attention")
+                                .setMessage("Attention! Please wake up!")
+                                .setPositiveButton(R
+                                        .string.ok, listener)
+                                .show();
+                    }
+                });
             }
             FaceTrackerActivity.this.runOnUiThread(new Runnable() {
                 @Override
@@ -516,7 +544,9 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
                     .tripStartingTime;
             long hours = TimeUnit.MILLISECONDS.toHours(elapsed);
             long minutes = TimeUnit.MILLISECONDS.toMinutes(elapsed) % 60;
-            tripDurationText.setText(hours + " hours " + minutes + " minutes");
+            if (tripDurationText != null) {
+                tripDurationText.setText(hours + " hours " + minutes + " minutes");
+            }
             timerHandler.postDelayed(this, TimeUnit.MINUTES.toMillis(1));
         }
     }
