@@ -1,5 +1,7 @@
 package au.edu.unimelb.mc.trippal.recommendations;
 
+import android.graphics.Bitmap;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -26,7 +28,9 @@ public class Place {
     private OpeningHours openingHours;
 
     @JsonProperty("photos")
-    private ArrayList<Photos> photos;
+    private ArrayList<Photo> photos;
+
+    private Bitmap image;
 
     @JsonProperty("place_id")
     private String placeId;
@@ -92,12 +96,20 @@ public class Place {
         this.openingHours = openingHours;
     }
 
-    public ArrayList<Photos> getPhotos() {
+    public ArrayList<Photo> getPhotos() {
         return photos;
     }
 
-    public void setPhotos(ArrayList<Photos> photos) {
+    public void setPhotos(ArrayList<Photo> photos) {
         this.photos = photos;
+    }
+
+    public Bitmap getImage() {
+        return image;
+    }
+
+    public void setImage(Bitmap image) {
+        this.image = image;
     }
 
     public String getPlaceId() {
@@ -217,7 +229,7 @@ class OpeningHours {
     }
 }
 
-class Photos {
+class Photo {
     @JsonProperty("height")
     private int height;
 

@@ -44,7 +44,7 @@ public class Recommendations extends AppCompatActivity {
             ab.setTitle("WHAT TO DO?");
         }
 
-        // Initialize places and list view
+        // Initialize mappings
         mDataSet = new ArrayList<>();
         mDataSet.add(RecommendationMapping.COFFEE);
         mDataSet.add(RecommendationMapping.FOOD);
@@ -52,11 +52,12 @@ public class Recommendations extends AppCompatActivity {
         mDataSet.add(RecommendationMapping.SLEEP);
         mDataSet.add(RecommendationMapping.STRETCH_LEGS);
         mDataSet.add(RecommendationMapping.SWITCH_DRIVER);
-        GridView mGridView = (GridView) findViewById(R.id.gridview_recommendations);
+
+        // Initialize grid view
+        GridView gridView = (GridView) findViewById(R.id.gridview_recommendations);
         RecommendationsAdapter adapter = new RecommendationsAdapter(this, mDataSet);
-        mGridView.setAdapter(adapter);
-        mGridView.setStretchMode(GridView.STRETCH_COLUMN_WIDTH);
-        mGridView.setOnItemClickListener(onItemClickListener);
+        gridView.setAdapter(adapter);
+        gridView.setOnItemClickListener(onItemClickListener);
     }
 
     private final AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
@@ -96,10 +97,6 @@ public class Recommendations extends AppCompatActivity {
         @Override
         public long getItemId(int position) {
             return position;
-        }
-
-        public void setDataSource(ArrayList<RecommendationMapping> dataSource) {
-            mDataSource = dataSource;
         }
 
         @Override
