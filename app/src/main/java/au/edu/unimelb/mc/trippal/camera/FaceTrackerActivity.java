@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
@@ -33,6 +34,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -73,6 +75,7 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
     private TextView blinkText;
     private TextView eyeStatus;
     private TextView tripDurationText;
+    private ProgressBar energyLevel;
 
     private int blinkCount = 0;
     private LatLng destinationLatLng;
@@ -99,6 +102,7 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
         blinkText = (TextView) findViewById(R.id.blinkText);
         eyeStatus = (TextView) findViewById(R.id.eyeStatus);
         tripDurationText = (TextView) findViewById(R.id.tripDuration);
+        energyLevel = (ProgressBar) findViewById(R.id.energyLevel);
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
@@ -447,6 +451,7 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
      */
     private class GraphicFaceTracker extends Tracker<Face> {
         private final TextView blinkText;
+        private long EYES_CLOSED_THRESHOLD = TimeUnit.SECONDS.toMillis(2);
         private GraphicOverlay mOverlay;
         private FaceGraphic mFaceGraphic;
         private boolean lastOpen = true;
@@ -495,9 +500,11 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
                         AlertDialog.Builder builder = new AlertDialog.Builder(FaceTrackerActivity
                                 .this);
                         builder.setTitle("Attention")
-                                .setMessage("Attention! Please wake up!")
+                                .setMessage("Your eyes were closed for awhile!\nPlease pull over " +
+                                        "and take a break.")
                                 .setPositiveButton(R
                                         .string.ok, listener)
+                                .setIcon(R.drawable.warning)
                                 .show();
                     }
                 });
@@ -506,7 +513,10 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
                 @Override
                 public void run() {
                     String text = blinkCount > 10 ? "HIGH" : "LOW";
-                    blinkText.setText(text);
+                    //blinkText.setText(text);
+                    int level = blinkCount % 100;
+                    energyLevel.setProgress(level);
+
                     eyeStatus.setText("Left eye: " + leftProb + " Right eye: " + rightProb);
                 }
             });
