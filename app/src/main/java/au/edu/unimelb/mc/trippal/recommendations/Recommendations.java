@@ -1,9 +1,6 @@
 package au.edu.unimelb.mc.trippal.recommendations;
 
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
@@ -14,7 +11,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
-import android.widget.ListView;
+import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -28,7 +26,6 @@ import au.edu.unimelb.mc.trippal.R;
 public class Recommendations extends AppCompatActivity {
     private static final String LOG_ID = "RecommendationsActivity";
     private ArrayList<RecommendationMapping> mDataSet;
-    private RecommendationsAdapter mAdapter;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,10 +51,12 @@ public class Recommendations extends AppCompatActivity {
         mDataSet.add(RecommendationMapping.BATHROOM);
         mDataSet.add(RecommendationMapping.SLEEP);
         mDataSet.add(RecommendationMapping.STRETCH_LEGS);
-        ListView mListView = (ListView) findViewById(R.id.listview_recommendations);
-        mAdapter = new Recommendations.RecommendationsAdapter(this, mDataSet);
-        mListView.setAdapter(mAdapter);
-        mListView.setOnItemClickListener(onItemClickListener);
+        mDataSet.add(RecommendationMapping.SWITCH_DRIVER);
+        GridView mGridView = (GridView) findViewById(R.id.gridview_recommendations);
+        RecommendationsAdapter adapter = new RecommendationsAdapter(this, mDataSet);
+        mGridView.setAdapter(adapter);
+        mGridView.setStretchMode(GridView.STRETCH_COLUMN_WIDTH);
+        mGridView.setOnItemClickListener(onItemClickListener);
     }
 
     private final AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
@@ -108,9 +107,12 @@ public class Recommendations extends AppCompatActivity {
             View rowView = mInflater.inflate(R.layout.item_recommendations, parent, false);
 
             RecommendationMapping mapping = mDataSource.get(position);
-            TextView titleTextView = (TextView) rowView.findViewById(R.id.recommendation_label);
 
-            titleTextView.setText(mapping.getActivity());
+            TextView titleTextView = (TextView) rowView.findViewById(R.id.recommendation_label);
+            titleTextView.setText(mapping.getActivity().toUpperCase());
+
+            ImageView imageView = (ImageView) rowView.findViewById(R.id.recommendation_icon);
+            imageView.setImageResource(mapping.getIcon());
 
             return rowView;
         }
