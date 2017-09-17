@@ -25,6 +25,9 @@ public class PlaceResponse {
     @JsonProperty("status")
     private String status;
 
+    @JsonProperty("error_message")
+    private String errorMessage;
+
     public ArrayList<String> getAttributions() {
         return attributions;
     }
@@ -63,5 +66,13 @@ public class PlaceResponse {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
     }
 }

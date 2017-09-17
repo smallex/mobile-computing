@@ -28,7 +28,6 @@ import android.widget.TextView;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -38,6 +37,8 @@ import java.util.concurrent.CountDownLatch;
 
 import au.edu.unimelb.mc.trippal.R;
 
+import static android.graphics.Bitmap.createScaledBitmap;
+
 public class RecommendationsDetail extends AppCompatActivity implements LocationListener {
     private static final int RC_HANDLE_FINE_LOCATION_PERM = 99;
     private static final String API_KEY = "AIzaSyBf0PRbW8zP5lHcGjfwbevS6CMQYfey20Q";
@@ -45,11 +46,13 @@ public class RecommendationsDetail extends AppCompatActivity implements Location
     private static final String GET_PHOTO_ADDRESS = "https://maps.googleapis.com/maps/api/place/photo?";
     private static final String LOG_ID = "RecDetActivity";
     private static final int MAX_WIDTH = 500;
+    private static final int MAX_HEIGHT = 500;
 
     private LocationManager mLocationManager;
     private ArrayList<Place> mDataSet;
     private RecommendationsDetailAdapter mAdapter;
     private RecommendationMapping mRecMapping;
+    private GridView mGridView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,10 +77,10 @@ public class RecommendationsDetail extends AppCompatActivity implements Location
 
         // Initialize grid view
         mDataSet = new ArrayList<>();
-        GridView gridView = (GridView) findViewById(R.id.gridview_recommendations_detail);
+        mGridView = (GridView) findViewById(R.id.gridview_recommendations_detail);
         mAdapter = new RecommendationsDetailAdapter(this, mDataSet);
-        gridView.setAdapter(mAdapter);
-        gridView.setOnItemClickListener(onItemClickListener);
+        mGridView.setAdapter(mAdapter);
+        mGridView.setOnItemClickListener(onItemClickListener);
 
         // TODO Show ActivityIndicator until data loaded
 
@@ -201,11 +204,16 @@ public class RecommendationsDetail extends AppCompatActivity implements Location
                     ObjectMapper mapper2 = new ObjectMapper();
                     PlaceResponse response = mapper2.readValue(new URL(address), PlaceResponse.class);
 
-                    // TODO: Order by nearest vicinity
-                    for (Place place : response.getResults()) {
-                        if (place.getOpeningHours() == null || place.getOpeningHours().isOpenNow()) {
-                            mDataSet.add(place);
+                    if (response.getErrorMessage() == null) {
+                        // TODO: Order by nearest vicinity
+                        for (Place place : response.getResults()) {
+                            if (place.getOpeningHours() == null || place.getOpeningHours().isOpenNow()) {
+                                // TODO: Check no duplicates
+                                mDataSet.add(place);
+                            }
                         }
+                    } else {
+                        Log.e(LOG_ID, response.getErrorMessage());
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -272,11 +280,10 @@ public class RecommendationsDetail extends AppCompatActivity implements Location
             if (place.getPhotos() != null) {
                 if (place.getImage() == null) {
                     Photo photo = place.getPhotos().get(0);
-                    PhotoRequest photoRequest = new PhotoRequest(API_KEY, photo.getPhotoReference(), MAX_WIDTH);
+                    PhotoRequest photoRequest = new PhotoRequest(API_KEY, photo.getPhotoReference(), MAX_HEIGHT);
                     ObjectMapper mapper = new ObjectMapper();
                     String requestURI = mapper.convertValue(photoRequest, UriFormat.class).toString();
                     String address = GET_PHOTO_ADDRESS + requestURI;
-
                     new DownloadImageTask(place).execute(address);
                 } else {
                     imageView.setImageBitmap(place.getImage());
@@ -295,6 +302,7 @@ public class RecommendationsDetail extends AppCompatActivity implements Location
         }
 
         protected Bitmap doInBackground(String... urls) {
+            Log.d(LOG_ID, "Transforming " + mPlace.getName());
             String url = urls[0];
             Bitmap mIcon11 = null;
             InputStream in = null;
@@ -302,8 +310,6 @@ public class RecommendationsDetail extends AppCompatActivity implements Location
                 // TODO When erroneous URL response, we get "A connection to https://maps.googleapis.com/ was leaked. Did you forget to close a response body?" log - FIX IT!
                 in = new URL(url).openStream();
                 mIcon11 = BitmapFactory.decodeStream(in);
-            } catch (FileNotFoundException e) {
-                Log.e(LOG_ID, "We have exceeded the daily Google API quota");
             } catch (Exception e) {
                 Log.e(LOG_ID, e.getMessage());
                 e.printStackTrace();
@@ -321,17 +327,33 @@ public class RecommendationsDetail extends AppCompatActivity implements Location
 
         protected void onPostExecute(Bitmap result) {
             if (result != null) {
-                Bitmap resizedBitmap = Bitmap.createBitmap(result, (result.getWidth() - MAX_WIDTH) / 2, 0, MAX_WIDTH, MAX_WIDTH);
+                int height = result.getHeight();
+                int width = result.getWidth();
 
-                //bmImage.setImageBitmap(result);
-                //mPlace.setImage(result);
+                Bitmap resizedBitmap;
+                if (height > width) {
+                    int y = (height - width) / 2;
+                    resizedBitmap = Bitmap.createBitmap(result, 0, y, width, width);
+                    resizedBitmap = createScaledBitmap(resizedBitmap, MAX_WIDTH, MAX_HEIGHT, false);
+                } else {
+                    int x = (width - height) / 2;
+                    resizedBitmap = Bitmap.createBitmap(result, x, 0, height, height);
+                    resizedBitmap = createScaledBitmap(resizedBitmap, MAX_WIDTH, MAX_HEIGHT, false);
+                }
+
                 mPlace.setImage(resizedBitmap);
 
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        //mAdapter.setDataSource(mDataSet);
-                        mAdapter.notifyDataSetChanged();
+                        // Set image view of place's image
+                        View v = mGridView.getChildAt(mDataSet.indexOf(mPlace) - mGridView.getFirstVisiblePosition());
+
+                        if (v == null)
+                            return;
+
+                        ImageView imageView = (ImageView) v.findViewById(R.id.recommendation_detail_icon);
+                        imageView.setImageBitmap(mPlace.getImage());
                     }
                 });
             }

@@ -13,16 +13,16 @@ public class PhotoRequest {
     @JsonProperty("photoreference")
     private String photoReference;
 
-    @JsonProperty("maxwidth")
-    private int maxWidth;
+    /*@JsonProperty("maxwidth")
+    private int maxWidth;*/
 
     @JsonProperty("maxheight")
     private int maxHeight;
 
-    public PhotoRequest(String key, String photoReference, int maxWidth) {
+    public PhotoRequest(String key, String photoReference, int maxHeight) {
         this.key = key;
         this.photoReference = photoReference;
-        this.maxWidth = maxWidth;
+        this.maxHeight = maxHeight;
     }
 
     public String getKey() {
@@ -41,13 +41,13 @@ public class PhotoRequest {
         this.photoReference = photoReference;
     }
 
-    public int getMaxWidth() {
+    /*public int getMaxWidth() {
         return maxWidth;
     }
 
     public void setMaxWidth(int maxWidth) {
         this.maxWidth = maxWidth;
-    }
+    }*/
 
     public int getMaxHeight() {
         return maxHeight;
