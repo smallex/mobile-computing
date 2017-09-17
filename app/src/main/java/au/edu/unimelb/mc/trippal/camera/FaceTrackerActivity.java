@@ -23,7 +23,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
@@ -45,8 +44,10 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.MultiProcessor;
@@ -71,6 +72,9 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
 
     private GoogleMap mMap;
     private LocationManager locationManager;
+    private Marker currentLocationMarker;
+    private Marker startLocationMarker;
+    private Marker destinationLocationMarker;
 
     private TextView blinkText;
     private TextView eyeStatus;
@@ -83,7 +87,6 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
     private LatLng startingLatLng;
     private LatLng currentLocation;
     private long tripStartingTime;
-    private Marker currentLocationMarker;
     private long lastEyesOpenTime = -1;
     private boolean closedEyesAlertOpen = false;
 
@@ -362,25 +365,38 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        mMap.addMarker(new MarkerOptions().position(this.destinationLatLng).title(this
+        this.destinationLocationMarker = mMap.addMarker(new MarkerOptions().position(this
+                .destinationLatLng).title(this
                 .destinationName).icon(BitmapDescriptorFactory.fromResource(R.drawable
                 .blue_marker)));
+        this.destinationLocationMarker.showInfoWindow();
         mMap.moveCamera(CameraUpdateFactory.newLatLng(this.destinationLatLng));
         mMap.animateCamera(CameraUpdateFactory.zoomTo(10f));
         mMap.setPadding(0, 0, 0, 120);
 
         if (this.startingLatLng != null) {
-            createStartToDestinationMarkers();
+            createStartLocationMarkers();
+            showAllMarkers();
         }
     }
 
-    private void createStartToDestinationMarkers() {
-        mMap.addMarker(new MarkerOptions().position(FaceTrackerActivity.this
-                .startingLatLng).title("Start").icon(BitmapDescriptorFactory.fromResource(R
+    private void createStartLocationMarkers() {
+        this.startLocationMarker = mMap.addMarker(new MarkerOptions().position
+                (FaceTrackerActivity.this
+                        .startingLatLng).title("Start").icon(BitmapDescriptorFactory.fromResource(R
                 .drawable.red_marker)));
-        mMap.addPolyline(new PolylineOptions().add(FaceTrackerActivity.this
-                .startingLatLng, FaceTrackerActivity.this.destinationLatLng)
-                .width(5).color(Color.RED));
+    }
+
+    private void showAllMarkers() {
+        if (this.startingLatLng == null || this.destinationLatLng == null) {
+            return;
+        }
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+
+        builder.include(this.startingLatLng);
+        builder.include(this.destinationLatLng);
+        LatLngBounds bounds = builder.build();
+        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 120));
     }
 
     private void updateCurrentLocationMarker() {
@@ -401,16 +417,23 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
         @Override
         public void onLocationChanged(Location location) {
             if (startingLatLng == null) {
-                FaceTrackerActivity.this.startingLatLng = new LatLng(location.getLatitude(),
+                startingLatLng = new LatLng(location.getLatitude(),
                         location.getLongitude());
                 if (mMap != null) {
-                    createStartToDestinationMarkers();
+                    createStartLocationMarkers();
+                    showAllMarkers();
                 }
-                Log.d("TripPal", "Location: " + FaceTrackerActivity.this.startingLatLng);
+                Log.d("TripPal", "Location: " + startingLatLng);
             } else {
-                FaceTrackerActivity.this.currentLocation = new LatLng(location.getLatitude(),
+                if (currentLocation != null) {
+                    Polyline polyline = mMap.addPolyline(new PolylineOptions()
+                            .add(currentLocation, new LatLng(location.getLatitude(), location
+                                    .getLongitude())).width(5).color(Color.DKGRAY));
+                }
+                currentLocation = new LatLng(location.getLatitude(),
                         location.getLongitude());
                 updateCurrentLocationMarker();
+                Log.d("TripPal", "Location: " + startingLatLng);
             }
         }
 

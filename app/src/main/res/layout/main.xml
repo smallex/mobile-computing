@@ -107,7 +107,7 @@
                     android:drawableLeft="@drawable/distance"
                     android:drawablePadding="7dp"
                     android:padding="3dp"
-                    android:text="200 km"
+                    android:text="0 km"
                     android:textSize="18sp"/>
             </GridLayout>
 
