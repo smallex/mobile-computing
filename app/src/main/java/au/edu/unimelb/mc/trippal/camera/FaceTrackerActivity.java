@@ -230,7 +230,6 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
     @Override
     protected void onResume() {
         super.onResume();
-
         startCameraSource();
     }
 

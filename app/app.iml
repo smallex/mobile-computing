@@ -104,27 +104,28 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="support-v4-24.2.1" level="project" />
     <orderEntry type="library" exported="" name="support-compat-24.2.1" level="project" />
-    <orderEntry type="library" exported="" name="support-media-compat-24.2.1" level="project" />
     <orderEntry type="library" exported="" name="animated-vector-drawable-24.2.1" level="project" />
     <orderEntry type="library" exported="" name="play-services-base-9.8.0" level="project" />
     <orderEntry type="library" exported="" name="support-fragment-24.2.1" level="project" />
+    <orderEntry type="library" exported="" name="constraint-layout-1.0.2" level="project" />
+    <orderEntry type="library" exported="" name="jackson-annotations-2.9.1" level="project" />
+    <orderEntry type="library" exported="" name="play-services-vision-9.8.0" level="project" />
+    <orderEntry type="library" exported="" name="cardview-v7-24.2.1" level="project" />
+    <orderEntry type="library" exported="" name="play-services-maps-9.8.0" level="project" />
+    <orderEntry type="library" exported="" name="design-24.2.1" level="project" />
+    <orderEntry type="library" exported="" name="support-media-compat-24.2.1" level="project" />
     <orderEntry type="library" exported="" name="support-core-ui-24.2.1" level="project" />
     <orderEntry type="library" exported="" name="recyclerview-v7-24.2.1" level="project" />
     <orderEntry type="library" exported="" name="constraint-layout-solver-1.0.2" level="project" />
     <orderEntry type="library" exported="" name="jackson-core-2.9.1" level="project" />
     <orderEntry type="library" exported="" name="appcompat-v7-24.2.1" level="project" />
     <orderEntry type="library" exported="" name="support-vector-drawable-24.2.1" level="project" />
-    <orderEntry type="library" exported="" name="constraint-layout-1.0.2" level="project" />
     <orderEntry type="library" exported="" name="support-core-utils-24.2.1" level="project" />
     <orderEntry type="library" exported="" name="jackson-databind-2.9.1" level="project" />
     <orderEntry type="library" exported="" name="play-services-basement-9.8.0" level="project" />
     <orderEntry type="library" exported="" name="support-annotations-24.2.1" level="project" />
-    <orderEntry type="library" exported="" name="jackson-annotations-2.9.1" level="project" />
     <orderEntry type="library" exported="" name="play-services-tasks-9.8.0" level="project" />
-    <orderEntry type="library" exported="" name="play-services-vision-9.8.0" level="project" />
+    <orderEntry type="library" exported="" name="volley-1.0.0" level="project" />
     <orderEntry type="library" exported="" name="play-services-places-9.8.0" level="project" />
-    <orderEntry type="library" exported="" name="cardview-v7-24.2.1" level="project" />
-    <orderEntry type="library" exported="" name="play-services-maps-9.8.0" level="project" />
-    <orderEntry type="library" exported="" name="design-24.2.1" level="project" />
   </component>
 </module>

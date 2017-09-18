@@ -9,14 +9,12 @@ import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -37,7 +35,8 @@ import au.edu.unimelb.mc.trippal.R;
 public class Recommendations extends Activity implements LocationListener {
     private static final int RC_HANDLE_FINE_LOCATION_PERM = 99;
     private static final String API_KEY = "AIzaSyBf0PRbW8zP5lHcGjfwbevS6CMQYfey20Q";
-    private static final String GET_ADDRESS = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?";
+    private static final String GET_ADDRESS = "https://maps.googleapis" +
+            ".com/maps/api/place/nearbysearch/json?";
     private static final String LOG_ID = "RecommendationsActivity";
     private LocationManager mLocationManager;
     private ArrayList<Place> mDataSet;
@@ -58,10 +57,12 @@ public class Recommendations extends Activity implements LocationListener {
         // If yes, get recommendations for current location
         // If not, request it
         mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED) {
             getRecommendations();
         } else {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission
+                    .ACCESS_FINE_LOCATION)) {
 
                 // Show an explanation to the user *asynchronously* -- don't block
                 // this thread waiting for the user's response! After the user
@@ -69,18 +70,20 @@ public class Recommendations extends Activity implements LocationListener {
 
                 // TODO Show explanation for needing permission
             } else {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, RC_HANDLE_FINE_LOCATION_PERM);
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission
+                        .ACCESS_FINE_LOCATION}, RC_HANDLE_FINE_LOCATION_PERM);
             }
         }
     }
 
-
     @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[]
+            grantResults) {
         switch (requestCode) {
             case RC_HANDLE_FINE_LOCATION_PERM: {
                 // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager
+                        .PERMISSION_GRANTED) {
                     getRecommendations();
                 } else {
                     // TODO: Disable recommendations functionality
@@ -91,23 +94,31 @@ public class Recommendations extends Activity implements LocationListener {
     }
 
     private void getRecommendations() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            android.location.Location locationGPS = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            android.location.Location locationNetwork = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-            if (locationGPS != null && locationGPS.getTime() > Calendar.getInstance().getTimeInMillis() - 2 * 60 * 1000) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED) {
+            android.location.Location locationGPS = mLocationManager.getLastKnownLocation
+                    (LocationManager.GPS_PROVIDER);
+            android.location.Location locationNetwork = mLocationManager.getLastKnownLocation
+                    (LocationManager.NETWORK_PROVIDER);
+            if (locationGPS != null && locationGPS.getTime() > Calendar.getInstance()
+                    .getTimeInMillis() - 2 * 60 * 1000) {
                 // TODO: Recommended radius?
                 // TODO: Different types
-                PlaceRequest request = new PlaceRequest(API_KEY, locationGPS.getLatitude(), locationGPS.getLongitude(), 500, "restaurant");
+                PlaceRequest request = new PlaceRequest(API_KEY, locationGPS.getLatitude(),
+                        locationGPS.getLongitude(), 500, "restaurant");
                 startRecommendationsThread(request);
-            } else if (locationNetwork != null && locationNetwork.getTime() > Calendar.getInstance().getTimeInMillis() - 2 * 60 * 1000) {
+            } else if (locationNetwork != null && locationNetwork.getTime() > Calendar
+                    .getInstance().getTimeInMillis() - 2 * 60 * 1000) {
                 // TODO: Recommended radius?
                 // TODO: Different types
-                PlaceRequest request = new PlaceRequest(API_KEY, locationNetwork.getLatitude(), locationNetwork.getLongitude(), 500, "restaurant");
+                PlaceRequest request = new PlaceRequest(API_KEY, locationNetwork.getLatitude(),
+                        locationNetwork.getLongitude(), 500, "restaurant");
                 startRecommendationsThread(request);
             } else {
                 // TODO: Remove one of these.. Preferably Network_Provider -.-
                 mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
-                mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
+                mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0,
+                        this);
             }
         }
     }
@@ -116,7 +127,8 @@ public class Recommendations extends Activity implements LocationListener {
         if (location != null) {
             Log.v("Location Changed", location.getLatitude() + " and " + location.getLongitude());
             mLocationManager.removeUpdates(this);
-            PlaceRequest request = new PlaceRequest(API_KEY, location.getLatitude(), location.getLongitude(), 500, "restaurant");
+            PlaceRequest request = new PlaceRequest(API_KEY, location.getLatitude(), location
+                    .getLongitude(), 500, "restaurant");
             startRecommendationsThread(request);
         }
     }
@@ -156,12 +168,14 @@ public class Recommendations extends Activity implements LocationListener {
                     URL githubEndpoint = new URL(address);
 
                     // Create connection
-                    HttpsURLConnection myConnection = (HttpsURLConnection) githubEndpoint.openConnection();
+                    HttpsURLConnection myConnection = (HttpsURLConnection) githubEndpoint
+                            .openConnection();
 
                     if (myConnection.getResponseCode() == 200) {
                         // Success
                         ObjectMapper mapper2 = new ObjectMapper();
-                        PlaceResponse response = mapper2.readValue(new URL(address), PlaceResponse.class);
+                        PlaceResponse response = mapper2.readValue(new URL(address),
+                                PlaceResponse.class);
 
                         mDataSet = new ArrayList<>();
 
@@ -178,8 +192,6 @@ public class Recommendations extends Activity implements LocationListener {
                                 mAdapter.notifyDataSetChanged();
                             }
                         });
-
-
                     } else {
                         // Error handling code goes here
                         // TODO: Error handling
