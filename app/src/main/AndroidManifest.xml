@@ -62,17 +62,20 @@
             android:label="TripPal">
             <intent-filter android:label="TripPal">
                 <action android:name="android.intent.action.MAIN"/>
+
                 <category android:name="android.intent.category.LAUNCHER"/>
-
-                <action android:name="android.intent.action.VIEW"/>
-
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-
+            </intent-filter>
+        </activity>
+        <activity android:name=".RedirectActivity">
+            <intent-filter>
                 <data
                     android:host="success"
                     android:pathPattern=".*"
                     android:scheme="trippal"/>
+                <action android:name="android.intent.action.VIEW"/>
+
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
     </application>

@@ -55,11 +55,6 @@ public class NewTripActivity extends AppCompatActivity {
         durationMinutes = (EditText) findViewById(R.id.durationMinutes);
         sleepQuality = (SeekBar) findViewById(R.id.sleepQuality);
 
-        Intent intent = getIntent();
-        if (Intent.ACTION_VIEW.equals(intent.getAction())) {
-            loadSleepData(intent);
-        }
-
         destinationLayout.clearFocus();
         destinationText.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -67,6 +62,14 @@ public class NewTripActivity extends AppCompatActivity {
                 startPlaceAutocomplete();
             }
         });
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        if (intent.getExtras() != null) {
+            loadSleepData(intent.getExtras());
+        }
     }
 
     private void startPlaceAutocomplete() {
@@ -84,13 +87,9 @@ public class NewTripActivity extends AppCompatActivity {
         }
     }
 
-    private void loadSleepData(Intent intent) {
-        Uri uri = intent.getData();
-        // Replace '#' by '?' so query parameters can be parsed
-        uri = Uri.parse(uri.toString().replace("#", "?"));
-        final String accessToken = uri.getQueryParameter("access_token");
-        String userID = uri.getQueryParameter("user_id");
-        Log.d("TripPal", accessToken);
+    private void loadSleepData(Bundle bundle) {
+        final String accessToken = bundle.getString("accessToken");
+        String userID = bundle.getString("userID");
 
         // Instantiate the RequestQueue.
         RequestQueue queue = Volley.newRequestQueue(this);
