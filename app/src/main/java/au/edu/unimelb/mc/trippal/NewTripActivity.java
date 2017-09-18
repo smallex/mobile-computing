@@ -162,7 +162,7 @@ public class NewTripActivity extends AppCompatActivity {
         }
     }
 
-    public void openBrowser(View view) {
+    public void loadSleepData(View view) {
         Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.fitbit" +
                 ".com/oauth2/authorize?response_type=token&client_id=228LQG&redirect_uri=trippal" +
                 "%3A" +
