@@ -29,6 +29,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Vibrator;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -230,7 +231,6 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
     @Override
     protected void onResume() {
         super.onResume();
-
         startCameraSource();
     }
 
@@ -474,7 +474,7 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
      */
     private class GraphicFaceTracker extends Tracker<Face> {
         private final TextView blinkText;
-        private long EYES_CLOSED_THRESHOLD = TimeUnit.SECONDS.toMillis(2);
+        private long EYES_CLOSED_THRESHOLD = TimeUnit.SECONDS.toMillis(1);
         private GraphicOverlay mOverlay;
         private FaceGraphic mFaceGraphic;
         private boolean lastOpen = true;
@@ -529,6 +529,9 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
                                         .string.ok, listener)
                                 .setIcon(R.drawable.warning)
                                 .show();
+                        Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                        // Vibrate for 500 milliseconds
+                        v.vibrate(1000);
                     }
                 });
             }
