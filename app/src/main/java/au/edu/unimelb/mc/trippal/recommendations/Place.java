@@ -15,6 +15,8 @@ public class Place {
     @JsonProperty("geometry")
     private Geometry geometry;
 
+    private int distance;
+
     @JsonProperty("icon")
     private String icon;
 
@@ -62,6 +64,14 @@ public class Place {
 
     public void setGeometry(Geometry geometry) {
         this.geometry = geometry;
+    }
+
+    public int getDistance() {
+        return distance;
+    }
+
+    public void setDistance(int distance) {
+        this.distance = distance;
     }
 
     public String getIcon() {
@@ -175,6 +185,26 @@ public class Place {
     public void setVicinity(String vicinity) {
         this.vicinity = vicinity;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null)
+            return false;
+        if (!(obj instanceof Place))
+            return false;
+        if (obj == this)
+            return true;
+
+        Place place = (Place) obj;
+        return place.getId().equals(this.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 17;
+        result = 31 * result + id.hashCode();
+        return result;
+    }
 }
 
 @JsonIgnoreProperties(value = {"viewport"})
@@ -193,24 +223,24 @@ class Geometry {
 
 class Location {
     @JsonProperty("lat")
-    private long latitude;
+    private double latitude;
 
     @JsonProperty("lng")
-    private long longitude;
+    private double longitude;
 
-    public long getLatitude() {
+    public double getLatitude() {
         return latitude;
     }
 
-    public void setLatitude(long latitude) {
+    public void setLatitude(double latitude) {
         this.latitude = latitude;
     }
 
-    public long getLongitude() {
+    public double getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(long longitude) {
+    public void setLongitude(double longitude) {
         this.longitude = longitude;
     }
 }

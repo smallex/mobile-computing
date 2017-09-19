@@ -33,6 +33,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.concurrent.CountDownLatch;
 
 import au.edu.unimelb.mc.trippal.R;
@@ -160,15 +162,13 @@ public class RecommendationsDetail extends AppCompatActivity implements Location
     }
 
     private void startRecs(android.location.Location location) {
-        // TODO: Different types
-
         mDataSet = new ArrayList<>();
         final CountDownLatch latch = new CountDownLatch(mRecMapping.getTypes().length);
 
         for (final PlaceType type : mRecMapping.getTypes()) {
             // TODO: Recommended radius?
             PlaceRequest request = new PlaceRequest(API_KEY, location.getLatitude(), location.getLongitude(), 500, type.getName());
-            startRecommendationsThread(request, latch);
+            startRecommendationsThread(request, latch, location);
         }
 
         AsyncTask.execute(new Runnable() {
@@ -176,6 +176,14 @@ public class RecommendationsDetail extends AppCompatActivity implements Location
             public void run() {
                 try {
                     latch.await();
+
+                    // Sort entries by closest
+                    Collections.sort(mDataSet, new Comparator<Place>() {
+                        @Override
+                        public int compare(Place o1, Place o2) {
+                            return Double.compare(o1.getDistance(), o2.getDistance());
+                        }
+                    });
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -191,7 +199,7 @@ public class RecommendationsDetail extends AppCompatActivity implements Location
         });
     }
 
-    private void startRecommendationsThread(final PlaceRequest request, final CountDownLatch latch) {
+    private void startRecommendationsThread(final PlaceRequest request, final CountDownLatch latch, final android.location.Location location) {
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
@@ -205,11 +213,13 @@ public class RecommendationsDetail extends AppCompatActivity implements Location
                     PlaceResponse response = mapper2.readValue(new URL(address), PlaceResponse.class);
 
                     if (response.getErrorMessage() == null) {
-                        // TODO: Order by nearest vicinity
                         for (Place place : response.getResults()) {
                             if (place.getOpeningHours() == null || place.getOpeningHours().isOpenNow()) {
-                                // TODO: Check no duplicates
-                                mDataSet.add(place);
+                                // Avoid duplicate entries
+                                if (!mDataSet.contains(place)) {
+                                    calculateHaversineDistance(location, place);
+                                    mDataSet.add(place);
+                                }
                             }
                         }
                     } else {
@@ -224,12 +234,29 @@ public class RecommendationsDetail extends AppCompatActivity implements Location
         });
     }
 
+    private void calculateHaversineDistance(android.location.Location location, Place place) {
+        double lat1 = location.getLatitude();
+        double lon1 = location.getLongitude();
+        double lat2 = place.getGeometry().getLocation().getLatitude();
+        double lon2 = place.getGeometry().getLocation().getLongitude();
+
+
+        double R = 6378.137; // Radius of earth in KM
+        double dLat = lat2 * Math.PI / 180 - lat1 * Math.PI / 180;
+        double dLon = lon2 * Math.PI / 180 - lon1 * Math.PI / 180;
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        double d = R * c;
+        place.setDistance(Double.valueOf(d * 1000).intValue()); // meters
+    }
+
     private final AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> adapter, View v, int position, long arg3) {
             // Get corresponding RecommendationMapping item
             Place place = mDataSet.get(position);
 
+            Log.d(LOG_ID, place.getName() + place.getDistance());
             // TODO Action on item click
         }
     };
@@ -271,8 +298,7 @@ public class RecommendationsDetail extends AppCompatActivity implements Location
             Place place = mDataSource.get(position);
 
             TextView titleTextView = (TextView) rowView.findViewById(R.id.recommendation_detail_label);
-            titleTextView.setText(place.getName() + " @ " + place.getVicinity());
-            // TODO Calculate & display distance from current location rather than displaying address
+            titleTextView.setText(place.getName() + " (" + place.getDistance() + " m)");
 
             ImageView imageView = (ImageView) rowView.findViewById(R.id.recommendation_detail_icon);
             imageView.setImageResource(mRecMapping.getIcon());
@@ -302,12 +328,10 @@ public class RecommendationsDetail extends AppCompatActivity implements Location
         }
 
         protected Bitmap doInBackground(String... urls) {
-            Log.d(LOG_ID, "Transforming " + mPlace.getName());
             String url = urls[0];
             Bitmap mIcon11 = null;
             InputStream in = null;
             try {
-                // TODO When erroneous URL response, we get "A connection to https://maps.googleapis.com/ was leaked. Did you forget to close a response body?" log - FIX IT!
                 in = new URL(url).openStream();
                 mIcon11 = BitmapFactory.decodeStream(in);
             } catch (Exception e) {
