@@ -10,6 +10,7 @@ import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Looper;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
@@ -17,6 +18,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -24,6 +26,7 @@ import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -49,17 +52,22 @@ public class RecommendationsDetail extends AppCompatActivity implements Location
     private static final String LOG_ID = "RecDetActivity";
     private static final int MAX_WIDTH = 500;
     private static final int MAX_HEIGHT = 500;
+    private static final int MIN_RADIUS = 500;
+    private static final int MAX_RADIUS = 10000;
 
     private LocationManager mLocationManager;
     private ArrayList<Place> mDataSet;
     private RecommendationsDetailAdapter mAdapter;
     private RecommendationMapping mRecMapping;
     private GridView mGridView;
+    private RecommendationsDetail mActivity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recommendations_detail);
+
+        mActivity = this;
 
         // Get intent details
         mRecMapping = (RecommendationMapping) getIntent().getSerializableExtra("MAPPING");
@@ -102,6 +110,17 @@ public class RecommendationsDetail extends AppCompatActivity implements Location
     }
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                finish();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
             case RC_HANDLE_FINE_LOCATION_PERM: {
@@ -121,9 +140,9 @@ public class RecommendationsDetail extends AppCompatActivity implements Location
             android.location.Location locationGPS = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             android.location.Location locationNetwork = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
             if (locationGPS != null && locationGPS.getTime() > Calendar.getInstance().getTimeInMillis() - 2 * 60 * 1000) {
-                startRecs(locationGPS);
+                startRecs(locationGPS, MIN_RADIUS);
             } else if (locationNetwork != null && locationNetwork.getTime() > Calendar.getInstance().getTimeInMillis() - 2 * 60 * 1000) {
-                startRecs(locationNetwork);
+                startRecs(locationNetwork, MIN_RADIUS);
             } else {
                 // TODO: Remove one of these.. Preferably Network_Provider -.-
                 mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
@@ -136,7 +155,7 @@ public class RecommendationsDetail extends AppCompatActivity implements Location
         if (location != null) {
             Log.v("Location Changed", location.getLatitude() + " and " + location.getLongitude());
             mLocationManager.removeUpdates(this);
-            startRecs(location);
+            startRecs(location, MIN_RADIUS);
         }
     }
 
@@ -161,13 +180,12 @@ public class RecommendationsDetail extends AppCompatActivity implements Location
         }
     }
 
-    private void startRecs(android.location.Location location) {
+    private void startRecs(final android.location.Location location, final int radius) {
         mDataSet = new ArrayList<>();
         final CountDownLatch latch = new CountDownLatch(mRecMapping.getTypes().length);
 
         for (final PlaceType type : mRecMapping.getTypes()) {
-            // TODO: Recommended radius?
-            PlaceRequest request = new PlaceRequest(API_KEY, location.getLatitude(), location.getLongitude(), 500, type.getName());
+            PlaceRequest request = new PlaceRequest(API_KEY, location.getLatitude(), location.getLongitude(), radius, type.getName());
             startRecommendationsThread(request, latch, location);
         }
 
@@ -176,7 +194,24 @@ public class RecommendationsDetail extends AppCompatActivity implements Location
             public void run() {
                 try {
                     latch.await();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
 
+                if (mDataSet.isEmpty()) {
+                    if (radius < MAX_RADIUS) {
+                        int r = radius;
+                        startRecs(location, r += MIN_RADIUS);
+                    } else {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(mActivity, "There are no points of interest in a " + MAX_RADIUS + "m radius.", Toast.LENGTH_LONG).show();
+                                finish();
+                            }
+                        });
+                    }
+                } else {
                     // Sort entries by closest
                     Collections.sort(mDataSet, new Comparator<Place>() {
                         @Override
@@ -184,17 +219,16 @@ public class RecommendationsDetail extends AppCompatActivity implements Location
                             return Double.compare(o1.getDistance(), o2.getDistance());
                         }
                     });
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
 
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mAdapter.setDataSource(mDataSet);
-                        mAdapter.notifyDataSetChanged();
-                    }
-                });
+                    // Update grid view with new data
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mAdapter.setDataSource(mDataSet);
+                            mAdapter.notifyDataSetChanged();
+                        }
+                    });
+                }
             }
         });
     }
@@ -240,7 +274,6 @@ public class RecommendationsDetail extends AppCompatActivity implements Location
         double lat2 = place.getGeometry().getLocation().getLatitude();
         double lon2 = place.getGeometry().getLocation().getLongitude();
 
-
         double R = 6378.137; // Radius of earth in KM
         double dLat = lat2 * Math.PI / 180 - lat1 * Math.PI / 180;
         double dLon = lon2 * Math.PI / 180 - lon1 * Math.PI / 180;
@@ -257,7 +290,7 @@ public class RecommendationsDetail extends AppCompatActivity implements Location
             Place place = mDataSet.get(position);
 
             Log.d(LOG_ID, place.getName() + place.getDistance());
-            // TODO Action on item click
+            // TODO PAUL: Add address as stop to route
         }
     };
 
