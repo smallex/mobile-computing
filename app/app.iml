@@ -113,6 +113,7 @@
     <orderEntry type="library" exported="" name="play-services-vision-9.8.0" level="project" />
     <orderEntry type="library" exported="" name="cardview-v7-24.2.1" level="project" />
     <orderEntry type="library" exported="" name="play-services-maps-9.8.0" level="project" />
+    <orderEntry type="library" exported="" name="pocketsphinx-android-5prealpha-release-unspecified" level="project" />
     <orderEntry type="library" exported="" name="design-24.2.1" level="project" />
     <orderEntry type="library" exported="" name="support-media-compat-24.2.1" level="project" />
     <orderEntry type="library" exported="" name="support-core-ui-24.2.1" level="project" />
@@ -127,6 +128,7 @@
     <orderEntry type="library" exported="" name="support-annotations-24.2.1" level="project" />
     <orderEntry type="library" exported="" name="play-services-tasks-9.8.0" level="project" />
     <orderEntry type="library" exported="" name="volley-1.0.0" level="project" />
+    <orderEntry type="library" exported="" name="java-string-similarity-0.10" level="project" />
     <orderEntry type="library" exported="" name="play-services-places-9.8.0" level="project" />
   </component>
 </module>

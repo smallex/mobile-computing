@@ -10,7 +10,6 @@ import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Looper;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
@@ -25,6 +24,7 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -60,6 +60,7 @@ public class RecommendationsDetail extends AppCompatActivity implements Location
     private RecommendationsDetailAdapter mAdapter;
     private RecommendationMapping mRecMapping;
     private GridView mGridView;
+    private ProgressBar mProgressBar;
     private RecommendationsDetail mActivity;
 
     @Override
@@ -92,7 +93,9 @@ public class RecommendationsDetail extends AppCompatActivity implements Location
         mGridView.setAdapter(mAdapter);
         mGridView.setOnItemClickListener(onItemClickListener);
 
-        // TODO Show ActivityIndicator until data loaded
+        // Show progress bar while data loads
+        mProgressBar = (ProgressBar) findViewById(R.id.progressbar_recommendations_detail);
+        mProgressBar.setVisibility(View.VISIBLE);
 
         // Check if location permission granted
         // If yes, get recommendations for current location
@@ -224,6 +227,7 @@ public class RecommendationsDetail extends AppCompatActivity implements Location
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            mProgressBar.setVisibility(View.GONE);
                             mAdapter.setDataSource(mDataSet);
                             mAdapter.notifyDataSetChanged();
                         }
