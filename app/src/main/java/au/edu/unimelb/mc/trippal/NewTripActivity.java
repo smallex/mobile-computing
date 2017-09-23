@@ -2,10 +2,12 @@ package au.edu.unimelb.mc.trippal;
 
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Address;
 import android.location.Geocoder;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
@@ -81,6 +83,24 @@ public class NewTripActivity extends AppCompatActivity {
         ActionBar ab = getSupportActionBar();
         if (ab != null) {
             ab.setTitle("New Trip");
+        }
+
+        // Open splash screen on first start
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        boolean isFirstStart = sharedPreferences.getBoolean("FIRST_START", true);
+
+        // If the activity has never started before...
+        if (isFirstStart) {
+            // Open 'Welcome' screens
+            Intent i = new Intent(this, IntroActivity.class);
+            startActivity(i);
+
+            // Make a new preferences editor
+            SharedPreferences.Editor e = sharedPreferences.edit();
+
+            // Edit preference to make it false because we don't want this to run again
+            e.putBoolean("FIRST_START", false);
+            e.apply();
         }
 
         startNewTripButton = (Button) findViewById(R.id.startNewTripButton);
@@ -242,7 +262,7 @@ public class NewTripActivity extends AppCompatActivity {
 
     public void startNewTrip(View view) {
         Intent intent = new Intent(this, FaceTrackerActivity.class);
-        if(selectedPlace !=null) {
+        if (selectedPlace != null) {
             String destinationName = selectedPlace.getName().toString();
             LatLng latLng = selectedPlace.getLatLng();
             intent.putExtra("destinationName", destinationName);
@@ -254,7 +274,7 @@ public class NewTripActivity extends AppCompatActivity {
 
             } else {
                 Address location = address.get(0);
-                double lat= location.getLatitude();
+                double lat = location.getLatitude();
                 double lng = location.getLongitude();
                 intent.putExtra("destinationName", finalDestination);
                 intent.putExtra("destinationLat", lat);
@@ -296,7 +316,7 @@ public class NewTripActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK && null != data) {
 
                 ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                Log.d("test",result.get(0));
+                Log.d("test", result.get(0));
 
                 if (result.get(0).equals("one") || result.get(0).equals("1")) {
                     seekBar.setProgress(0);
@@ -310,12 +330,12 @@ public class NewTripActivity extends AppCompatActivity {
                     seekBar.setProgress(4);
                 } else {
                     Levenshtein l = new Levenshtein();
-                    Map<String,Double> results = new HashMap<>();
-                    results.put("1",l.distance(result.get(0),"one"));
-                    results.put("2",l.distance(result.get(0),"two"));
-                    results.put("3",l.distance(result.get(0),"three"));
-                    results.put("4",l.distance(result.get(0),"four"));
-                    results.put("5",l.distance(result.get(0),"five"));
+                    Map<String, Double> results = new HashMap<>();
+                    results.put("1", l.distance(result.get(0), "one"));
+                    results.put("2", l.distance(result.get(0), "two"));
+                    results.put("3", l.distance(result.get(0), "three"));
+                    results.put("4", l.distance(result.get(0), "four"));
+                    results.put("5", l.distance(result.get(0), "five"));
 
                     Map.Entry<String, Double> min = null;
                     for (Map.Entry<String, Double> entry : results.entrySet()) {
@@ -323,7 +343,7 @@ public class NewTripActivity extends AppCompatActivity {
                             min = entry;
                         }
                     }
-                    seekBar.setProgress(Integer.valueOf(min.getKey())-1);
+                    seekBar.setProgress(Integer.valueOf(min.getKey()) - 1);
 
                 }
                 startNewTripButton.setEnabled(true);
