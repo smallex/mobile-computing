@@ -191,8 +191,9 @@ public class NewTripActivity extends AppCompatActivity {
         });
     }
 
+
     private void startVoiceOutput(String s, String id) {
-        tts.speak(s, TextToSpeech.QUEUE_FLUSH, null, id);
+        tts.speak(s, TextToSpeech.QUEUE_ADD, null, id);
     }
 
     @Override
@@ -289,7 +290,7 @@ public class NewTripActivity extends AppCompatActivity {
                 Address location = address.get(0);
                 double lat = location.getLatitude();
                 double lng = location.getLongitude();
-                intent.putExtra("destinationName", finalDestination);
+                intent.putExtra("destinationName", location.getLocality());
                 intent.putExtra("destinationLat", lat);
                 intent.putExtra("destinationLng", lng);
                 intent.putExtra("tripStartingTime", new Date().getTime());
@@ -342,8 +343,9 @@ public class NewTripActivity extends AppCompatActivity {
                                     JSONObject location = array.getJSONObject(0);
                                     String loc = location.getString("entity");
                                     if (loc.isEmpty()) {
-                                        startVoiceOutput("I could not find the location . please " +
-                                                "repeat your input.", "1");
+                                        startVoiceOutput("I could not find the location","1");
+                                        tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
+                                        startVoiceOutput("Please repeat your input","1");
                                     } else {
                                         String output = loc.substring(0, 1).toUpperCase() + loc
                                                 .substring(1);
@@ -351,16 +353,19 @@ public class NewTripActivity extends AppCompatActivity {
                                         address = getLatLongFromPlace(output);
                                         destinationText.setText(output);
 
-                                        startVoiceOutput("How tired are you feeling right now .. " +
-                                                        "Rate on a scale between 1 and 5 .. where" +
-                                                        " 1 is " +
-                                                        "Not at all tired . and 5 is extremely " +
-                                                        "tired",
-                                                UTTERANCE_ID_FEELINGS);
+                                        startVoiceOutput("How tired are you feeling right now","1");
+                                        tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
+                                        startVoiceOutput("Rate on a scale between 1 and 5","1");
+                                        tts.playSilentUtterance(200, TextToSpeech.QUEUE_ADD, null);
+                                        startVoiceOutput("where one is not at all tired","1");
+                                        tts.playSilentUtterance(100, TextToSpeech.QUEUE_ADD, null);
+                                        startVoiceOutput("and 5 is extremely tired",UTTERANCE_ID_FEELINGS);
+
                                     }
                                 } else {
-                                    startVoiceOutput("I could not find the location please repeat" +
-                                            " your input.", "1");
+                                    startVoiceOutput("I could not find the location","1");
+                                    tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
+                                    startVoiceOutput("Please repeat your input","1");
                                 }
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -371,8 +376,9 @@ public class NewTripActivity extends AppCompatActivity {
                         public void onErrorResponse(VolleyError error) {
                             error.printStackTrace();
                             Log.d("AzureCall", "Error: " + error.toString());
-                            startVoiceOutput("I could not find the location please repeat your " +
-                                    "input.", "1");
+                            startVoiceOutput("I could not find the location","1");
+                            tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
+                            startVoiceOutput("Please repeat your input","1");
                         }
                     });
                     AzureCall azureCall = new AzureCall(this);
@@ -381,9 +387,13 @@ public class NewTripActivity extends AppCompatActivity {
                     destinationText.setText(result.get(0));
                     finalDestination = result.get(0);
                     address = getLatLongFromPlace(result.get(0));
-                    startVoiceOutput("How tired are you feeling right now .. Rate on a scale " +
-                            "between 1 and 5 .. where 1 is Not at all tired . and 5 is extremely " +
-                            "tired", UTTERANCE_ID_FEELINGS);
+                    startVoiceOutput("How tired are you feeling right now","1");
+                    tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
+                    startVoiceOutput("Rate on a scale between 1 and 5","1");
+                    tts.playSilentUtterance(200, TextToSpeech.QUEUE_ADD, null);
+                    startVoiceOutput("where one is not at all tired","1");
+                    tts.playSilentUtterance(100, TextToSpeech.QUEUE_ADD, null);
+                    startVoiceOutput("and 5 is extremely tired",UTTERANCE_ID_FEELINGS);
                 }
             }
         } else if (requestCode == REQ_CODE_SPEECH_INPUT_Feeling) {
@@ -421,6 +431,8 @@ public class NewTripActivity extends AppCompatActivity {
                     seekBar.setProgress(Integer.valueOf(min.getKey()) - 1);
                 }
                 startNewTripButton.setEnabled(true);
+                startNewTripButton.setBackgroundTintList(ColorStateList.valueOf(ContextCompat
+                        .getColor(this, R.color.accent)));
             }
         }
     }

@@ -84,7 +84,7 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
     private static final int RC_HANDLE_CAMERA_PERM = 2;
     private static final int MY_PERMISSIONS_REQUEST_LOCATION = 1;
     private static final String KWS_SEARCH = "wakeup";
-    private static final String KEYPHRASE = "break";
+    private static final String KEYPHRASE = "take a break";
     private static final int PERMISSIONS_REQUEST_RECORD_AUDIO = 134;
     private static final String UTTERANCE_ID_BREAK = "111";
     private CameraSource mCameraSource = null;
@@ -553,7 +553,7 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
     public void onPartialResult(Hypothesis hypothesis) {
         if (hypothesis == null)
             return;
-        String text = hypothesis.getHypstr();
+        String text = hypothesis.getHypstr().toLowerCase();
         if (text.equals(KEYPHRASE)) {
             recognizer.stop();
         }
@@ -562,10 +562,11 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
     @Override
     public void onResult(Hypothesis hypothesis) {
         if (hypothesis != null) {
-            String text = hypothesis.getHypstr();
+            String text = hypothesis.getHypstr().toLowerCase();
             if (text.equals(KEYPHRASE)) {
-                tts.speak("Where do you wanna take your break. Choose one of the following " +
-                        "locations", TextToSpeech.QUEUE_FLUSH, null, UTTERANCE_ID_BREAK);
+                tts.speak("What are you planning to do on your break.",TextToSpeech.QUEUE_ADD,null,"1");
+                tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
+                tts.speak("Choose one of the following activities.",TextToSpeech.QUEUE_ADD,null,UTTERANCE_ID_BREAK);
             }
         }
     }
