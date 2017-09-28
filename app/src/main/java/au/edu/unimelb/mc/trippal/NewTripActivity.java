@@ -38,6 +38,7 @@ import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.maps.model.LatLng;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -47,6 +48,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import au.edu.unimelb.mc.trippal.camera.FaceTrackerActivity;
 import info.debatty.java.stringsimilarity.Levenshtein;
@@ -317,15 +320,63 @@ public class NewTripActivity extends AppCompatActivity {
             }
         } else if (requestCode == REQ_CODE_SPEECH_INPUT_Location) {
             if (resultCode == RESULT_OK && null != data) {
-                ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent
-                        .EXTRA_RESULTS);
-                Log.d("test", result.get(0));
-                destinationText.setText(result.get(0));
-                finalDestination = result.get(0);
-                address = getLatLongFromPlace(result.get(0));
-                startVoiceOutput("How tired are you feeling right now .. Rate on a scale between " +
-                        "1 and 5 .. where 1 is Not at all tired . and 5 is extremely tired",
-                        UTTERANCE_ID_FEELINGS);
+                ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+
+
+                Log.d("resultLocation", result.get(0));
+                Pattern pattern = Pattern.compile("\\s");
+                Matcher matcher = pattern.matcher(result.get(0));
+                boolean found = matcher.find();
+                if(found) {
+                    Uri builtUri = Uri.parse(AzureCall.url)
+                            .buildUpon()
+                            .appendQueryParameter("q", result.get(0))
+                            .build();
+                    JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, builtUri.toString(), null, new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            try {
+                                JSONArray array = response.getJSONArray("entities");
+                                if (array.length()>0) {
+                                    JSONObject location = array.getJSONObject(0);
+                                    String loc = location.getString("entity");
+                                    if (loc.isEmpty()){
+                                        startVoiceOutput("I could not find the location . please repeat your input.","1");
+                                    } else {
+                                        String output = loc.substring(0, 1).toUpperCase() + loc.substring(1);
+                                        finalDestination = output;
+                                        address = getLatLongFromPlace(output);
+                                        destinationText.setText(output);
+
+                                        startVoiceOutput("How tired are you feeling right now .. Rate on a scale between 1 and 5 .. where 1 is Not at all tired . and 5 is extremely tired", UTTERANCE_ID_FEELINGS);
+                                    }
+                                } else {
+                                    startVoiceOutput("I could not find the location please repeat your input.","1");
+                                }
+
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+
+                        }
+                    }, new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            error.printStackTrace();
+                            Log.d("AzureCall", "Error: " + error.toString());
+                            startVoiceOutput("I could not find the location please repeat your input.","1");
+                        }
+                    });
+                    AzureCall azureCall = new AzureCall(this);
+                    azureCall.sendRequest(jsObjRequest,result.get(0));
+                } else {
+                    destinationText.setText(result.get(0));
+                    finalDestination = result.get(0);
+                    address = getLatLongFromPlace(result.get(0));
+                    startVoiceOutput("How tired are you feeling right now .. Rate on a scale between 1 and 5 .. where 1 is Not at all tired . and 5 is extremely tired", UTTERANCE_ID_FEELINGS);
+                }
+
             }
         } else if (requestCode == REQ_CODE_SPEECH_INPUT_Feeling) {
             if (resultCode == RESULT_OK && null != data) {
