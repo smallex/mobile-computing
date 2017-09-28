@@ -45,11 +45,14 @@ import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.CustomCap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
@@ -64,7 +67,9 @@ import com.google.android.gms.vision.face.FaceDetector;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
@@ -107,6 +112,9 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
     private boolean closedEyesAlertOpen = false;
     private SpeechRecognizer recognizer;
     private TextToSpeech tts;
+    private List<LatLng> userLocationList;
+    private double distanceTraveledMeters = 0;
+    private TextView distanceText;
 
     //==============================================================================================
     // Activity Methods
@@ -124,6 +132,7 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
         eyeStatus = (TextView) findViewById(R.id.eyeStatus);
         tripDurationText = (TextView) findViewById(R.id.tripDuration);
         energyLevel = (ProgressBar) findViewById(R.id.energyLevel);
+        distanceText = (TextView) findViewById(R.id.distanceText);
 
         // Show toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_facetracker);
@@ -131,8 +140,9 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
             setSupportActionBar(toolbar);
         }
 
-        ActionBar ab = getSupportActionBar();
+        this.userLocationList = new ArrayList<>();
 
+        ActionBar ab = getSupportActionBar();
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             this.destinationName = extras.getString("destinationName");
@@ -255,9 +265,9 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
         }
         locationManager = (LocationManager) this.getSystemService(Context
                 .LOCATION_SERVICE);
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 500, 0, new
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 0, new
                 MyLocationListenerGPS());
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 500, 0, new
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 2000, 0, new
                 MyLocationListenerGPS());
         Log.d("TripPal", "Requesting current location");
     }
@@ -405,7 +415,7 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
                 Log.d("TripPal", "Location permission not granted");
                 return;
             }
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 400, 0, new
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 0, new
                     MyLocationListenerGPS());
             Log.d("TripPal", "requestLocationUpdates");
             return;
@@ -581,11 +591,15 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
     }
 
     private class MyLocationListenerGPS implements LocationListener {
+
+        private Polyline polyline;
+
         @Override
         public void onLocationChanged(Location location) {
             if (startingLatLng == null) {
                 startingLatLng = new LatLng(location.getLatitude(),
                         location.getLongitude());
+                userLocationList.add(startingLatLng);
                 if (mMap != null) {
                     createStartLocationMarkers();
                     showAllMarkers();
@@ -593,15 +607,62 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
                 Log.d("TripPal", "Location: " + startingLatLng);
             } else {
                 if (currentLocation != null) {
-                    Polyline polyline = mMap.addPolyline(new PolylineOptions()
-                            .add(currentLocation, new LatLng(location.getLatitude(), location
-                                    .getLongitude())).width(5).color(Color.DKGRAY));
+                    if (polyline == null) {
+                        initUserPolyline();
+                    }
+                    LatLng locationLatLng = new LatLng(location.getLatitude(), location
+                            .getLongitude());
+                    userLocationList.add(locationLatLng);
+                    polyline.setPoints(userLocationList);
+                    double bearing = calculateBearing(currentLocation, locationLatLng);
+                    CameraPosition currentPos = mMap.getCameraPosition();
+                    CameraUpdate update = CameraUpdateFactory.newCameraPosition(new
+                            CameraPosition(locationLatLng, currentPos.zoom, currentPos.tilt,
+                            (float) bearing));
+                    mMap.animateCamera(update, 1000, null);
+                    float[] distance = new float[]{0};
+                    Location.distanceBetween(currentLocation.latitude,
+                            currentLocation.longitude, location.getLatitude(), location
+                                    .getLongitude(), distance);
+                    distanceTraveledMeters += distance[0];
+                    distanceText.setText(String.format("%.3f", distanceTraveledMeters / 1000.0) +
+                            " km");
                 }
                 currentLocation = new LatLng(location.getLatitude(),
                         location.getLongitude());
                 updateCurrentLocationMarker();
                 Log.d("TripPal", "Location: " + startingLatLng);
             }
+        }
+
+        private void initUserPolyline() {
+            polyline = mMap.addPolyline(new PolylineOptions().width(5).color
+                    (Color.DKGRAY));
+            polyline.setEndCap(new CustomCap(BitmapDescriptorFactory.fromResource(R
+                    .drawable.ic_keyboard_arrow_up_black_48dp), 10));
+        }
+
+        private double calculateBearing(LatLng currentLocation, LatLng locationLatLng) {
+            double lon1 = degToRad(currentLocation.longitude);
+            double lon2 = degToRad(locationLatLng.longitude);
+            double lat1 = degToRad(currentLocation.latitude);
+            double lat2 = degToRad(locationLatLng.latitude);
+
+            double a = Math.sin(lon2 - lon1) * Math.cos(lat2);
+            double b = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math
+                    .cos(lon2 - lon1);
+            double c = radToDeg(Math.atan2(a, b));
+            return c;
+        }
+
+        public double degToRad(double deg) {
+            return deg * Math.PI / 180.0;
+        }
+
+        public double radToDeg(double rad) {
+            rad = rad * (180.0 / Math.PI);
+            if (rad < 0) rad = 360.0 + rad;
+            return rad;
         }
 
         @Override
