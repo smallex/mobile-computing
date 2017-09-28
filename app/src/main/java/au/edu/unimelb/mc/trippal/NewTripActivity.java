@@ -4,7 +4,6 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.net.Uri;
@@ -15,13 +14,13 @@ import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputLayout;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.SeekBar;
 
 import com.android.volley.AuthFailureError;
@@ -67,7 +66,7 @@ public class NewTripActivity extends AppCompatActivity {
     private EditText durationHours;
     private EditText durationMinutes;
     private SeekBar sleepQuality;
-    private ImageButton mSpeakBtn;
+    private FloatingActionButton mSpeakBtn;
     private TextToSpeech tts;
     private SeekBar seekBar;
     private List<Address> address;
@@ -126,7 +125,7 @@ public class NewTripActivity extends AppCompatActivity {
         });
 
         seekBar = (SeekBar) findViewById(R.id.drowsinessSeekBar);
-        mSpeakBtn = (ImageButton) findViewById(R.id.btnMic);
+        mSpeakBtn = (FloatingActionButton) findViewById(R.id.btnMic);
         mSpeakBtn.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -310,7 +309,8 @@ public class NewTripActivity extends AppCompatActivity {
                 destinationText.setText(place.getName());
                 destinationText.clearFocus();
                 startNewTripButton.setEnabled(true);
-                startNewTripButton.setBackgroundTintList(ColorStateList.valueOf(Color.RED));
+                startNewTripButton.setBackgroundTintList(ColorStateList.valueOf(ContextCompat
+                        .getColor(this, R.color.accent)));
             } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
                 Status status = PlaceAutocomplete.getStatus(this, data);
                 // TODO: Handle the error.
@@ -320,63 +320,71 @@ public class NewTripActivity extends AppCompatActivity {
             }
         } else if (requestCode == REQ_CODE_SPEECH_INPUT_Location) {
             if (resultCode == RESULT_OK && null != data) {
-                ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-
+                ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent
+                        .EXTRA_RESULTS);
 
                 Log.d("resultLocation", result.get(0));
                 Pattern pattern = Pattern.compile("\\s");
                 Matcher matcher = pattern.matcher(result.get(0));
                 boolean found = matcher.find();
-                if(found) {
+                if (found) {
                     Uri builtUri = Uri.parse(AzureCall.url)
                             .buildUpon()
                             .appendQueryParameter("q", result.get(0))
                             .build();
-                    JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, builtUri.toString(), null, new Response.Listener<JSONObject>() {
+                    JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET,
+                            builtUri.toString(), null, new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
                             try {
                                 JSONArray array = response.getJSONArray("entities");
-                                if (array.length()>0) {
+                                if (array.length() > 0) {
                                     JSONObject location = array.getJSONObject(0);
                                     String loc = location.getString("entity");
-                                    if (loc.isEmpty()){
-                                        startVoiceOutput("I could not find the location . please repeat your input.","1");
+                                    if (loc.isEmpty()) {
+                                        startVoiceOutput("I could not find the location . please " +
+                                                "repeat your input.", "1");
                                     } else {
-                                        String output = loc.substring(0, 1).toUpperCase() + loc.substring(1);
+                                        String output = loc.substring(0, 1).toUpperCase() + loc
+                                                .substring(1);
                                         finalDestination = output;
                                         address = getLatLongFromPlace(output);
                                         destinationText.setText(output);
 
-                                        startVoiceOutput("How tired are you feeling right now .. Rate on a scale between 1 and 5 .. where 1 is Not at all tired . and 5 is extremely tired", UTTERANCE_ID_FEELINGS);
+                                        startVoiceOutput("How tired are you feeling right now .. " +
+                                                        "Rate on a scale between 1 and 5 .. where" +
+                                                        " 1 is " +
+                                                        "Not at all tired . and 5 is extremely " +
+                                                        "tired",
+                                                UTTERANCE_ID_FEELINGS);
                                     }
                                 } else {
-                                    startVoiceOutput("I could not find the location please repeat your input.","1");
+                                    startVoiceOutput("I could not find the location please repeat" +
+                                            " your input.", "1");
                                 }
-
-
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
-
                         }
                     }, new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
                             error.printStackTrace();
                             Log.d("AzureCall", "Error: " + error.toString());
-                            startVoiceOutput("I could not find the location please repeat your input.","1");
+                            startVoiceOutput("I could not find the location please repeat your " +
+                                    "input.", "1");
                         }
                     });
                     AzureCall azureCall = new AzureCall(this);
-                    azureCall.sendRequest(jsObjRequest,result.get(0));
+                    azureCall.sendRequest(jsObjRequest, result.get(0));
                 } else {
                     destinationText.setText(result.get(0));
                     finalDestination = result.get(0);
                     address = getLatLongFromPlace(result.get(0));
-                    startVoiceOutput("How tired are you feeling right now .. Rate on a scale between 1 and 5 .. where 1 is Not at all tired . and 5 is extremely tired", UTTERANCE_ID_FEELINGS);
+                    startVoiceOutput("How tired are you feeling right now .. Rate on a scale " +
+                            "between 1 and 5 .. where 1 is Not at all tired . and 5 is extremely " +
+                            "tired", UTTERANCE_ID_FEELINGS);
                 }
-
             }
         } else if (requestCode == REQ_CODE_SPEECH_INPUT_Feeling) {
             if (resultCode == RESULT_OK && null != data) {

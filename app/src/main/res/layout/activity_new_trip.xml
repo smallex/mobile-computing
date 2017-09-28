@@ -8,9 +8,9 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_gravity="top"
-        android:scaleType="centerCrop"
-        android:alpha="0.5"
+        android:alpha="0.7"
         android:fadingEdgeLength="20dp"
+        android:scaleType="centerCrop"
         android:src="@drawable/roadtrip"/>
 
     <LinearLayout
@@ -89,7 +89,8 @@
                     android:layout_height="wrap_content"
                     android:paddingBottom="5dp"
                     android:paddingLeft="15dp"
-                    android:text="How tired are you feeling?"/>
+                    android:text="How tired are you feeling?"
+                    android:textColor="#000000"/>
 
                 <SeekBar
                     android:id="@+id/drowsinessSeekBar"
@@ -167,7 +168,8 @@
                         android:layout_height="wrap_content"
                         android:paddingBottom="5dp"
                         android:paddingLeft="15dp"
-                        android:text="How long did you sleep?"/>
+                        android:text="How long did you sleep?"
+                        android:textColor="#000000"/>
 
                     <Button
                         android:layout_width="match_parent"
@@ -178,7 +180,6 @@
                         android:onClick="loadSleepData"
                         android:paddingBottom="8dp"
                         android:text="Sync with"
-                        android:textColor="#FFFFFF"
                         android:textSize="12sp">
 
                     </Button>
@@ -254,7 +255,8 @@
                     android:layout_height="wrap_content"
                     android:paddingBottom="5dp"
                     android:paddingLeft="15dp"
-                    android:text="How was your sleep last night?"/>
+                    android:text="How was your sleep last night?"
+                    android:textColor="#000000"/>
 
                 <SeekBar
                     android:id="@+id/sleepQuality"
@@ -310,25 +312,33 @@
             android:clipToPadding="false"
             android:padding="20dp">
 
-            <ImageButton
-                android:id="@+id/btnMic"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_above="@+id/startNewTripButton"
-                android:layout_centerHorizontal="true"
-                android:layout_marginBottom="34dp"
-                app:srcCompat="@drawable/mic"/>
-
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/startNewTripButton"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
-                android:layout_alignParentRight="true"
-                android:enabled="false"
-                android:onClick="startNewTrip"
-                android:src="@drawable/ic_add_white_48dp"
-                app:backgroundTint="@android:color/darker_gray"/>
+                android:orientation="vertical">
+
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/btnMic"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:layout_margin="5dp"
+                    android:enabled="false"
+                    android:onClick="startNewTrip"
+                    android:src="@drawable/ic_mic_white_48dp"/>
+
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/startNewTripButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:layout_margin="5dp"
+                    android:enabled="false"
+                    android:onClick="startNewTrip"
+                    android:src="@drawable/ic_add_white_48dp"
+                    app:backgroundTint="@android:color/darker_gray"/>
+            </LinearLayout>
         </RelativeLayout>
     </LinearLayout>
 </FrameLayout>
