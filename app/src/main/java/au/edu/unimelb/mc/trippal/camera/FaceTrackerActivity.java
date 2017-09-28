@@ -65,14 +65,23 @@ import com.google.android.gms.vision.Tracker;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
 
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+import au.edu.unimelb.mc.trippal.DirectionsJSONParser;
 import au.edu.unimelb.mc.trippal.R;
 import au.edu.unimelb.mc.trippal.recommendations.Recommendations;
 import edu.cmu.pocketsphinx.Assets;
@@ -574,9 +583,11 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
         if (hypothesis != null) {
             String text = hypothesis.getHypstr().toLowerCase();
             if (text.equals(KEYPHRASE)) {
-                tts.speak("What are you planning to do on your break.",TextToSpeech.QUEUE_ADD,null,"1");
+                tts.speak("What are you planning to do on your break.", TextToSpeech.QUEUE_ADD,
+                        null, "1");
                 tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
-                tts.speak("Choose one of the following activities.",TextToSpeech.QUEUE_ADD,null,UTTERANCE_ID_BREAK);
+                tts.speak("Choose one of the following activities.", TextToSpeech.QUEUE_ADD,
+                        null, UTTERANCE_ID_BREAK);
             }
         }
     }
@@ -588,6 +599,76 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
 
     @Override
     public void onTimeout() {
+    }
+
+    private String getDirectionsUrl(LatLng origin, LatLng dest) {
+
+        // Origin of route
+        String str_origin = "origin=" + origin.latitude + "," + origin.longitude;
+
+        // Destination of route
+        String str_dest = "destination=" + dest.latitude + "," + dest.longitude;
+
+        // Sensor enabled
+        String sensor = "sensor=false";
+        String mode = "mode=driving";
+        // Building the parameters to the web service
+        String parameters = str_origin + "&" + str_dest + "&" + sensor + "&" + mode +
+                "&key=AIzaSyDQjDkBJd69ZfDHmXbWJd_cX4q5zJYWJl8";
+
+        // Output format
+        String output = "json";
+
+        // Building the url to the web service
+        String url = "https://maps.googleapis.com/maps/api/directions/" + output + "?" + parameters;
+
+        return url;
+    }
+
+    //==============================================================================================
+    // Graphic Face Tracker
+    //==============================================================================================
+
+    /**
+     * A method to download json data from url
+     */
+    private String downloadUrl(String strUrl) throws IOException {
+        String data = "";
+        InputStream iStream = null;
+        HttpURLConnection urlConnection = null;
+        try {
+            URL url = new URL(strUrl);
+            urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.connect();
+            iStream = urlConnection.getInputStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(iStream));
+
+            StringBuffer sb = new StringBuffer();
+            String line = "";
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+            }
+
+            data = sb.toString();
+
+            br.close();
+        } catch (Exception e) {
+            Log.d("Exception", e.toString());
+        } finally {
+            iStream.close();
+            urlConnection.disconnect();
+        }
+        return data;
+    }
+
+    private void drawRoute() {
+        // Getting URL to the Google Directions API
+        String url = getDirectionsUrl(startingLatLng, destinationLatLng);
+
+        DownloadTask downloadTask = new DownloadTask();
+
+        // Start downloading json data from Google Directions API
+        downloadTask.execute(url);
     }
 
     private class MyLocationListenerGPS implements LocationListener {
@@ -603,6 +684,7 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
                 if (mMap != null) {
                     createStartLocationMarkers();
                     showAllMarkers();
+                    drawRoute();
                 }
                 Log.d("TripPal", "Location: " + startingLatLng);
             } else {
@@ -680,10 +762,6 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
 
         }
     }
-
-    //==============================================================================================
-    // Graphic Face Tracker
-    //==============================================================================================
 
     /**
      * Factory for creating a face tracker to be associated with a new face.  The multiprocessor
@@ -812,6 +890,91 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
                 tripDurationText.setText(hours + " hours " + minutes + " minutes");
             }
             timerHandler.postDelayed(this, TimeUnit.MINUTES.toMillis(1));
+        }
+    }
+
+    private class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<String,
+            String>>>> {
+
+        // Parsing the data in non-ui thread
+        @Override
+        protected List<List<HashMap<String, String>>> doInBackground(String... jsonData) {
+
+            JSONObject jObject;
+            List<List<HashMap<String, String>>> routes = null;
+
+            try {
+                jObject = new JSONObject(jsonData[0]);
+                Log.d("JSON", jsonData[0]);
+                DirectionsJSONParser parser = new DirectionsJSONParser();
+
+                routes = parser.parse(jObject);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return routes;
+        }
+
+        @Override
+        protected void onPostExecute(List<List<HashMap<String, String>>> result) {
+            ArrayList points = null;
+            PolylineOptions lineOptions = null;
+            MarkerOptions markerOptions = new MarkerOptions();
+
+            if(result.isEmpty()) {
+                return;
+            }
+
+            for (int i = 0; i < result.size(); i++) {
+                points = new ArrayList();
+                lineOptions = new PolylineOptions();
+
+                List<HashMap<String, String>> path = result.get(i);
+
+                for (int j = 0; j < path.size(); j++) {
+                    HashMap<String, String> point = path.get(j);
+
+                    double lat = Double.parseDouble(point.get("lat"));
+                    double lng = Double.parseDouble(point.get("lng"));
+                    LatLng position = new LatLng(lat, lng);
+
+                    points.add(position);
+                }
+
+                lineOptions.addAll(points);
+                lineOptions.width(12);
+                lineOptions.color(Color.RED);
+                lineOptions.geodesic(true);
+            }
+
+            // Drawing polyline in the Google Map for the i-th route
+            mMap.addPolyline(lineOptions);
+        }
+    }
+
+    private class DownloadTask extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected String doInBackground(String... url) {
+
+            String data = "";
+
+            try {
+                Log.d("URL", url[0]);
+                data = downloadUrl(url[0]);
+            } catch (Exception e) {
+                Log.d("Background Task", e.toString());
+            }
+            return data;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+
+            ParserTask parserTask = new ParserTask();
+
+            parserTask.execute(result);
         }
     }
 }
