@@ -87,7 +87,7 @@ public class NewTripActivity extends AppCompatActivity {
         // Enable up navigation (back arrow)
         ActionBar ab = getSupportActionBar();
         if (ab != null) {
-            ab.setTitle("New Trip");
+            ab.setTitle("Start a New Trip");
         }
 
         // Open splash screen on first start

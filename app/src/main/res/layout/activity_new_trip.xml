@@ -1,319 +1,334 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context="au.edu.unimelb.mc.trippal.NewTripActivity">
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:layout_width="fill_parent"
+             android:layout_height="fill_parent"
+             android:orientation="vertical">
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar_newtrip"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?attr/colorPrimary"
-        android:minHeight="?attr/actionBarSize"
-        android:theme="?attr/actionBarTheme"/>
+    <ImageView
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_gravity="top"
+        android:scaleType="centerCrop"
+        android:alpha="0.5"
+        android:fadingEdgeLength="20dp"
+        android:src="@drawable/roadtrip"/>
 
     <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingTop="5dp">
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        tools:context="au.edu.unimelb.mc.trippal.NewTripActivity">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:drawableLeft="@drawable/distance"
-            android:paddingLeft="15dp"
-            android:paddingTop="25dp"/>
-
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/destinationWrapper"
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar_newtrip"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:paddingLeft="10dp"
-            android:paddingRight="15dp">
-
-            <EditText
-                android:id="@+id/destination"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Destination"
-                android:inputType="textPostalAddress"
-                android:padding="10dp"
-                android:textSize="16sp"/>
-
-        </android.support.design.widget.TextInputLayout>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingTop="5dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:drawableLeft="@drawable/head"
-            android:paddingLeft="15dp"
-            android:paddingTop="20dp"/>
-
-        <GridLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:columnCount="1"
-            android:paddingRight="5dp"
-            android:paddingTop="10dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingBottom="5dp"
-                android:paddingLeft="15dp"
-                android:text="How tired are you feeling?"/>
-
-            <SeekBar
-                android:id="@+id/drowsinessSeekBar"
-                style="@style/Widget.AppCompat.SeekBar.Discrete"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:max="4"
-                android:progress="2"/>
-
-            <GridLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:columnCount="3">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:layout_gravity="fill"
-                    android:gravity="start"
-                    android:paddingBottom="5dp"
-                    android:text="Not at all"
-                    android:textSize="12sp"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:layout_gravity="fill"
-                    android:gravity="center"
-                    android:paddingBottom="5dp"
-                    android:text="Mildy"
-                    android:textSize="12sp"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:layout_gravity="fill"
-                    android:gravity="end"
-                    android:paddingBottom="5dp"
-                    android:text="Extremely"
-                    android:textSize="12sp"/>
-            </GridLayout>
-        </GridLayout>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingTop="5dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:drawableLeft="@drawable/alarm_clock"
-            android:paddingLeft="15dp"
-            android:paddingTop="25dp"/>
+            android:background="?attr/colorPrimary"
+            android:minHeight="?attr/actionBarSize"
+            android:theme="?attr/actionBarTheme"/>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingRight="5dp"
-            android:paddingTop="10dp">
+            android:orientation="horizontal"
+            android:paddingTop="5dp">
 
-            <LinearLayout
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableLeft="@drawable/distance"
+                android:paddingLeft="15dp"
+                android:paddingTop="25dp"/>
+
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/destinationWrapper"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_weight="1"
+                android:paddingLeft="10dp"
+                android:paddingRight="15dp">
+
+                <EditText
+                    android:id="@+id/destination"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Destination"
+                    android:inputType="textPostalAddress"
+                    android:padding="10dp"
+                    android:textSize="16sp"/>
+
+            </android.support.design.widget.TextInputLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="5dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableLeft="@drawable/head"
+                android:paddingLeft="15dp"
+                android:paddingTop="20dp"/>
+
+            <GridLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:columnCount="1"
+                android:paddingRight="5dp"
+                android:paddingTop="10dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingBottom="5dp"
                     android:paddingLeft="15dp"
-                    android:text="How long did you sleep?"/>
+                    android:text="How tired are you feeling?"/>
 
-                <Button
+                <SeekBar
+                    android:id="@+id/drowsinessSeekBar"
+                    style="@style/Widget.AppCompat.SeekBar.Discrete"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:drawableRight="@drawable/fitbit"
-                    android:minHeight="0dp"
-                    android:minWidth="0dp"
-                    android:onClick="loadSleepData"
-                    android:paddingBottom="8dp"
-                    android:text="Sync with"
-                    android:textColor="#FFFFFF"
-                    android:textSize="12sp">
+                    android:max="4"
+                    android:progress="2"/>
 
-                </Button>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal">
-
-                <android.support.design.widget.TextInputLayout
-                    android:id="@+id/durationHourWrapper"
+                <GridLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:paddingLeft="10dp"
-                    android:paddingRight="15dp">
+                    android:columnCount="3">
 
-                    <EditText
-                        android:id="@+id/durationHours"
-                        android:layout_width="match_parent"
+                    <TextView
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:hint="Hours"
-                        android:inputType="number"
-                        android:textSize="16sp"/>
+                        android:layout_columnWeight="1"
+                        android:layout_gravity="fill"
+                        android:gravity="start"
+                        android:paddingBottom="5dp"
+                        android:text="Not at all"
+                        android:textSize="12sp"/>
 
-                </android.support.design.widget.TextInputLayout>
-
-                <android.support.design.widget.TextInputLayout
-                    android:id="@+id/durationMinutesWrapper"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:paddingLeft="10dp"
-                    android:paddingRight="15dp">
-
-                    <EditText
-                        android:id="@+id/durationMinutes"
-                        android:layout_width="match_parent"
+                    <TextView
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:hint="Minutes"
-                        android:inputType="number"
-                        android:textSize="16sp"/>
+                        android:layout_columnWeight="1"
+                        android:layout_gravity="fill"
+                        android:gravity="center"
+                        android:paddingBottom="5dp"
+                        android:text="Mildy"
+                        android:textSize="12sp"/>
 
-                </android.support.design.widget.TextInputLayout>
-            </LinearLayout>
-
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:layout_gravity="fill"
+                        android:gravity="end"
+                        android:paddingBottom="5dp"
+                        android:text="Extremely"
+                        android:textSize="12sp"/>
+                </GridLayout>
+            </GridLayout>
         </LinearLayout>
-    </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingTop="5dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:drawableLeft="@drawable/sleep"
-            android:paddingLeft="15dp"
-            android:paddingTop="25dp"/>
-
-        <GridLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:columnCount="1"
-            android:paddingRight="5dp"
-            android:paddingTop="10dp">
+            android:orientation="horizontal"
+            android:paddingTop="5dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingBottom="5dp"
+                android:drawableLeft="@drawable/alarm_clock"
                 android:paddingLeft="15dp"
-                android:text="How was your sleep last night?"/>
+                android:paddingTop="25dp"/>
 
-            <SeekBar
-                android:id="@+id/sleepQuality"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:max="100"
-                android:progress="50"/>
+                android:orientation="vertical"
+                android:paddingRight="5dp"
+                android:paddingTop="10dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingBottom="5dp"
+                        android:paddingLeft="15dp"
+                        android:text="How long did you sleep?"/>
+
+                    <Button
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:drawableRight="@drawable/fitbit"
+                        android:minHeight="0dp"
+                        android:minWidth="0dp"
+                        android:onClick="loadSleepData"
+                        android:paddingBottom="8dp"
+                        android:text="Sync with"
+                        android:textColor="#FFFFFF"
+                        android:textSize="12sp">
+
+                    </Button>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal">
+
+                    <android.support.design.widget.TextInputLayout
+                        android:id="@+id/durationHourWrapper"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:paddingLeft="10dp"
+                        android:paddingRight="15dp">
+
+                        <EditText
+                            android:id="@+id/durationHours"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Hours"
+                            android:inputType="number"
+                            android:textSize="16sp"/>
+
+                    </android.support.design.widget.TextInputLayout>
+
+                    <android.support.design.widget.TextInputLayout
+                        android:id="@+id/durationMinutesWrapper"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:paddingLeft="10dp"
+                        android:paddingRight="15dp">
+
+                        <EditText
+                            android:id="@+id/durationMinutes"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Minutes"
+                            android:inputType="number"
+                            android:textSize="16sp"/>
+
+                    </android.support.design.widget.TextInputLayout>
+                </LinearLayout>
+
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="5dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableLeft="@drawable/sleep"
+                android:paddingLeft="15dp"
+                android:paddingTop="25dp"/>
 
             <GridLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:columnCount="3">
+                android:layout_height="wrap_content"
+                android:columnCount="1"
+                android:paddingRight="5dp"
+                android:paddingTop="10dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:layout_gravity="fill"
-                    android:gravity="start"
                     android:paddingBottom="5dp"
-                    android:text="Poor"
-                    android:textSize="12sp"/>
+                    android:paddingLeft="15dp"
+                    android:text="How was your sleep last night?"/>
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <SeekBar
+                    android:id="@+id/sleepQuality"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:layout_gravity="fill"
-                    android:gravity="center"
-                    android:paddingBottom="5dp"
-                    android:text="Normal"
-                    android:textSize="12sp"/>
+                    android:max="100"
+                    android:progress="50"/>
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:layout_gravity="fill"
-                    android:gravity="end"
-                    android:paddingBottom="5dp"
-                    android:text="Great"
-                    android:textSize="12sp"/>
+                <GridLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:columnCount="3">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:layout_gravity="fill"
+                        android:gravity="start"
+                        android:paddingBottom="5dp"
+                        android:text="Poor"
+                        android:textSize="12sp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:layout_gravity="fill"
+                        android:gravity="center"
+                        android:paddingBottom="5dp"
+                        android:text="Normal"
+                        android:textSize="12sp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:layout_gravity="fill"
+                        android:gravity="end"
+                        android:paddingBottom="5dp"
+                        android:text="Great"
+                        android:textSize="12sp"/>
+                </GridLayout>
+
             </GridLayout>
 
-        </GridLayout>
+        </LinearLayout>
 
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:padding="20dp">
+
+            <ImageButton
+                android:id="@+id/btnMic"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_above="@+id/startNewTripButton"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="34dp"
+                app:srcCompat="@drawable/mic"/>
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/startNewTripButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentRight="true"
+                android:enabled="false"
+                android:onClick="startNewTrip"
+                android:src="@drawable/ic_add_white_48dp"
+                app:backgroundTint="@android:color/darker_gray"/>
+        </RelativeLayout>
     </LinearLayout>
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:clipChildren="false"
-        android:clipToPadding="false"
-        android:padding="20dp">
-
-        <ImageButton
-            android:id="@+id/btnMic"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_above="@+id/startNewTripButton"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="34dp"
-            app:srcCompat="@drawable/mic"/>
-
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/startNewTripButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true"
-            android:enabled="false"
-            app:backgroundTint="@android:color/darker_gray"
-            android:onClick="startNewTrip"
-            android:src="@drawable/ic_add_white_48dp"/>
-    </RelativeLayout>
-</LinearLayout>
+</FrameLayout>
