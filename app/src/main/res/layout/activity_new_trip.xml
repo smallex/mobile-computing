@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:background="?attr/colorPrimary"
         android:minHeight="?attr/actionBarSize"
-        android:theme="?attr/actionBarTheme" />
+        android:theme="?attr/actionBarTheme"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -158,14 +158,14 @@
                 <Button
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:drawableRight="@drawable/fitbit"
                     android:minHeight="0dp"
                     android:minWidth="0dp"
-                    android:textSize="12sp"
                     android:onClick="loadSleepData"
-                    android:drawableRight="@drawable/fitbit"
-                    android:text="Sync with"
                     android:paddingBottom="8dp"
-                    android:textColor="#FFFFFF">
+                    android:text="Sync with"
+                    android:textColor="#FFFFFF"
+                    android:textSize="12sp">
 
                 </Button>
             </LinearLayout>
@@ -291,18 +291,10 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <Button
-            android:id="@+id/startNewTripButton"
-            style="@style/Widget.AppCompat.Button.Colored"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:enabled="false"
-            android:onClick="startNewTrip"
-            android:text="Start New Trip"
-            android:theme="@style/MyTheme"/>
+        android:layout_height="wrap_content"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:padding="20dp">
 
         <ImageButton
             android:id="@+id/btnMic"
@@ -311,6 +303,17 @@
             android:layout_above="@+id/startNewTripButton"
             android:layout_centerHorizontal="true"
             android:layout_marginBottom="34dp"
-            app:srcCompat="@drawable/mic" />
+            app:srcCompat="@drawable/mic"/>
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/startNewTripButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:enabled="false"
+            app:backgroundTint="@android:color/darker_gray"
+            android:onClick="startNewTrip"
+            android:src="@drawable/ic_add_white_48dp"/>
     </RelativeLayout>
 </LinearLayout>

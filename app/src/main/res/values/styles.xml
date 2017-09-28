@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary">#3F51B5</color>
-    <color name="primary_dark">#303F9F</color>
-    <color name="primary_light">#C5CAE9</color>
-    <color name="accent">#e91e63</color>
+    <color name="primary">#009688</color>
+    <color name="primary_dark">#00796B</color>
+    <color name="primary_light">#B2DFDB</color>
+    <color name="accent">#FF5252</color>
     <color name="primary_text">#212121</color>
     <color name="secondary_text">#757575</color>
     <color name="icons">#FFFFFF</color>
-    <color name="transparent">#CCFFFFFF</color>
     <color name="divider">#BDBDBD</color>
+    <color name="transparent">#CCFFFFFF</color>
 
     <style name="MyTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <!--   Primary Color -->
@@ -22,7 +22,7 @@
         <item name="windowNoTitle">true</item>
     </style>
 
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
 
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light">

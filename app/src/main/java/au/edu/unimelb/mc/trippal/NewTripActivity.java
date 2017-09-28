@@ -3,6 +3,8 @@ package au.edu.unimelb.mc.trippal;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.net.Uri;
@@ -11,13 +13,13 @@ import android.preference.PreferenceManager;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
@@ -50,15 +52,15 @@ import au.edu.unimelb.mc.trippal.camera.FaceTrackerActivity;
 import info.debatty.java.stringsimilarity.Levenshtein;
 
 public class NewTripActivity extends AppCompatActivity {
-    private int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
     private static final int REQ_CODE_SPEECH_INPUT_Location = 1000;
     private static final int REQ_CODE_SPEECH_INPUT_Feeling = 2000;
+    private int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
     private String UTTERANCE_ID_LOCATION = "100";
     private String UTTERANCE_ID_FEELINGS = "200";
     private EditText destinationText;
     private TextInputLayout destinationLayout;
     private Place selectedPlace;
-    private Button startNewTripButton;
+    private FloatingActionButton startNewTripButton;
     private EditText durationHours;
     private EditText durationMinutes;
     private SeekBar sleepQuality;
@@ -86,7 +88,8 @@ public class NewTripActivity extends AppCompatActivity {
         }
 
         // Open splash screen on first start
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences
+                (getBaseContext());
         boolean isFirstStart = sharedPreferences.getBoolean("FIRST_START", true);
 
         // If the activity has never started before...
@@ -103,7 +106,8 @@ public class NewTripActivity extends AppCompatActivity {
             e.apply();
         }
 
-        startNewTripButton = (Button) findViewById(R.id.startNewTripButton);
+        startNewTripButton = (FloatingActionButton) findViewById(R.id.startNewTripButton);
+        startNewTripButton.setEnabled(false);
         destinationText = (EditText) findViewById(R.id.destination);
         destinationLayout = (TextInputLayout) findViewById(R.id.destinationWrapper);
         durationHours = (EditText) findViewById(R.id.durationHours);
@@ -142,10 +146,14 @@ public class NewTripActivity extends AppCompatActivity {
                         @Override
                         public void onDone(String s) {
                             if (s.equals(UTTERANCE_ID_LOCATION)) {
-                                Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-                                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-                                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
-                                intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Hello, where do you wanna travel?");
+                                Intent intent = new Intent(RecognizerIntent
+                                        .ACTION_RECOGNIZE_SPEECH);
+                                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                                        RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+                                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale
+                                        .getDefault());
+                                intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Hello, where do " +
+                                        "you wanna travel?");
 
                                 try {
                                     startActivityForResult(intent, REQ_CODE_SPEECH_INPUT_Location);
@@ -154,10 +162,14 @@ public class NewTripActivity extends AppCompatActivity {
                                 }
                             }
                             if (s.equals(UTTERANCE_ID_FEELINGS)) {
-                                Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-                                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-                                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
-                                intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "How tired are you feeling?");
+                                Intent intent = new Intent(RecognizerIntent
+                                        .ACTION_RECOGNIZE_SPEECH);
+                                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                                        RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+                                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale
+                                        .getDefault());
+                                intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "How tired are you" +
+                                        " feeling?");
 
                                 try {
                                     startActivityForResult(intent, REQ_CODE_SPEECH_INPUT_Feeling);
@@ -253,7 +265,6 @@ public class NewTripActivity extends AppCompatActivity {
 
             address = selected_place_geocoder.getFromLocationName(place, 5);
             return address;
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -296,6 +307,7 @@ public class NewTripActivity extends AppCompatActivity {
                 destinationText.setText(place.getName());
                 destinationText.clearFocus();
                 startNewTripButton.setEnabled(true);
+                startNewTripButton.setBackgroundTintList(ColorStateList.valueOf(Color.RED));
             } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
                 Status status = PlaceAutocomplete.getStatus(this, data);
                 // TODO: Handle the error.
@@ -305,17 +317,21 @@ public class NewTripActivity extends AppCompatActivity {
             }
         } else if (requestCode == REQ_CODE_SPEECH_INPUT_Location) {
             if (resultCode == RESULT_OK && null != data) {
-                ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent
+                        .EXTRA_RESULTS);
                 Log.d("test", result.get(0));
                 destinationText.setText(result.get(0));
                 finalDestination = result.get(0);
                 address = getLatLongFromPlace(result.get(0));
-                startVoiceOutput("How tired are you feeling right now .. Rate on a scale between 1 and 5 .. where 1 is Not at all tired . and 5 is extremely tired", UTTERANCE_ID_FEELINGS);
+                startVoiceOutput("How tired are you feeling right now .. Rate on a scale between " +
+                        "1 and 5 .. where 1 is Not at all tired . and 5 is extremely tired",
+                        UTTERANCE_ID_FEELINGS);
             }
         } else if (requestCode == REQ_CODE_SPEECH_INPUT_Feeling) {
             if (resultCode == RESULT_OK && null != data) {
 
-                ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent
+                        .EXTRA_RESULTS);
                 Log.d("test", result.get(0));
 
                 if (result.get(0).equals("one") || result.get(0).equals("1")) {
@@ -344,7 +360,6 @@ public class NewTripActivity extends AppCompatActivity {
                         }
                     }
                     seekBar.setProgress(Integer.valueOf(min.getKey()) - 1);
-
                 }
                 startNewTripButton.setEnabled(true);
             }

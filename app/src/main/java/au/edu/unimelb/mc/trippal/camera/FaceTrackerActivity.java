@@ -19,7 +19,6 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -32,7 +31,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
-import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.support.v4.app.ActivityCompat;
@@ -78,25 +76,27 @@ import edu.cmu.pocketsphinx.RecognitionListener;
 import edu.cmu.pocketsphinx.SpeechRecognizer;
 import edu.cmu.pocketsphinx.SpeechRecognizerSetup;
 
-public final class FaceTrackerActivity extends AppCompatActivity implements OnMapReadyCallback, RecognitionListener {
+public final class FaceTrackerActivity extends AppCompatActivity implements OnMapReadyCallback,
+        RecognitionListener {
     private static final String TAG = "FaceTracker";
     private static final int RC_HANDLE_GMS = 9001;
     // permission request codes need to be < 256
     private static final int RC_HANDLE_CAMERA_PERM = 2;
     private static final int MY_PERMISSIONS_REQUEST_LOCATION = 1;
+    private static final String KWS_SEARCH = "wakeup";
+    private static final String KEYPHRASE = "break";
+    private static final int PERMISSIONS_REQUEST_RECORD_AUDIO = 134;
+    private static final String UTTERANCE_ID_BREAK = "111";
     private CameraSource mCameraSource = null;
-
     private GoogleMap mMap;
     private LocationManager locationManager;
     private Marker currentLocationMarker;
     private Marker startLocationMarker;
     private Marker destinationLocationMarker;
-
     private TextView blinkText;
     private TextView eyeStatus;
     private TextView tripDurationText;
     private ProgressBar energyLevel;
-
     private int blinkCount = 0;
     private LatLng destinationLatLng;
     private String destinationName;
@@ -105,14 +105,8 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
     private long tripStartingTime;
     private long lastEyesOpenTime = -1;
     private boolean closedEyesAlertOpen = false;
-    private static final String KWS_SEARCH = "wakeup";
-    private static final String KEYPHRASE = "break";
-    private static final int PERMISSIONS_REQUEST_RECORD_AUDIO = 134;
     private SpeechRecognizer recognizer;
     private TextToSpeech tts;
-    private static final String UTTERANCE_ID_BREAK = "111";
-
-
 
     //==============================================================================================
     // Activity Methods
@@ -145,7 +139,6 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
             if (ab != null) {
                 ab.setTitle("Trip to " + this.destinationName);
             }
-
 
             double lat = extras.getDouble("destinationLat");
             double lng = extras.getDouble("destinationLng");
@@ -187,7 +180,6 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
                             if (s.equals(UTTERANCE_ID_BREAK)) {
                                 openRecommendations(null);
                             }
-
                         }
 
                         @Override
@@ -212,18 +204,17 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
                 .getRecognizer();
         recognizer.addListener(this);
 
-
         // Create keyword-activation search.
         recognizer.addKeyphraseSearch(KWS_SEARCH, KEYPHRASE);
-
-
     }
 
     private void runRecognizerSetup() {
         // Check if user has given permission to record audio
-        int permissionCheck = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.RECORD_AUDIO);
+        int permissionCheck = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest
+                .permission.RECORD_AUDIO);
         if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, PERMISSIONS_REQUEST_RECORD_AUDIO);
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission
+                    .RECORD_AUDIO}, PERMISSIONS_REQUEST_RECORD_AUDIO);
             return;
         } else {
 
@@ -235,7 +226,7 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
                         File assetDir = assets.syncAssets();
                         setupRecognizer(assetDir);
                     } catch (IOException e) {
-                        Log.d("errorvoice",e.toString());
+                        Log.d("errorvoice", e.toString());
                         return e;
                     }
                     return null;
@@ -349,7 +340,7 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
     protected void onResume() {
         super.onResume();
         startCameraSource();
-        if(recognizer!=null) {
+        if (recognizer != null) {
             recognizer.startListening(KWS_SEARCH);
         }
     }
@@ -363,7 +354,7 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
         if (mCameraSource != null) {
             mCameraSource.stop();
         }
-        if(recognizer!=null) {
+        if (recognizer != null) {
             recognizer.stop();
         }
     }
@@ -556,7 +547,6 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
     @Override
     public void onEndOfSpeech() {
         recognizer.startListening(KWS_SEARCH);
-
     }
 
     @Override
@@ -567,7 +557,6 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
         if (text.equals(KEYPHRASE)) {
             recognizer.stop();
         }
-
     }
 
     @Override
@@ -575,7 +564,8 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
         if (hypothesis != null) {
             String text = hypothesis.getHypstr();
             if (text.equals(KEYPHRASE)) {
-                tts.speak("Where do you wanna take your break. Choose one of the following locations", TextToSpeech.QUEUE_FLUSH, null, UTTERANCE_ID_BREAK);
+                tts.speak("Where do you wanna take your break. Choose one of the following " +
+                        "locations", TextToSpeech.QUEUE_FLUSH, null, UTTERANCE_ID_BREAK);
             }
         }
     }
