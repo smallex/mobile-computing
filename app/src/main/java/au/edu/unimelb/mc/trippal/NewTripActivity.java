@@ -208,7 +208,7 @@ public class NewTripActivity extends AppCompatActivity {
             Intent intent =
                     new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete
                             .MODE_FULLSCREEN)
-                            .zzlf(destinationText.getText().toString())
+                            .zzih(destinationText.getText().toString())
                             .build(NewTripActivity.this);
             startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
         } catch (GooglePlayServicesRepairableException e) {

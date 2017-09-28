@@ -498,7 +498,7 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
         this.destinationLocationMarker.showInfoWindow();
         mMap.moveCamera(CameraUpdateFactory.newLatLng(this.destinationLatLng));
         mMap.animateCamera(CameraUpdateFactory.zoomTo(10f));
-        mMap.setPadding(0, 0, 0, 120);
+        mMap.setPadding(20, 20, 20, 20);
 
         if (this.startingLatLng != null) {
             createStartLocationMarkers();
