@@ -513,7 +513,7 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
         this.destinationLocationMarker = mMap.addMarker(new MarkerOptions().position(this
                 .destinationLatLng).title(this
                 .destinationName).icon(BitmapDescriptorFactory.fromResource(R.drawable
-                .blue_marker)));
+                .ic_place_black_24dp)));
         this.destinationLocationMarker.showInfoWindow();
         mMap.moveCamera(CameraUpdateFactory.newLatLng(this.destinationLatLng));
         mMap.animateCamera(CameraUpdateFactory.zoomTo(10f));
@@ -529,7 +529,7 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
         this.startLocationMarker = mMap.addMarker(new MarkerOptions().position
                 (FaceTrackerActivity.this
                         .startingLatLng).title("Start").icon(BitmapDescriptorFactory.fromResource(R
-                .drawable.red_marker)));
+                .drawable.ic_person_pin_circle_black_24dp)));
     }
 
     private void showAllMarkers() {
@@ -540,6 +540,18 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
 
         builder.include(this.startingLatLng);
         builder.include(this.destinationLatLng);
+        LatLngBounds bounds = builder.build();
+        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 120));
+    }
+
+    private void showCurrentStop(LatLng stopLatLng) {
+        if (this.currentLocation == null) {
+            return;
+        }
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+
+        builder.include(this.currentLocation);
+        builder.include(stopLatLng);
         LatLngBounds bounds = builder.build();
         mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 120));
     }
@@ -671,6 +683,23 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
         downloadTask.execute(url);
     }
 
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        if (intent.getExtras() != null) {
+            String stopLocationName = intent.getExtras().getString("stopLocationName");
+            double stopLocationLong = intent.getExtras().getDouble("stopLocationLong");
+            double stopLocationLat = intent.getExtras().getDouble("stopLocationLat");
+
+            Marker marker = mMap.addMarker(new MarkerOptions().title(stopLocationName).position
+                    (new LatLng
+                            (stopLocationLat, stopLocationLong)).icon(BitmapDescriptorFactory
+                    .fromResource(R.drawable.ic_local_cafe_black_24dp)));
+            marker.showInfoWindow();
+            showCurrentStop(marker.getPosition());
+        }
+    }
+
     private class MyLocationListenerGPS implements LocationListener {
 
         private Polyline polyline;
@@ -691,6 +720,7 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
                 if (currentLocation != null) {
                     if (polyline == null) {
                         initUserPolyline();
+                        mMap.animateCamera(CameraUpdateFactory.zoomTo(15.0f));
                     }
                     LatLng locationLatLng = new LatLng(location.getLatitude(), location
                             .getLongitude());
@@ -701,7 +731,7 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
                     CameraUpdate update = CameraUpdateFactory.newCameraPosition(new
                             CameraPosition(locationLatLng, currentPos.zoom, currentPos.tilt,
                             (float) bearing));
-                    mMap.animateCamera(update, 1000, null);
+                    mMap.animateCamera(update, 2000, null);
                     float[] distance = new float[]{0};
                     Location.distanceBetween(currentLocation.latitude,
                             currentLocation.longitude, location.getLatitude(), location
@@ -721,7 +751,7 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
             polyline = mMap.addPolyline(new PolylineOptions().width(5).color
                     (Color.DKGRAY));
             polyline.setEndCap(new CustomCap(BitmapDescriptorFactory.fromResource(R
-                    .drawable.ic_keyboard_arrow_up_black_48dp), 10));
+                    .drawable.ic_navigation_black_24dp), 10));
         }
 
         private double calculateBearing(LatLng currentLocation, LatLng locationLatLng) {
@@ -921,7 +951,7 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
             PolylineOptions lineOptions = null;
             MarkerOptions markerOptions = new MarkerOptions();
 
-            if(result.isEmpty()) {
+            if (result.isEmpty()) {
                 return;
             }
 

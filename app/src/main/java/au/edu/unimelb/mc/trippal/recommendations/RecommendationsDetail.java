@@ -2,6 +2,7 @@ package au.edu.unimelb.mc.trippal.recommendations;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -41,14 +42,17 @@ import java.util.Comparator;
 import java.util.concurrent.CountDownLatch;
 
 import au.edu.unimelb.mc.trippal.R;
+import au.edu.unimelb.mc.trippal.camera.FaceTrackerActivity;
 
 import static android.graphics.Bitmap.createScaledBitmap;
 
 public class RecommendationsDetail extends AppCompatActivity implements LocationListener {
     private static final int RC_HANDLE_FINE_LOCATION_PERM = 99;
     private static final String API_KEY = "AIzaSyBf0PRbW8zP5lHcGjfwbevS6CMQYfey20Q";
-    private static final String GET_PLACE_ADDRESS = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?";
-    private static final String GET_PHOTO_ADDRESS = "https://maps.googleapis.com/maps/api/place/photo?";
+    private static final String GET_PLACE_ADDRESS = "https://maps.googleapis" +
+            ".com/maps/api/place/nearbysearch/json?";
+    private static final String GET_PHOTO_ADDRESS = "https://maps.googleapis" +
+            ".com/maps/api/place/photo?";
     private static final String LOG_ID = "RecDetActivity";
     private static final int MAX_WIDTH = 500;
     private static final int MAX_HEIGHT = 500;
@@ -57,6 +61,28 @@ public class RecommendationsDetail extends AppCompatActivity implements Location
 
     private LocationManager mLocationManager;
     private ArrayList<Place> mDataSet;
+    private final AdapterView.OnItemClickListener onItemClickListener = new AdapterView
+            .OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> adapter, View v, int position, long arg3) {
+            // Get corresponding RecommendationMapping item
+            Place place = mDataSet.get(position);
+
+            Log.d(LOG_ID, place.getName() + place.getDistance());
+
+            Intent redirectIntent = new Intent(RecommendationsDetail.this, FaceTrackerActivity
+                    .class);
+            redirectIntent.putExtra("stopLocationName", place.getName());
+            redirectIntent.putExtra("stopLocationLat", place.getGeometry().getLocation()
+                    .getLatitude());
+            redirectIntent.putExtra("stopLocationLong", place.getGeometry().getLocation()
+                    .getLongitude());
+            redirectIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent
+                    .FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(redirectIntent);
+            finish();
+        }
+    };
     private RecommendationsDetailAdapter mAdapter;
     private RecommendationMapping mRecMapping;
     private GridView mGridView;
@@ -101,13 +127,16 @@ public class RecommendationsDetail extends AppCompatActivity implements Location
         // If yes, get recommendations for current location
         // If not, request it
         mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED) {
             getRecommendations();
         } else {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission
+                    .ACCESS_FINE_LOCATION)) {
                 // TODO Show explanation for needing permission
             } else {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, RC_HANDLE_FINE_LOCATION_PERM);
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission
+                        .ACCESS_FINE_LOCATION}, RC_HANDLE_FINE_LOCATION_PERM);
             }
         }
     }
@@ -124,11 +153,13 @@ public class RecommendationsDetail extends AppCompatActivity implements Location
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[]
+            grantResults) {
         switch (requestCode) {
             case RC_HANDLE_FINE_LOCATION_PERM: {
                 // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager
+                        .PERMISSION_GRANTED) {
                     getRecommendations();
                 } else {
                     // TODO: Disable recommendations functionality
@@ -139,17 +170,23 @@ public class RecommendationsDetail extends AppCompatActivity implements Location
     }
 
     private void getRecommendations() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            android.location.Location locationGPS = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            android.location.Location locationNetwork = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-            if (locationGPS != null && locationGPS.getTime() > Calendar.getInstance().getTimeInMillis() - 2 * 60 * 1000) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED) {
+            android.location.Location locationGPS = mLocationManager.getLastKnownLocation
+                    (LocationManager.GPS_PROVIDER);
+            android.location.Location locationNetwork = mLocationManager.getLastKnownLocation
+                    (LocationManager.NETWORK_PROVIDER);
+            if (locationGPS != null && locationGPS.getTime() > Calendar.getInstance()
+                    .getTimeInMillis() - 2 * 60 * 1000) {
                 startRecs(locationGPS, MIN_RADIUS);
-            } else if (locationNetwork != null && locationNetwork.getTime() > Calendar.getInstance().getTimeInMillis() - 2 * 60 * 1000) {
+            } else if (locationNetwork != null && locationNetwork.getTime() > Calendar
+                    .getInstance().getTimeInMillis() - 2 * 60 * 1000) {
                 startRecs(locationNetwork, MIN_RADIUS);
             } else {
                 // TODO: Remove one of these.. Preferably Network_Provider -.-
                 mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
-                mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
+                mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0,
+                        this);
             }
         }
     }
@@ -188,7 +225,8 @@ public class RecommendationsDetail extends AppCompatActivity implements Location
         final CountDownLatch latch = new CountDownLatch(mRecMapping.getTypes().length);
 
         for (final PlaceType type : mRecMapping.getTypes()) {
-            PlaceRequest request = new PlaceRequest(API_KEY, location.getLatitude(), location.getLongitude(), radius, type.getName());
+            PlaceRequest request = new PlaceRequest(API_KEY, location.getLatitude(), location
+                    .getLongitude(), radius, type.getName());
             startRecommendationsThread(request, latch, location);
         }
 
@@ -209,7 +247,8 @@ public class RecommendationsDetail extends AppCompatActivity implements Location
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Toast.makeText(mActivity, "There are no points of interest in a " + MAX_RADIUS + "m radius.", Toast.LENGTH_LONG).show();
+                                Toast.makeText(mActivity, "There are no points of interest in a "
+                                        + MAX_RADIUS + "m radius.", Toast.LENGTH_LONG).show();
                                 finish();
                             }
                         });
@@ -237,7 +276,8 @@ public class RecommendationsDetail extends AppCompatActivity implements Location
         });
     }
 
-    private void startRecommendationsThread(final PlaceRequest request, final CountDownLatch latch, final android.location.Location location) {
+    private void startRecommendationsThread(final PlaceRequest request, final CountDownLatch
+            latch, final android.location.Location location) {
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
@@ -248,11 +288,13 @@ public class RecommendationsDetail extends AppCompatActivity implements Location
                     String address = GET_PLACE_ADDRESS + requestURI;
 
                     ObjectMapper mapper2 = new ObjectMapper();
-                    PlaceResponse response = mapper2.readValue(new URL(address), PlaceResponse.class);
+                    PlaceResponse response = mapper2.readValue(new URL(address), PlaceResponse
+                            .class);
 
                     if (response.getErrorMessage() == null) {
                         for (Place place : response.getResults()) {
-                            if (place.getOpeningHours() == null || place.getOpeningHours().isOpenNow()) {
+                            if (place.getOpeningHours() == null || place.getOpeningHours()
+                                    .isOpenNow()) {
                                 // Avoid duplicate entries
                                 if (!mDataSet.contains(place)) {
                                     calculateHaversineDistance(location, place);
@@ -281,22 +323,12 @@ public class RecommendationsDetail extends AppCompatActivity implements Location
         double R = 6378.137; // Radius of earth in KM
         double dLat = lat2 * Math.PI / 180 - lat1 * Math.PI / 180;
         double dLon = lon2 * Math.PI / 180 - lon1 * Math.PI / 180;
-        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1 * Math.PI / 180) *
+                Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         double d = R * c;
         place.setDistance(Double.valueOf(d * 1000).intValue()); // meters
     }
-
-    private final AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
-        @Override
-        public void onItemClick(AdapterView<?> adapter, View v, int position, long arg3) {
-            // Get corresponding RecommendationMapping item
-            Place place = mDataSet.get(position);
-
-            Log.d(LOG_ID, place.getName() + place.getDistance());
-            // TODO PAUL: Add address as stop to route
-        }
-    };
 
     public class RecommendationsDetailAdapter extends BaseAdapter {
         private final Context mContext;
@@ -334,7 +366,8 @@ public class RecommendationsDetail extends AppCompatActivity implements Location
 
             Place place = mDataSource.get(position);
 
-            TextView titleTextView = (TextView) rowView.findViewById(R.id.recommendation_detail_label);
+            TextView titleTextView = (TextView) rowView.findViewById(R.id
+                    .recommendation_detail_label);
             titleTextView.setText(place.getName() + " (" + place.getDistance() + " m)");
 
             ImageView imageView = (ImageView) rowView.findViewById(R.id.recommendation_detail_icon);
@@ -343,9 +376,11 @@ public class RecommendationsDetail extends AppCompatActivity implements Location
             if (place.getPhotos() != null) {
                 if (place.getImage() == null) {
                     Photo photo = place.getPhotos().get(0);
-                    PhotoRequest photoRequest = new PhotoRequest(API_KEY, photo.getPhotoReference(), MAX_HEIGHT);
+                    PhotoRequest photoRequest = new PhotoRequest(API_KEY, photo.getPhotoReference
+                            (), MAX_HEIGHT);
                     ObjectMapper mapper = new ObjectMapper();
-                    String requestURI = mapper.convertValue(photoRequest, UriFormat.class).toString();
+                    String requestURI = mapper.convertValue(photoRequest, UriFormat.class)
+                            .toString();
                     String address = GET_PHOTO_ADDRESS + requestURI;
                     new DownloadImageTask(place).execute(address);
                 } else {
@@ -408,20 +443,20 @@ public class RecommendationsDetail extends AppCompatActivity implements Location
                     @Override
                     public void run() {
                         // Set image view of place's image
-                        View v = mGridView.getChildAt(mDataSet.indexOf(mPlace) - mGridView.getFirstVisiblePosition());
+                        View v = mGridView.getChildAt(mDataSet.indexOf(mPlace) - mGridView
+                                .getFirstVisiblePosition());
 
                         if (v == null)
                             return;
 
-                        ImageView imageView = (ImageView) v.findViewById(R.id.recommendation_detail_icon);
+                        ImageView imageView = (ImageView) v.findViewById(R.id
+                                .recommendation_detail_icon);
                         imageView.setImageBitmap(mPlace.getImage());
                     }
                 });
             }
         }
     }
-
-
 }
 
 class UriFormat {
