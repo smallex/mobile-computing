@@ -902,7 +902,8 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
                             Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
                             Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
                             r.play();
-                            wait(1000);
+                            wait(2000);
+                            r.stop();
                             tts.speak("Attention!", TextToSpeech.QUEUE_ADD,
                                     null, "1");
                             tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
