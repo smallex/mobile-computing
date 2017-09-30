@@ -42,7 +42,7 @@ import java.util.Comparator;
 import java.util.concurrent.CountDownLatch;
 
 import au.edu.unimelb.mc.trippal.R;
-import au.edu.unimelb.mc.trippal.camera.FaceTrackerActivity;
+import au.edu.unimelb.mc.trippal.trip.TripActivity;
 
 import static android.graphics.Bitmap.createScaledBitmap;
 
@@ -70,7 +70,7 @@ public class RecommendationsDetail extends AppCompatActivity implements Location
 
             Log.d(LOG_ID, place.getName() + place.getDistance());
 
-            Intent redirectIntent = new Intent(RecommendationsDetail.this, FaceTrackerActivity
+            Intent redirectIntent = new Intent(RecommendationsDetail.this, TripActivity
                     .class);
             redirectIntent.putExtra("stopLocationName", place.getName());
             redirectIntent.putExtra("stopLocationLat", place.getGeometry().getLocation()

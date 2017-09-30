@@ -1,4 +1,4 @@
-package au.edu.unimelb.mc.trippal;
+package au.edu.unimelb.mc.trippal.trip;
 
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
@@ -51,7 +51,9 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import au.edu.unimelb.mc.trippal.camera.FaceTrackerActivity;
+import au.edu.unimelb.mc.trippal.AzureCall;
+import au.edu.unimelb.mc.trippal.IntroActivity;
+import au.edu.unimelb.mc.trippal.R;
 import info.debatty.java.stringsimilarity.Levenshtein;
 
 public class NewTripActivity extends AppCompatActivity {
@@ -320,7 +322,7 @@ public class NewTripActivity extends AppCompatActivity {
     }
 
     public void startNewTrip(View view) {
-        Intent intent = new Intent(this, FaceTrackerActivity.class);
+        Intent intent = new Intent(this, TripActivity.class);
         if (selectedPlace != null) {
             String destinationName = selectedPlace.getName().toString();
             LatLng latLng = selectedPlace.getLatLng();

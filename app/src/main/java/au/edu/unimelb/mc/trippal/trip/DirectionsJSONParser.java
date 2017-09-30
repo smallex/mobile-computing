@@ -1,4 +1,4 @@
-package au.edu.unimelb.mc.trippal;
+package au.edu.unimelb.mc.trippal.trip;
 
 import com.google.android.gms.maps.model.LatLng;
 

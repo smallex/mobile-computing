@@ -42,17 +42,17 @@
             android:name="IntroActivity"
             android:label="TripPal" />
         <activity
-            android:name=".camera.FaceTrackerActivity"
+            android:name=".trip.TripActivity"
             android:icon="@drawable/icon"
             android:label="TripPal"
             android:screenOrientation="fullSensor" />
         <activity
             android:name=".recommendations.Recommendations"
             android:label="@string/title_activity_recommendations"
-            android:parentActivityName=".camera.FaceTrackerActivity">
+            android:parentActivityName=".trip.TripActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".camera.FaceTrackerActivity" />
+                android:value=".trip.TripActivity" />
         </activity>
 
         <activity
@@ -76,7 +76,7 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name=".NewTripActivity"
+            android:name=".trip.NewTripActivity"
             android:label="TripPal">
             <intent-filter android:label="TripPal">
                 <action android:name="android.intent.action.MAIN" />

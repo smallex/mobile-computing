@@ -20,7 +20,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        tools:context="au.edu.unimelb.mc.trippal.NewTripActivity">
+        tools:context="au.edu.unimelb.mc.trippal.trip.NewTripActivity">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar_newtrip"

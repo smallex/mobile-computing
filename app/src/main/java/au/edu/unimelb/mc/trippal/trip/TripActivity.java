@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package au.edu.unimelb.mc.trippal.camera;
+package au.edu.unimelb.mc.trippal.trip;
 
 import android.Manifest;
 import android.app.Activity;
@@ -68,6 +68,7 @@ import com.google.android.gms.vision.MultiProcessor;
 import com.google.android.gms.vision.Tracker;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
+import com.google.android.gms.vision.face.Landmark;
 
 import org.json.JSONObject;
 
@@ -85,7 +86,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
-import au.edu.unimelb.mc.trippal.DirectionsJSONParser;
 import au.edu.unimelb.mc.trippal.R;
 import au.edu.unimelb.mc.trippal.recommendations.Recommendations;
 import edu.cmu.pocketsphinx.Assets;
@@ -94,7 +94,7 @@ import edu.cmu.pocketsphinx.RecognitionListener;
 import edu.cmu.pocketsphinx.SpeechRecognizer;
 import edu.cmu.pocketsphinx.SpeechRecognizerSetup;
 
-public final class FaceTrackerActivity extends AppCompatActivity implements OnMapReadyCallback,
+public final class TripActivity extends AppCompatActivity implements OnMapReadyCallback,
         RecognitionListener {
     private static final String TAG = "FaceTracker";
     private static final int RC_HANDLE_GMS = 9001;
@@ -151,7 +151,7 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
         btnBreak.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                openRecommendations(v,false);
+                openRecommendations(v, false);
             }
         });
 
@@ -209,8 +209,7 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
                         @Override
                         public void onDone(String s) {
                             if (s.equals(UTTERANCE_ID_BREAK)) {
-                                openRecommendations(null,true);
-
+                                openRecommendations(null, true);
                             }
                         }
 
@@ -254,7 +253,7 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
                 @Override
                 protected Exception doInBackground(Void... params) {
                     try {
-                        Assets assets = new Assets(FaceTrackerActivity.this);
+                        Assets assets = new Assets(TripActivity.this);
                         File assetDir = assets.syncAssets();
                         setupRecognizer(assetDir);
                     } catch (IOException e) {
@@ -482,8 +481,8 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
                 .show();
     }
 
-    public void openRecommendations(View view,boolean speech) {
-        Intent intent = new Intent(FaceTrackerActivity.this, Recommendations.class);
+    public void openRecommendations(View view, boolean speech) {
+        Intent intent = new Intent(TripActivity.this, Recommendations.class);
         intent.putExtra("speech", speech);
         startActivity(intent);
     }
@@ -541,7 +540,7 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
 
     private void createStartLocationMarkers() {
         this.startLocationMarker = mMap.addMarker(new MarkerOptions().position
-                (FaceTrackerActivity.this
+                (TripActivity.this
                         .startingLatLng).title("Start").icon(BitmapDescriptorFactory.fromResource(R
                 .drawable.ic_person_pin_circle_black_24dp)));
     }
@@ -830,7 +829,7 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
     private class GraphicFaceTrackerFactory implements MultiProcessor.Factory<Face> {
         @Override
         public Tracker<Face> create(Face face) {
-            return new GraphicFaceTracker(null, blinkText);
+            return new GraphicFaceTracker(blinkText);
         }
     }
 
@@ -841,12 +840,9 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
     private class GraphicFaceTracker extends Tracker<Face> {
         private final TextView blinkText;
         private long EYES_CLOSED_THRESHOLD = TimeUnit.SECONDS.toMillis(1);
-        private GraphicOverlay mOverlay;
-        private FaceGraphic mFaceGraphic;
         private boolean lastOpen = true;
 
-        GraphicFaceTracker(GraphicOverlay overlay, TextView blinkText) {
-            mOverlay = overlay;
+        GraphicFaceTracker(TextView blinkText) {
             this.blinkText = blinkText;
         }
 
@@ -862,6 +858,10 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
          */
         @Override
         public void onUpdate(FaceDetector.Detections<Face> detectionResults, Face face) {
+            blinkingUpdate(face);
+        }
+
+        private void blinkingUpdate(Face face) {
             final float leftProb = face.getIsLeftEyeOpenProbability();
             final float rightProb = face.getIsRightEyeOpenProbability();
             final boolean closed = leftProb > 0 && rightProb > 0 && leftProb < 0.5 && rightProb <
@@ -870,13 +870,13 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
                 blinkCount++;
             }
             if (!closed) {
-                FaceTrackerActivity.this.lastEyesOpenTime = new Date().getTime();
+                TripActivity.this.lastEyesOpenTime = new Date().getTime();
             }
-            if (FaceTrackerActivity.this.lastEyesOpenTime != -1 && new Date().getTime() -
-                    FaceTrackerActivity.this.lastEyesOpenTime > TimeUnit
-                    .SECONDS.toMillis(2) && !closedEyesAlertOpen) {
+            if (TripActivity.this.lastEyesOpenTime != -1 && new Date().getTime() -
+                    TripActivity.this.lastEyesOpenTime > EYES_CLOSED_THRESHOLD &&
+                    !closedEyesAlertOpen) {
                 closedEyesAlertOpen = true;
-                FaceTrackerActivity.this.runOnUiThread(new Runnable() {
+                TripActivity.this.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         DialogInterface.OnClickListener listener = new DialogInterface
@@ -886,7 +886,7 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
                             }
                         };
 
-                        AlertDialog.Builder builder = new AlertDialog.Builder(FaceTrackerActivity
+                        AlertDialog.Builder builder = new AlertDialog.Builder(TripActivity
                                 .this);
                         builder.setTitle("Attention")
                                 .setMessage("Your eyes were closed for awhile!\nPlease pull over " +
@@ -899,8 +899,10 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
                         // Vibrate for 500 milliseconds
                         v.vibrate(1000);
                         try {
-                            Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
-                            Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
+                            Uri notification = RingtoneManager.getDefaultUri(RingtoneManager
+                                    .TYPE_ALARM);
+                            Ringtone r = RingtoneManager.getRingtone(getApplicationContext(),
+                                    notification);
                             r.play();
                             wait(2000);
                             r.stop();
@@ -912,14 +914,13 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
                             tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
                             tts.speak("Please pull over and make a break", TextToSpeech.QUEUE_ADD,
                                     null, "1");
-
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
                     }
                 });
             }
-            FaceTrackerActivity.this.runOnUiThread(new Runnable() {
+            TripActivity.this.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     String text = blinkCount > 10 ? "HIGH" : "LOW";
@@ -960,7 +961,7 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
 
         @Override
         public void run() {
-            long elapsed = new Date().getTime() - FaceTrackerActivity.this
+            long elapsed = new Date().getTime() - TripActivity.this
                     .tripStartingTime;
             long hours = TimeUnit.MILLISECONDS.toHours(elapsed);
             long minutes = TimeUnit.MILLISECONDS.toMinutes(elapsed) % 60;
