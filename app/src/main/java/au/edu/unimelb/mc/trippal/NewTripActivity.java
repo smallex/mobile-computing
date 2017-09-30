@@ -311,7 +311,7 @@ public class NewTripActivity extends AppCompatActivity {
                 destinationText.clearFocus();
                 startNewTripButton.setEnabled(true);
                 startNewTripButton.setBackgroundTintList(ColorStateList.valueOf(ContextCompat
-                        .getColor(this, R.color.accent)));
+                        .getColor(this, R.color.primary)));
             } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
                 Status status = PlaceAutocomplete.getStatus(this, data);
                 // TODO: Handle the error.
@@ -432,7 +432,7 @@ public class NewTripActivity extends AppCompatActivity {
                 }
                 startNewTripButton.setEnabled(true);
                 startNewTripButton.setBackgroundTintList(ColorStateList.valueOf(ContextCompat
-                        .getColor(this, R.color.accent)));
+                        .getColor(this, R.color.primary)));
             }
         }
     }

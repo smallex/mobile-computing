@@ -336,7 +336,7 @@
                     android:layout_margin="5dp"
                     android:enabled="false"
                     android:onClick="startNewTrip"
-                    android:src="@drawable/ic_add_white_48dp"
+                    android:src="@drawable/ic_check_white_48dp"
                     app:backgroundTint="@android:color/darker_gray"/>
             </LinearLayout>
         </RelativeLayout>
