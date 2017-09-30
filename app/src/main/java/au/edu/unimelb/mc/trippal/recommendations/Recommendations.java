@@ -1,11 +1,16 @@
 package au.edu.unimelb.mc.trippal.recommendations;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.speech.RecognizerIntent;
+import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,8 +22,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
 import au.edu.unimelb.mc.trippal.R;
+import info.debatty.java.stringsimilarity.Levenshtein;
 
 /**
  * Created by alexandrafritzen on 12/09/2017.
@@ -27,10 +36,17 @@ import au.edu.unimelb.mc.trippal.R;
 public class Recommendations extends AppCompatActivity {
     private static final String LOG_ID = "RecommendationsActivity";
     private ArrayList<RecommendationMapping> mDataSet;
+    private TextToSpeech tts;
+    private static final String UTTERANCE_ID_ACT = "666";
+    private int REQ_CODE_SPEECH_INPUT_ACT = 600;
+
+
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recommendations);
+        Log.d("take", String.valueOf(getIntent().getExtras().getBoolean("speech")));
+
 
         // Show toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_recommendations);
@@ -59,10 +75,62 @@ public class Recommendations extends AppCompatActivity {
         RecommendationsAdapter adapter = new RecommendationsAdapter(this, mDataSet);
         gridView.setAdapter(adapter);
         gridView.setOnItemClickListener(onItemClickListener);
+
+        if (getIntent().getExtras().getBoolean("speech")==true) {
+            tts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+                @Override
+                public void onInit(int status) {
+                    if (status != TextToSpeech.ERROR) {
+                        tts.setLanguage(Locale.US);
+                        tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+                            @Override
+                            public void onStart(String s) {
+
+                            }
+
+                            @Override
+                            public void onDone(String s) {
+                                if (s.equals(UTTERANCE_ID_ACT)) {
+
+                                }
+                            }
+
+                            @Override
+                            public void onError(String s) {
+
+                            }
+                        });
+                    } else {
+                    }
+                }
+            });
+
+        }
+        Intent intent = new Intent(RecognizerIntent
+                .ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale
+                .getDefault());
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Which activity do you choose");
+
+        try {
+            startActivityForResult(intent, REQ_CODE_SPEECH_INPUT_ACT);
+        } catch (ActivityNotFoundException a) {
+
+        }
+    }
+
+
+    public void speak() {
+
+
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        speak();
+
         switch (item.getItemId()) {
             // Respond to the action bar's Up/Home button
             case android.R.id.home:
@@ -71,6 +139,73 @@ public class Recommendations extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    public void goToSelection(int position) {
+        // Get corresponding RecommendationMapping item
+        RecommendationMapping mapping = mDataSet.get(position);
+
+        // Open RecommendationsDetail page for the mapping
+        Intent i = new Intent(Recommendations.this, RecommendationsDetail.class);
+        i.putExtra("MAPPING", mapping);
+        startActivity(i);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQ_CODE_SPEECH_INPUT_ACT) {
+            if (resultCode == RESULT_OK && null != data) {
+                ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent
+                        .EXTRA_RESULTS);
+                String res = result.get(0).toLowerCase();
+                Log.d("resultSleep",res);
+                if (res.contains("coffee")) {
+                    goToSelection(0);
+                } else if(res.contains("food")){
+                   goToSelection(1);
+                } else if(res.contains("bathroom")){
+                    goToSelection(2);
+                }else if(res.contains("sleep")){
+                    goToSelection(3);
+                } else if(res.contains("stretch legs")){
+                    goToSelection(4);
+                }else if(res.contains("switch driver")){
+                    goToSelection(5);
+                }else {
+                    Levenshtein l = new Levenshtein();
+                    Map<String, Double> results = new HashMap<>();
+                    results.put("coffee", l.distance(res, "coffee"));
+                    results.put("food", l.distance(res, "food"));
+                    results.put("bathroom", l.distance(res, "bathroom"));
+                    results.put("sleep", l.distance(res, "sleep"));
+                    results.put("stretch legs", l.distance(res, "stretch legs"));
+                    results.put("switch driver", l.distance(res, "switch driver"));
+
+
+                    Map.Entry<String, Double> min = null;
+                    for (Map.Entry<String, Double> entry : results.entrySet()) {
+                        if (min == null || min.getValue() > entry.getValue()) {
+                            min = entry;
+                        }
+                    }
+                    res = min.getKey();
+                    if (res.contains("coffee")) {
+                        goToSelection(0);
+                    } else if(res.contains("food")){
+                        goToSelection(1);
+                    } else if(res.contains("bathroom")){
+                        goToSelection(2);
+                    }else if(res.contains("sleep")){
+                        goToSelection(3);
+                    } else if(res.contains("stretch legs")){
+                        goToSelection(4);
+                    }else if(res.contains("switch driver")){
+                        goToSelection(5);
+                    }
+                }
+            }
+        }
+    }
+
 
     private final AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
         @Override

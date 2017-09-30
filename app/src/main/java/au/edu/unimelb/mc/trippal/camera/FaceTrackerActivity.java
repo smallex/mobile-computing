@@ -27,12 +27,16 @@ import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
@@ -124,6 +128,7 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
     private List<LatLng> userLocationList;
     private double distanceTraveledMeters = 0;
     private TextView distanceText;
+    private FloatingActionButton btnBreak;
 
     //==============================================================================================
     // Activity Methods
@@ -142,6 +147,13 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
         tripDurationText = (TextView) findViewById(R.id.tripDuration);
         energyLevel = (ProgressBar) findViewById(R.id.energyLevel);
         distanceText = (TextView) findViewById(R.id.distanceText);
+        btnBreak = (FloatingActionButton) findViewById(R.id.btnBreak);
+        btnBreak.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openRecommendations(v,false);
+            }
+        });
 
         // Show toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_facetracker);
@@ -197,7 +209,8 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
                         @Override
                         public void onDone(String s) {
                             if (s.equals(UTTERANCE_ID_BREAK)) {
-                                openRecommendations(null);
+                                openRecommendations(null,true);
+
                             }
                         }
 
@@ -469,8 +482,9 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
                 .show();
     }
 
-    public void openRecommendations(View view) {
+    public void openRecommendations(View view,boolean speech) {
         Intent intent = new Intent(FaceTrackerActivity.this, Recommendations.class);
+        intent.putExtra("speech", speech);
         startActivity(intent);
     }
 
@@ -594,13 +608,29 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
     public void onResult(Hypothesis hypothesis) {
         if (hypothesis != null) {
             String text = hypothesis.getHypstr().toLowerCase();
-            if (text.equals(KEYPHRASE)) {
-                tts.speak("What are you planning to do on your break.", TextToSpeech.QUEUE_ADD,
-                        null, "1");
-                tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
-                tts.speak("Choose one of the following activities.", TextToSpeech.QUEUE_ADD,
-                        null, UTTERANCE_ID_BREAK);
-            }
+            tts.speak("What are you planning to do", TextToSpeech.QUEUE_ADD,
+                    null, "1");
+            tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
+            tts.speak("Choose one of the following activities", TextToSpeech.QUEUE_ADD,
+                    null, "1");
+            tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
+            tts.speak("Coffee", TextToSpeech.QUEUE_ADD,
+                    null, "1");
+            tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
+            tts.speak("Food", TextToSpeech.QUEUE_ADD,
+                    null, "1");
+            tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
+            tts.speak("Bathroom", TextToSpeech.QUEUE_ADD,
+                    null, "1");
+            tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
+            tts.speak("Sleep", TextToSpeech.QUEUE_ADD,
+                    null, "1");
+            tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
+            tts.speak("Stretch Legs", TextToSpeech.QUEUE_ADD,
+                    null, "1");
+            tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
+            tts.speak("Switch Driver", TextToSpeech.QUEUE_ADD,
+                    null, UTTERANCE_ID_BREAK);
         }
     }
 
@@ -868,6 +898,23 @@ public final class FaceTrackerActivity extends AppCompatActivity implements OnMa
                         Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
                         // Vibrate for 500 milliseconds
                         v.vibrate(1000);
+                        try {
+                            Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+                            Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
+                            r.play();
+                            wait(1000);
+                            tts.speak("Attention!", TextToSpeech.QUEUE_ADD,
+                                    null, "1");
+                            tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
+                            tts.speak("Your eyes were closed for a while", TextToSpeech.QUEUE_ADD,
+                                    null, "1");
+                            tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
+                            tts.speak("Please pull over and make a break", TextToSpeech.QUEUE_ADD,
+                                    null, "1");
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                 });
             }

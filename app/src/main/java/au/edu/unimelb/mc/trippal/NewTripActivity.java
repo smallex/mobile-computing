@@ -42,6 +42,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -56,9 +57,15 @@ import info.debatty.java.stringsimilarity.Levenshtein;
 public class NewTripActivity extends AppCompatActivity {
     private static final int REQ_CODE_SPEECH_INPUT_Location = 1000;
     private static final int REQ_CODE_SPEECH_INPUT_Feeling = 2000;
+    private static final int REQ_CODE_SPEECH_INPUT_TIME = 3000;
+    private static final int REQ_CODE_SPEECH_INPUT_Sleep = 4000;
+
+
     private int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
     private String UTTERANCE_ID_LOCATION = "100";
     private String UTTERANCE_ID_FEELINGS = "200";
+    private String UTTERANCE_ID_TIME = "300";
+    private String UTTERANCE_ID_SLEEP = "400";
     private EditText destinationText;
     private TextInputLayout destinationLayout;
     private Place selectedPlace;
@@ -71,11 +78,18 @@ public class NewTripActivity extends AppCompatActivity {
     private SeekBar seekBar;
     private List<Address> address;
     private String finalDestination;
+    private EditText hours;
+    private EditText min;
+    private SeekBar sleep;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_trip);
+
+        hours = (EditText) findViewById(R.id.durationHours);
+        min = (EditText) findViewById(R.id.durationMinutes);
+        sleep = (SeekBar) findViewById(R.id.sleepQuality);
 
         // Show toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_newtrip);
@@ -175,6 +189,37 @@ public class NewTripActivity extends AppCompatActivity {
 
                                 try {
                                     startActivityForResult(intent, REQ_CODE_SPEECH_INPUT_Feeling);
+                                } catch (ActivityNotFoundException a) {
+
+                                }
+                            }
+                            if (s.equals(UTTERANCE_ID_TIME)) {
+                                Intent intent = new Intent(RecognizerIntent
+                                        .ACTION_RECOGNIZE_SPEECH);
+                                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                                        RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+                                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale
+                                        .getDefault());
+                                intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "How long did you sleep last night?");
+
+                                try {
+                                    startActivityForResult(intent, REQ_CODE_SPEECH_INPUT_TIME);
+                                } catch (ActivityNotFoundException a) {
+
+                                }
+                            }
+
+                            if (s.equals(UTTERANCE_ID_SLEEP)) {
+                                Intent intent = new Intent(RecognizerIntent
+                                        .ACTION_RECOGNIZE_SPEECH);
+                                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                                        RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+                                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale
+                                        .getDefault());
+                                intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "How was your sleep last night?");
+
+                                try {
+                                    startActivityForResult(intent, REQ_CODE_SPEECH_INPUT_Sleep);
                                 } catch (ActivityNotFoundException a) {
 
                                 }
@@ -429,6 +474,72 @@ public class NewTripActivity extends AppCompatActivity {
                         }
                     }
                     seekBar.setProgress(Integer.valueOf(min.getKey()) - 1);
+                }
+                startVoiceOutput("How long did you sleep last night",UTTERANCE_ID_TIME);
+            }
+        }else if (requestCode == REQ_CODE_SPEECH_INPUT_TIME) {
+            if (resultCode == RESULT_OK && null != data) {
+                ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent
+                        .EXTRA_RESULTS);
+                String str = result.get(0);
+                str = str.replaceAll("[^-?0-9]+", " ");
+                List<String> res = Arrays.asList(str.trim().split(" "));
+                if (!res.isEmpty()) {
+                    if (res.size() > 1) {
+                        hours.setText(res.get(0).toString());
+                        min.setText(res.get(1).toString());
+
+                    } else {
+                        hours.setText(res.get(0).toString());
+                        min.setText("00");
+                    }
+                    startVoiceOutput("How was your sleep last night","1");
+                    tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
+                    startVoiceOutput("Choose one of the following answers","1");
+                    tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
+                    startVoiceOutput("Poor","1");
+                    tts.playSilentUtterance(200, TextToSpeech.QUEUE_ADD, null);
+                    startVoiceOutput("Normal","1");
+                    startVoiceOutput("or Great",UTTERANCE_ID_SLEEP);
+
+                } else {
+                    //TODO No valid input
+                }
+            }
+        }else if (requestCode == REQ_CODE_SPEECH_INPUT_Sleep) {
+            if (resultCode == RESULT_OK && null != data) {
+                ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent
+                        .EXTRA_RESULTS);
+                String res = result.get(0).toLowerCase();
+                Log.d("resultSleep",res);
+                if (res.contains("poor")) {
+                    sleep.setProgress(0);
+                } else if(res.contains("normal")){
+                    sleep.setProgress(1);
+                } else if(res.contains("great")){
+                    sleep.setProgress(2);
+                } else {
+                    Levenshtein l = new Levenshtein();
+                    Map<String, Double> results = new HashMap<>();
+                    results.put("poor", l.distance(res, "poor"));
+                    results.put("normal", l.distance(res, "normal"));
+                    results.put("great", l.distance(res, "great"));
+
+
+                    Map.Entry<String, Double> min = null;
+                    for (Map.Entry<String, Double> entry : results.entrySet()) {
+                        if (min == null || min.getValue() > entry.getValue()) {
+                            min = entry;
+                        }
+                    }
+                    res = min.getKey();
+                    if (res.contains("poor")) {
+                        sleep.setProgress(0);
+                    } else if(res.contains("normal")){
+                        sleep.setProgress(1);
+                    } else if(res.contains("great")){
+                        sleep.setProgress(2);
+                    }
                 }
                 startNewTripButton.setEnabled(true);
                 startNewTripButton.setBackgroundTintList(ColorStateList.valueOf(ContextCompat

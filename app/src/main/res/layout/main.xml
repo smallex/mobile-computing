@@ -142,14 +142,13 @@
             android:clipToPadding="false">
 
             <android.support.design.widget.FloatingActionButton
-                android:id="@+id/button2"
+                android:id="@+id/btnBreak"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentRight="true"
                 android:enabled="false"
-                android:onClick="openRecommendations"
-                android:src="@drawable/ic_free_breakfast_white_48dp"/>
+                android:src="@drawable/ic_free_breakfast_white_48dp" />
         </RelativeLayout>
     </RelativeLayout>
 
