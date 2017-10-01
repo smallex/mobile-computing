@@ -499,10 +499,14 @@ public class NewTripActivity extends AppCompatActivity {
                     tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
                     startVoiceOutput("Choose one of the following answers","1");
                     tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
-                    startVoiceOutput("Poor","1");
+                    tts.setSpeechRate((float) 0.5);
+                    startVoiceOutput(" Poor, Normal","1");
                     tts.playSilentUtterance(200, TextToSpeech.QUEUE_ADD, null);
-                    startVoiceOutput("Normal","1");
-                    startVoiceOutput("or Great",UTTERANCE_ID_SLEEP);
+                    tts.setSpeechRate((float) 1);
+                    startVoiceOutput(" or Great","1");
+                    startVoiceOutput(" ",UTTERANCE_ID_SLEEP );
+
+
 
                 } else {
                     //TODO No valid input
@@ -517,9 +521,9 @@ public class NewTripActivity extends AppCompatActivity {
                 if (res.contains("poor")) {
                     sleep.setProgress(0);
                 } else if(res.contains("normal")){
-                    sleep.setProgress(1);
+                    sleep.setProgress(50);
                 } else if(res.contains("great")){
-                    sleep.setProgress(2);
+                    sleep.setProgress(100);
                 } else {
                     Levenshtein l = new Levenshtein();
                     Map<String, Double> results = new HashMap<>();
@@ -538,9 +542,9 @@ public class NewTripActivity extends AppCompatActivity {
                     if (res.contains("poor")) {
                         sleep.setProgress(0);
                     } else if(res.contains("normal")){
-                        sleep.setProgress(1);
+                        sleep.setProgress(50);
                     } else if(res.contains("great")){
-                        sleep.setProgress(2);
+                        sleep.setProgress(100);
                     }
                 }
                 startNewTripButton.setEnabled(true);
