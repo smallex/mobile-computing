@@ -629,21 +629,19 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
             tts.speak("Choose one of the following activities", TextToSpeech.QUEUE_ADD,
                     null, "1");
             tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
+            tts.setSpeechRate((float) 0.8);
             tts.speak("Coffee", TextToSpeech.QUEUE_ADD,
                     null, "1");
-            tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
             tts.speak("Food", TextToSpeech.QUEUE_ADD,
                     null, "1");
-            tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
             tts.speak("Bathroom", TextToSpeech.QUEUE_ADD,
                     null, "1");
-            tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
             tts.speak("Sleep", TextToSpeech.QUEUE_ADD,
                     null, "1");
-            tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
+            tts.setSpeechRate((float) 1);
+
             tts.speak("Stretch Legs", TextToSpeech.QUEUE_ADD,
                     null, "1");
-            tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
             tts.speak("Switch Driver", TextToSpeech.QUEUE_ADD,
                     null, UTTERANCE_ID_BREAK);
         }
