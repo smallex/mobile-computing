@@ -16,10 +16,18 @@ import java.util.List;
 
 public class DirectionsJSONParser {
 
+    private final JSONObject jObject;
+    private int distanceMeters = 0;
+    private int durationSeconds = 0;
+
+    public DirectionsJSONParser(JSONObject jObject) {
+        this.jObject = jObject;
+    }
+
     /**
      * Receives a JSONObject and returns a list of lists containing latitude and longitude
      */
-    public List<List<HashMap<String, String>>> parse(JSONObject jObject) {
+    public List<List<HashMap<String, String>>> parse() {
 
         List<List<HashMap<String, String>>> routes = new ArrayList<List<HashMap<String, String>>>();
         JSONArray jRoutes = null;
@@ -31,13 +39,17 @@ public class DirectionsJSONParser {
             jRoutes = jObject.getJSONArray("routes");
 
             /** Traversing all routes */
-            for (int i = 0; i < jRoutes.length(); i++) {
+            for (int i = 0; i < 1; i++) {
                 jLegs = ((JSONObject) jRoutes.get(i)).getJSONArray("legs");
                 List path = new ArrayList<HashMap<String, String>>();
 
                 /** Traversing all legs */
                 for (int j = 0; j < jLegs.length(); j++) {
                     jSteps = ((JSONObject) jLegs.get(j)).getJSONArray("steps");
+                    distanceMeters += ((JSONObject) jLegs.get(j)).getJSONObject("distance").getInt
+                            ("value");
+                    durationSeconds += ((JSONObject) jLegs.get(j)).getJSONObject("duration").getInt
+                            ("value");
 
                     /** Traversing all steps */
                     for (int k = 0; k < jSteps.length(); k++) {
@@ -63,6 +75,14 @@ public class DirectionsJSONParser {
         }
 
         return routes;
+    }
+
+    public int getDistanceKM() {
+        return (int) (distanceMeters / 1000.0);
+    }
+
+    public int getDurationSeconds() {
+        return durationSeconds;
     }
 
     /**

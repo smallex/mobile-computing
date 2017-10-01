@@ -54,6 +54,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.CustomCap;
@@ -68,7 +69,6 @@ import com.google.android.gms.vision.MultiProcessor;
 import com.google.android.gms.vision.Tracker;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
-import com.google.android.gms.vision.face.Landmark;
 
 import org.json.JSONObject;
 
@@ -94,6 +94,9 @@ import edu.cmu.pocketsphinx.RecognitionListener;
 import edu.cmu.pocketsphinx.SpeechRecognizer;
 import edu.cmu.pocketsphinx.SpeechRecognizerSetup;
 
+/**
+ * Activity that is displayed during a trip, showing a map and current trip status.
+ */
 public final class TripActivity extends AppCompatActivity implements OnMapReadyCallback,
         RecognitionListener {
     private static final String TAG = "FaceTracker";
@@ -114,7 +117,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
     private TextView blinkText;
     private TextView eyeStatus;
     private TextView tripDurationText;
-    private ProgressBar energyLevel;
+    private ProgressBar fatigueLevel;
     private int blinkCount = 0;
     private LatLng destinationLatLng;
     private String destinationName;
@@ -129,6 +132,8 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
     private double distanceTraveledMeters = 0;
     private TextView distanceText;
     private FloatingActionButton btnBreak;
+
+    private FatigueModel fatigue;
 
     //==============================================================================================
     // Activity Methods
@@ -145,7 +150,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
         blinkText = (TextView) findViewById(R.id.blinkText);
         eyeStatus = (TextView) findViewById(R.id.eyeStatus);
         tripDurationText = (TextView) findViewById(R.id.tripDuration);
-        energyLevel = (ProgressBar) findViewById(R.id.energyLevel);
+        fatigueLevel = (ProgressBar) findViewById(R.id.energyLevel);
         distanceText = (TextView) findViewById(R.id.distanceText);
         btnBreak = (FloatingActionButton) findViewById(R.id.btnBreak);
         btnBreak.setOnClickListener(new View.OnClickListener() {
@@ -179,6 +184,8 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
             final Handler timerHandler = new Handler();
             final Runnable timeUpdater = new TimeUpdater(timerHandler);
             timerHandler.post(timeUpdater);
+
+            initFatigue(extras);
         }
         requestCurrentLocation();
 
@@ -225,7 +232,14 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
         runRecognizerSetup();
     }
 
-
+    private void initFatigue(Bundle extras) {
+        int currentDrowsinessLevel = extras.getInt("currentDrowsinessLevel");
+        int lastSleepQuality = extras.getInt("lastSleepQuality");
+        int lastSleepHours = extras.getInt("lastSleepHours");
+        this.fatigue = new FatigueModel(currentDrowsinessLevel, lastSleepHours, 0,
+                lastSleepQuality);
+        this.fatigueLevel.setProgress((int) this.fatigue.getFatigueLevel());
+    }
 
     private void setupRecognizer(File assetsDir) throws IOException {
         // The recognizer can be configured to perform multiple searches
@@ -290,8 +304,8 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
                 .LOCATION_SERVICE);
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 0, new
                 MyLocationListenerGPS());
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 2000, 0, new
-                MyLocationListenerGPS());
+        //locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 2000, 0, new
+        //      MyLocationListenerGPS());
         Log.d("TripPal", "Requesting current location");
     }
 
@@ -390,7 +404,6 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
         if (recognizer != null) {
             recognizer.stop();
         }
-
     }
 
     /**
@@ -926,12 +939,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
             TripActivity.this.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    String text = blinkCount > 10 ? "HIGH" : "LOW";
-                    //blinkText.setText(text);
-                    int level = blinkCount % 100;
-                    energyLevel.setProgress(level);
-
-                    eyeStatus.setText("Left eye: " + leftProb + " Right eye: " + rightProb);
+                    // TODO: Do something with blink count here
                 }
             });
             lastOpen = !closed;
@@ -975,12 +983,11 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
         }
     }
 
-    private class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<String,
-            String>>>> {
+    private class ParserTask extends AsyncTask<String, Integer, DirectionsJSONParser> {
 
         // Parsing the data in non-ui thread
         @Override
-        protected List<List<HashMap<String, String>>> doInBackground(String... jsonData) {
+        protected DirectionsJSONParser doInBackground(String... jsonData) {
 
             JSONObject jObject;
             List<List<HashMap<String, String>>> routes = null;
@@ -988,21 +995,23 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
             try {
                 jObject = new JSONObject(jsonData[0]);
                 Log.d("JSON", jsonData[0]);
-                DirectionsJSONParser parser = new DirectionsJSONParser();
-
-                routes = parser.parse(jObject);
+                DirectionsJSONParser parser = new DirectionsJSONParser(jObject);
+                return parser;
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            return routes;
+            return null;
         }
 
         @Override
-        protected void onPostExecute(List<List<HashMap<String, String>>> result) {
-            ArrayList points = null;
+        protected void onPostExecute(DirectionsJSONParser parser) {
+            ArrayList<LatLng> points = null;
             PolylineOptions lineOptions = null;
             MarkerOptions markerOptions = new MarkerOptions();
-
+            if (parser == null) {
+                return;
+            }
+            List<List<HashMap<String, String>>> result = parser.parse();
             if (result.isEmpty()) {
                 return;
             }
@@ -1028,9 +1037,32 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
                 lineOptions.color(Color.RED);
                 lineOptions.geodesic(true);
             }
-
             // Drawing polyline in the Google Map for the i-th route
             mMap.addPolyline(lineOptions);
+
+            LatLng halfwayLocation = points.get(points.size() / 2);
+            int durationSeconds = parser.getDurationSeconds();
+            int durationHours = durationSeconds / (60 * 60);
+            int durationMinutes = (durationSeconds / 60) % 60;
+
+            String durationText = durationMinutes + " minutes";
+            if (durationHours > 0) {
+                durationText = durationHours + " hours " + durationText;
+            }
+
+            BitmapDescriptor transparent = BitmapDescriptorFactory.fromResource(R.drawable
+                    .transparent);
+            MarkerOptions options = new MarkerOptions()
+                    .position(halfwayLocation)
+                    .title(parser.getDistanceKM() + " km")
+                    .snippet(durationText)
+                    .icon(transparent)
+                    .anchor((float) 0.5, (float) 0.5); //puts the info window on the polyline
+
+            Marker marker = mMap.addMarker(options);
+
+            //open the marker's info window
+            marker.showInfoWindow();
         }
     }
 
@@ -1059,5 +1091,4 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
             parserTask.execute(result);
         }
     }
-
 }

@@ -62,7 +62,6 @@ public class NewTripActivity extends AppCompatActivity {
     private static final int REQ_CODE_SPEECH_INPUT_TIME = 3000;
     private static final int REQ_CODE_SPEECH_INPUT_Sleep = 4000;
 
-
     private int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
     private String UTTERANCE_ID_LOCATION = "100";
     private String UTTERANCE_ID_FEELINGS = "200";
@@ -77,7 +76,7 @@ public class NewTripActivity extends AppCompatActivity {
     private SeekBar sleepQuality;
     private FloatingActionButton mSpeakBtn;
     private TextToSpeech tts;
-    private SeekBar seekBar;
+    private SeekBar currentDrowsiness;
     private List<Address> address;
     private String finalDestination;
     private EditText hours;
@@ -140,7 +139,7 @@ public class NewTripActivity extends AppCompatActivity {
             }
         });
 
-        seekBar = (SeekBar) findViewById(R.id.drowsinessSeekBar);
+        currentDrowsiness = (SeekBar) findViewById(R.id.drowsinessSeekBar);
         mSpeakBtn = (FloatingActionButton) findViewById(R.id.btnMic);
         mSpeakBtn.setOnClickListener(new View.OnClickListener() {
 
@@ -202,7 +201,8 @@ public class NewTripActivity extends AppCompatActivity {
                                         RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
                                 intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale
                                         .getDefault());
-                                intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "How long did you sleep last night?");
+                                intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "How long did you " +
+                                        "sleep last night?");
 
                                 try {
                                     startActivityForResult(intent, REQ_CODE_SPEECH_INPUT_TIME);
@@ -218,7 +218,8 @@ public class NewTripActivity extends AppCompatActivity {
                                         RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
                                 intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale
                                         .getDefault());
-                                intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "How was your sleep last night?");
+                                intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "How was your " +
+                                        "sleep last night?");
 
                                 try {
                                     startActivityForResult(intent, REQ_CODE_SPEECH_INPUT_Sleep);
@@ -237,7 +238,6 @@ public class NewTripActivity extends AppCompatActivity {
             }
         });
     }
-
 
     private void startVoiceOutput(String s, String id) {
         tts.speak(s, TextToSpeech.QUEUE_ADD, null, id);
@@ -343,6 +343,13 @@ public class NewTripActivity extends AppCompatActivity {
                 intent.putExtra("tripStartingTime", new Date().getTime());
             }
         }
+        intent.putExtra("currentDrowsinessLevel", currentDrowsiness.getProgress());
+        intent.putExtra("lastSleepQuality", sleepQuality.getProgress());
+        if (!durationHours.getText().toString().isEmpty()) {
+            intent.putExtra("lastSleepHours", Integer.parseInt(durationHours.getText().toString()));
+        } else {
+            intent.putExtra("lastSleepHours", 8);
+        }
 
         startActivity(intent);
     }
@@ -390,9 +397,9 @@ public class NewTripActivity extends AppCompatActivity {
                                     JSONObject location = array.getJSONObject(0);
                                     String loc = location.getString("entity");
                                     if (loc.isEmpty()) {
-                                        startVoiceOutput("I could not find the location","1");
+                                        startVoiceOutput("I could not find the location", "1");
                                         tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
-                                        startVoiceOutput("Please repeat your input","1");
+                                        startVoiceOutput("Please repeat your input", "1");
                                     } else {
                                         String output = loc.substring(0, 1).toUpperCase() + loc
                                                 .substring(1);
@@ -400,19 +407,20 @@ public class NewTripActivity extends AppCompatActivity {
                                         address = getLatLongFromPlace(output);
                                         destinationText.setText(output);
 
-                                        startVoiceOutput("How tired are you feeling right now","1");
+                                        startVoiceOutput("How tired are you feeling right now",
+                                                "1");
                                         tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
-                                        startVoiceOutput("Rate on a scale between 1 and 5","1");
+                                        startVoiceOutput("Rate on a scale between 1 and 5", "1");
                                         tts.playSilentUtterance(200, TextToSpeech.QUEUE_ADD, null);
-                                        startVoiceOutput("where one is not at all tired","1");
+                                        startVoiceOutput("where one is not at all tired", "1");
                                         tts.playSilentUtterance(100, TextToSpeech.QUEUE_ADD, null);
-                                        startVoiceOutput("and 5 is extremely tired",UTTERANCE_ID_FEELINGS);
-
+                                        startVoiceOutput("and 5 is extremely tired",
+                                                UTTERANCE_ID_FEELINGS);
                                     }
                                 } else {
-                                    startVoiceOutput("I could not find the location","1");
+                                    startVoiceOutput("I could not find the location", "1");
                                     tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
-                                    startVoiceOutput("Please repeat your input","1");
+                                    startVoiceOutput("Please repeat your input", "1");
                                 }
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -423,9 +431,9 @@ public class NewTripActivity extends AppCompatActivity {
                         public void onErrorResponse(VolleyError error) {
                             error.printStackTrace();
                             Log.d("AzureCall", "Error: " + error.toString());
-                            startVoiceOutput("I could not find the location","1");
+                            startVoiceOutput("I could not find the location", "1");
                             tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
-                            startVoiceOutput("Please repeat your input","1");
+                            startVoiceOutput("Please repeat your input", "1");
                         }
                     });
                     AzureCall azureCall = new AzureCall(this);
@@ -434,13 +442,13 @@ public class NewTripActivity extends AppCompatActivity {
                     destinationText.setText(result.get(0));
                     finalDestination = result.get(0);
                     address = getLatLongFromPlace(result.get(0));
-                    startVoiceOutput("How tired are you feeling right now","1");
+                    startVoiceOutput("How tired are you feeling right now", "1");
                     tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
-                    startVoiceOutput("Rate on a scale between 1 and 5","1");
+                    startVoiceOutput("Rate on a scale between 1 and 5", "1");
                     tts.playSilentUtterance(200, TextToSpeech.QUEUE_ADD, null);
-                    startVoiceOutput("where one is not at all tired","1");
+                    startVoiceOutput("where one is not at all tired", "1");
                     tts.playSilentUtterance(100, TextToSpeech.QUEUE_ADD, null);
-                    startVoiceOutput("and 5 is extremely tired",UTTERANCE_ID_FEELINGS);
+                    startVoiceOutput("and 5 is extremely tired", UTTERANCE_ID_FEELINGS);
                 }
             }
         } else if (requestCode == REQ_CODE_SPEECH_INPUT_Feeling) {
@@ -451,15 +459,15 @@ public class NewTripActivity extends AppCompatActivity {
                 Log.d("test", result.get(0));
 
                 if (result.get(0).equals("one") || result.get(0).equals("1")) {
-                    seekBar.setProgress(0);
+                    currentDrowsiness.setProgress(0);
                 } else if (result.get(0).equals("two") || result.get(0).equals("2")) {
-                    seekBar.setProgress(1);
+                    currentDrowsiness.setProgress(1);
                 } else if (result.get(0).equals("three") || result.get(0).equals("3")) {
-                    seekBar.setProgress(2);
+                    currentDrowsiness.setProgress(2);
                 } else if (result.get(0).equals("four") || result.get(0).equals("4")) {
-                    seekBar.setProgress(3);
+                    currentDrowsiness.setProgress(3);
                 } else if (result.get(0).equals("five") || result.get(0).equals("5")) {
-                    seekBar.setProgress(4);
+                    currentDrowsiness.setProgress(4);
                 } else {
                     Levenshtein l = new Levenshtein();
                     Map<String, Double> results = new HashMap<>();
@@ -475,11 +483,11 @@ public class NewTripActivity extends AppCompatActivity {
                             min = entry;
                         }
                     }
-                    seekBar.setProgress(Integer.valueOf(min.getKey()) - 1);
+                    currentDrowsiness.setProgress(Integer.valueOf(min.getKey()) - 1);
                 }
-                startVoiceOutput("How long did you sleep last night",UTTERANCE_ID_TIME);
+                startVoiceOutput("How long did you sleep last night", UTTERANCE_ID_TIME);
             }
-        }else if (requestCode == REQ_CODE_SPEECH_INPUT_TIME) {
+        } else if (requestCode == REQ_CODE_SPEECH_INPUT_TIME) {
             if (resultCode == RESULT_OK && null != data) {
                 ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent
                         .EXTRA_RESULTS);
@@ -490,39 +498,35 @@ public class NewTripActivity extends AppCompatActivity {
                     if (res.size() > 1) {
                         hours.setText(res.get(0).toString());
                         min.setText(res.get(1).toString());
-
                     } else {
                         hours.setText(res.get(0).toString());
                         min.setText("00");
                     }
-                    startVoiceOutput("How was your sleep last night","1");
+                    startVoiceOutput("How was your sleep last night", "1");
                     tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
-                    startVoiceOutput("Choose one of the following answers","1");
+                    startVoiceOutput("Choose one of the following answers", "1");
                     tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
                     tts.setSpeechRate((float) 0.5);
-                    startVoiceOutput(" Poor, Normal","1");
+                    startVoiceOutput(" Poor, Normal", "1");
                     tts.playSilentUtterance(200, TextToSpeech.QUEUE_ADD, null);
                     tts.setSpeechRate((float) 1);
-                    startVoiceOutput(" or Great","1");
-                    startVoiceOutput(" ",UTTERANCE_ID_SLEEP );
-
-
-
+                    startVoiceOutput(" or Great", "1");
+                    startVoiceOutput(" ", UTTERANCE_ID_SLEEP);
                 } else {
                     //TODO No valid input
                 }
             }
-        }else if (requestCode == REQ_CODE_SPEECH_INPUT_Sleep) {
+        } else if (requestCode == REQ_CODE_SPEECH_INPUT_Sleep) {
             if (resultCode == RESULT_OK && null != data) {
                 ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent
                         .EXTRA_RESULTS);
                 String res = result.get(0).toLowerCase();
-                Log.d("resultSleep",res);
+                Log.d("resultSleep", res);
                 if (res.contains("poor")) {
                     sleep.setProgress(0);
-                } else if(res.contains("normal")){
+                } else if (res.contains("normal")) {
                     sleep.setProgress(50);
-                } else if(res.contains("great")){
+                } else if (res.contains("great")) {
                     sleep.setProgress(100);
                 } else {
                     Levenshtein l = new Levenshtein();
@@ -530,7 +534,6 @@ public class NewTripActivity extends AppCompatActivity {
                     results.put("poor", l.distance(res, "poor"));
                     results.put("normal", l.distance(res, "normal"));
                     results.put("great", l.distance(res, "great"));
-
 
                     Map.Entry<String, Double> min = null;
                     for (Map.Entry<String, Double> entry : results.entrySet()) {
@@ -541,9 +544,9 @@ public class NewTripActivity extends AppCompatActivity {
                     res = min.getKey();
                     if (res.contains("poor")) {
                         sleep.setProgress(0);
-                    } else if(res.contains("normal")){
+                    } else if (res.contains("normal")) {
                         sleep.setProgress(50);
-                    } else if(res.contains("great")){
+                    } else if (res.contains("great")) {
                         sleep.setProgress(100);
                     }
                 }
