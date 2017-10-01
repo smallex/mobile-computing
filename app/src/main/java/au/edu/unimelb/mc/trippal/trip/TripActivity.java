@@ -58,10 +58,13 @@ import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.CustomCap;
+import com.google.android.gms.maps.model.Dash;
+import com.google.android.gms.maps.model.Gap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PatternItem;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.vision.CameraSource;
@@ -80,6 +83,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -582,7 +586,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
         builder.include(this.currentLocation);
         builder.include(stopLatLng);
         LatLngBounds bounds = builder.build();
-        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 120));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 250));
     }
 
     private void updateCurrentLocationMarker() {
@@ -716,11 +720,11 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
         return data;
     }
 
-    private void drawRoute() {
+    private void drawRoute(LatLng from, LatLng to, int i) {
         // Getting URL to the Google Directions API
-        String url = getDirectionsUrl(startingLatLng, destinationLatLng);
+        String url = getDirectionsUrl(from, to);
 
-        DownloadTask downloadTask = new DownloadTask();
+        DownloadTask downloadTask = new DownloadTask(i);
 
         // Start downloading json data from Google Directions API
         downloadTask.execute(url);
@@ -734,9 +738,12 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
             double stopLocationLong = intent.getExtras().getDouble("stopLocationLong");
             double stopLocationLat = intent.getExtras().getDouble("stopLocationLat");
 
+            LatLng stopLocation = new LatLng(stopLocationLat, stopLocationLong);
+            if (currentLocation != null) {
+                drawRoute(currentLocation, stopLocation, 1);
+            }
             Marker marker = mMap.addMarker(new MarkerOptions().title(stopLocationName).position
-                    (new LatLng
-                            (stopLocationLat, stopLocationLong)).icon(BitmapDescriptorFactory
+                    (stopLocation).icon(BitmapDescriptorFactory
                     .fromResource(R.drawable.ic_local_cafe_black_24dp)));
             marker.showInfoWindow();
             showCurrentStop(marker.getPosition());
@@ -756,7 +763,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
                 if (mMap != null) {
                     createStartLocationMarkers();
                     showAllMarkers();
-                    drawRoute();
+                    drawRoute(startingLatLng, destinationLatLng, 0);
                 }
                 Log.d("TripPal", "Location: " + startingLatLng);
             } else {
@@ -793,6 +800,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
         private void initUserPolyline() {
             polyline = mMap.addPolyline(new PolylineOptions().width(5).color
                     (Color.DKGRAY));
+            polyline.setVisible(false);
             polyline.setEndCap(new CustomCap(BitmapDescriptorFactory.fromResource(R
                     .drawable.ic_navigation_black_24dp), 10));
         }
@@ -977,11 +985,36 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
             if (tripDurationText != null) {
                 tripDurationText.setText(hours + " hours " + minutes + " minutes");
             }
-            timerHandler.postDelayed(this, TimeUnit.MINUTES.toMillis(1));
+            fatigue.setTimeElapsed(elapsed);
+            if (fatigue.isHighRisk()) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(TripActivity
+                        .this);
+                builder.setTitle("Take a break?")
+                        .setMessage("You have been driving for a while.\nDo you want to take a " +
+                                "break?")
+                        .setPositiveButton(R
+                                .string.ok, null)
+                        .setIcon(R.drawable.warning)
+                        .show();
+            }
+            fatigueLevel.setProgress((int) fatigue.getFatigueLevel());
+            timerHandler.postDelayed(this, TimeUnit.SECONDS.toMillis(30));
         }
     }
 
     private class ParserTask extends AsyncTask<String, Integer, DirectionsJSONParser> {
+
+        // Create a stroke pattern of a gap followed by a dash.
+        private static final int PATTERN_DASH_LENGTH_PX = 20;
+        private static final int PATTERN_GAP_LENGTH_PX = 10;
+        private final int type;
+        private final PatternItem DASH = new Dash(PATTERN_DASH_LENGTH_PX);
+        private final PatternItem GAP = new Gap(PATTERN_GAP_LENGTH_PX);
+        private final List<PatternItem> PATTERN_POLYGON_ALPHA = Arrays.asList(GAP, DASH);
+
+        public ParserTask(int type) {
+            this.type = type;
+        }
 
         // Parsing the data in non-ui thread
         @Override
@@ -1031,8 +1064,14 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
                 }
 
                 lineOptions.addAll(points);
-                lineOptions.width(12);
-                lineOptions.color(Color.RED);
+                if (type == 0) {
+                    lineOptions.color(Color.RED);
+                    lineOptions.width(12);
+                } else if (type == 1) {
+                    lineOptions.color(Color.BLUE);
+                    lineOptions.width(10);
+                    lineOptions.pattern(PATTERN_POLYGON_ALPHA);
+                }
                 lineOptions.geodesic(true);
             }
             // Drawing polyline in the Google Map for the i-th route
@@ -1059,12 +1098,20 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
 
             Marker marker = mMap.addMarker(options);
 
-            //open the marker's info window
-            marker.showInfoWindow();
+            if (type == 0) {
+                //open the marker's info window
+                marker.showInfoWindow();
+            }
         }
     }
 
     private class DownloadTask extends AsyncTask<String, Void, String> {
+
+        private final int type;
+
+        public DownloadTask(int i) {
+            this.type = i;
+        }
 
         @Override
         protected String doInBackground(String... url) {
@@ -1084,7 +1131,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
 
-            ParserTask parserTask = new ParserTask();
+            ParserTask parserTask = new ParserTask(type);
 
             parserTask.execute(result);
         }
