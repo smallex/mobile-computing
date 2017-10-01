@@ -77,60 +77,28 @@ public class Recommendations extends AppCompatActivity {
         gridView.setOnItemClickListener(onItemClickListener);
 
         if (getIntent().getExtras().getBoolean("speech")==true) {
-            tts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
-                @Override
-                public void onInit(int status) {
-                    if (status != TextToSpeech.ERROR) {
-                        tts.setLanguage(Locale.US);
-                        tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
-                            @Override
-                            public void onStart(String s) {
+            Intent intent = new Intent(RecognizerIntent
+                    .ACTION_RECOGNIZE_SPEECH);
+            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                    RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale
+                    .getDefault());
+            intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Which activity do you choose");
 
-                            }
+            try {
+                startActivityForResult(intent, REQ_CODE_SPEECH_INPUT_ACT);
+            } catch (ActivityNotFoundException a) {
 
-                            @Override
-                            public void onDone(String s) {
-                                if (s.equals(UTTERANCE_ID_ACT)) {
-
-                                }
-                            }
-
-                            @Override
-                            public void onError(String s) {
-
-                            }
-                        });
-                    } else {
-                    }
-                }
-            });
-
+            }
         }
-        Intent intent = new Intent(RecognizerIntent
-                .ACTION_RECOGNIZE_SPEECH);
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale
-                .getDefault());
-        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Which activity do you choose");
 
-        try {
-            startActivityForResult(intent, REQ_CODE_SPEECH_INPUT_ACT);
-        } catch (ActivityNotFoundException a) {
-
-        }
     }
 
 
-    public void speak() {
 
-
-    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        speak();
-
         switch (item.getItemId()) {
             // Respond to the action bar's Up/Home button
             case android.R.id.home:
@@ -140,13 +108,16 @@ public class Recommendations extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void goToSelection(int position) {
+    public void goToSelection(int position, boolean speech) {
+
+
         // Get corresponding RecommendationMapping item
         RecommendationMapping mapping = mDataSet.get(position);
 
         // Open RecommendationsDetail page for the mapping
         Intent i = new Intent(Recommendations.this, RecommendationsDetail.class);
         i.putExtra("MAPPING", mapping);
+        i.putExtra("speech",speech);
         startActivity(i);
     }
 
@@ -159,17 +130,17 @@ public class Recommendations extends AppCompatActivity {
                 String res = result.get(0).toLowerCase();
                 Log.d("resultSleep",res);
                 if (res.contains("coffee")) {
-                    goToSelection(0);
+                    goToSelection(0,true);
                 } else if(res.contains("food")){
-                   goToSelection(1);
+                   goToSelection(1,true);
                 } else if(res.contains("bathroom")){
-                    goToSelection(2);
+                    goToSelection(2,true);
                 }else if(res.contains("sleep")){
-                    goToSelection(3);
+                    goToSelection(3,true);
                 } else if(res.contains("stretch legs")){
-                    goToSelection(4);
+                    goToSelection(4,true);
                 }else if(res.contains("switch driver")){
-                    goToSelection(5);
+                    goToSelection(5,true);
                 }else {
                     Levenshtein l = new Levenshtein();
                     Map<String, Double> results = new HashMap<>();
@@ -189,17 +160,17 @@ public class Recommendations extends AppCompatActivity {
                     }
                     res = min.getKey();
                     if (res.contains("coffee")) {
-                        goToSelection(0);
+                        goToSelection(0,true);
                     } else if(res.contains("food")){
-                        goToSelection(1);
+                        goToSelection(1,true);
                     } else if(res.contains("bathroom")){
-                        goToSelection(2);
+                        goToSelection(2,true);
                     }else if(res.contains("sleep")){
-                        goToSelection(3);
+                        goToSelection(3,true);
                     } else if(res.contains("stretch legs")){
-                        goToSelection(4);
+                        goToSelection(4,true);
                     }else if(res.contains("switch driver")){
-                        goToSelection(5);
+                        goToSelection(5,true);
                     }
                 }
             }

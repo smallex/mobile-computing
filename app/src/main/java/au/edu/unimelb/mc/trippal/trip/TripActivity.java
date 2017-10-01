@@ -225,6 +225,8 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
         runRecognizerSetup();
     }
 
+
+
     private void setupRecognizer(File assetsDir) throws IOException {
         // The recognizer can be configured to perform multiple searches
         // of different kind and switch between them
@@ -388,6 +390,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
         if (recognizer != null) {
             recognizer.stop();
         }
+
     }
 
     /**
@@ -1056,4 +1059,5 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
             parserTask.execute(result);
         }
     }
+
 }

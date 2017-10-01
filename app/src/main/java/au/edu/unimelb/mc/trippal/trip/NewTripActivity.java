@@ -557,4 +557,14 @@ public class NewTripActivity extends AppCompatActivity {
                 "%2F%2Fsuccess&scope=sleep&expires_in=604800"));
         startActivity(browserIntent);
     }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
 }

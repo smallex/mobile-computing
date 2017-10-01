@@ -1,6 +1,7 @@
 package au.edu.unimelb.mc.trippal.recommendations;
 
 import android.Manifest;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -11,6 +12,9 @@ import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.speech.RecognizerIntent;
+import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
@@ -39,10 +43,16 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import au.edu.unimelb.mc.trippal.R;
 import au.edu.unimelb.mc.trippal.trip.TripActivity;
+import info.debatty.java.stringsimilarity.Levenshtein;
 
 import static android.graphics.Bitmap.createScaledBitmap;
 
@@ -61,38 +71,50 @@ public class RecommendationsDetail extends AppCompatActivity implements Location
 
     private LocationManager mLocationManager;
     private ArrayList<Place> mDataSet;
-    private final AdapterView.OnItemClickListener onItemClickListener = new AdapterView
-            .OnItemClickListener() {
-        @Override
-        public void onItemClick(AdapterView<?> adapter, View v, int position, long arg3) {
-            // Get corresponding RecommendationMapping item
-            Place place = mDataSet.get(position);
 
-            Log.d(LOG_ID, place.getName() + place.getDistance());
-
-            Intent redirectIntent = new Intent(RecommendationsDetail.this, TripActivity
-                    .class);
-            redirectIntent.putExtra("stopLocationName", place.getName());
-            redirectIntent.putExtra("stopLocationLat", place.getGeometry().getLocation()
-                    .getLatitude());
-            redirectIntent.putExtra("stopLocationLong", place.getGeometry().getLocation()
-                    .getLongitude());
-            redirectIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent
-                    .FLAG_ACTIVITY_SINGLE_TOP);
-            startActivity(redirectIntent);
-            finish();
-        }
-    };
     private RecommendationsDetailAdapter mAdapter;
     private RecommendationMapping mRecMapping;
     private GridView mGridView;
     private ProgressBar mProgressBar;
     private RecommendationsDetail mActivity;
+    private TextToSpeech tts;
+    private static final String UTTERANCE_ID_LOC = "111";
+    private int REQ_CODE_SPEECH_INPUT_Location = 111;
+
+    private void startSelection(int position) {
+        Place place = mDataSet.get(position);
+
+        Log.d(LOG_ID, place.getName() + place.getDistance());
+
+        Intent redirectIntent = new Intent(RecommendationsDetail.this, TripActivity
+                .class);
+        redirectIntent.putExtra("stopLocationName", place.getName());
+        redirectIntent.putExtra("stopLocationLat", place.getGeometry().getLocation()
+                .getLatitude());
+        redirectIntent.putExtra("stopLocationLong", place.getGeometry().getLocation()
+                .getLongitude());
+        redirectIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent
+                .FLAG_ACTIVITY_SINGLE_TOP);
+        startActivity(redirectIntent);
+        finish();
+    }
+
+    private final AdapterView.OnItemClickListener onItemClickListener = new AdapterView
+            .OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> adapter, View v, int position, long arg3) {
+            // Get corresponding RecommendationMapping item
+            startSelection(position);
+        }
+    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recommendations_detail);
+
 
         mActivity = this;
 
@@ -123,6 +145,7 @@ public class RecommendationsDetail extends AppCompatActivity implements Location
         mProgressBar = (ProgressBar) findViewById(R.id.progressbar_recommendations_detail);
         mProgressBar.setVisibility(View.VISIBLE);
 
+
         // Check if location permission granted
         // If yes, get recommendations for current location
         // If not, request it
@@ -139,6 +162,18 @@ public class RecommendationsDetail extends AppCompatActivity implements Location
                         .ACCESS_FINE_LOCATION}, RC_HANDLE_FINE_LOCATION_PERM);
             }
         }
+
+
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
     }
 
     @Override
@@ -249,11 +284,99 @@ public class RecommendationsDetail extends AppCompatActivity implements Location
                             public void run() {
                                 Toast.makeText(mActivity, "There are no points of interest in a "
                                         + MAX_RADIUS + "m radius.", Toast.LENGTH_LONG).show();
+                                if(getIntent().getExtras().getBoolean("speech")) {
+                                    tts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+                                        @Override
+                                        public void onInit(int status) {
+                                            if (status != TextToSpeech.ERROR) {
+                                                tts.setLanguage(Locale.US);
+                                                tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+                                                    @Override
+                                                    public void onStart(String s) {
+
+                                                    }
+
+                                                    @Override
+                                                    public void onDone(String s) {
+                                                        if (s.equals(UTTERANCE_ID_LOC)) {
+
+                                                        }
+
+                                                    }
+
+                                                    @Override
+                                                    public void onError(String s) {
+
+                                                    }
+                                                });
+                                                tts.speak("There are no points of interest in a "
+                                                                + MAX_RADIUS + "m radius.", TextToSpeech.QUEUE_ADD,
+                                                        null, "1");
+                                            } else {
+                                            }
+                                        }
+                                    });
+                                }
                                 finish();
                             }
                         });
                     }
                 } else {
+                    if (getIntent().getExtras().getBoolean("speech")) {
+                        tts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+                            @Override
+                            public void onInit(int status) {
+                                if (status != TextToSpeech.ERROR) {
+                                    tts.setLanguage(Locale.US);
+                                    tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+                                        @Override
+                                        public void onStart(String s) {
+
+                                        }
+
+                                        @Override
+                                        public void onDone(String s) {
+                                            if (s.equals(UTTERANCE_ID_LOC)) {
+                                                Intent intent = new Intent(RecognizerIntent
+                                                        .ACTION_RECOGNIZE_SPEECH);
+                                                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                                                        RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+                                                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale
+                                                        .getDefault());
+                                                intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Choose location?");
+
+                                                try {
+                                                    startActivityForResult(intent, REQ_CODE_SPEECH_INPUT_Location);
+                                                } catch (ActivityNotFoundException a) {
+
+                                                }
+                                            }
+
+                                        }
+
+                                        @Override
+                                        public void onError(String s) {
+
+                                        }
+                                    });
+                                    tts.speak("The following Locations are available", TextToSpeech.QUEUE_ADD,
+                                            null, "1");
+                                    tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
+                                    for (int i = 0; i < mDataSet.size(); i++) {
+                                        tts.speak(mDataSet.get(i).getName(), TextToSpeech.QUEUE_ADD,
+                                                null, "1");
+                                        tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
+                                    }
+                                    tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
+                                    tts.speak("Choose one of these activities now!", TextToSpeech.QUEUE_ADD,
+                                            null, UTTERANCE_ID_LOC);
+
+                                } else {
+                                    Log.d("errorrrr", String.valueOf(status));
+                                }
+                            }
+                        });
+                    }
                     // Sort entries by closest
                     Collections.sort(mDataSet, new Comparator<Place>() {
                         @Override
@@ -262,6 +385,7 @@ public class RecommendationsDetail extends AppCompatActivity implements Location
                         }
                     });
 
+
                     // Update grid view with new data
                     runOnUiThread(new Runnable() {
                         @Override
@@ -269,11 +393,50 @@ public class RecommendationsDetail extends AppCompatActivity implements Location
                             mProgressBar.setVisibility(View.GONE);
                             mAdapter.setDataSource(mDataSet);
                             mAdapter.notifyDataSetChanged();
+
                         }
                     });
                 }
+
             }
         });
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQ_CODE_SPEECH_INPUT_Location) {
+            if (resultCode == RESULT_OK && null != data) {
+                ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent
+                        .EXTRA_RESULTS);
+                String res = result.get(0).toLowerCase();
+                Pattern pattern = Pattern.compile("\\s");
+                Matcher matcher = pattern.matcher(res);
+                boolean found = matcher.find();
+
+                Levenshtein l = new Levenshtein();
+                Map<String, Double> results = new HashMap<>();
+                for (int i = 0; i < mDataSet.size(); i++) {
+                    results.put(mDataSet.get(i).getName().toLowerCase(), l.distance(res, mDataSet.get(i).getName().toLowerCase()));
+                }
+
+                Map.Entry<String, Double> min = null;
+                for (Map.Entry<String, Double> entry : results.entrySet()) {
+                    if (min == null || min.getValue() > entry.getValue()) {
+                        min = entry;
+                    }
+                }
+                res = min.getKey();
+                int loc = 0;
+                for (int i = 0; i < mDataSet.size(); i++) {
+                    if (res.equals(mDataSet.get(i).getName().toLowerCase())) {
+                        loc = i;
+                    }
+                }
+                startSelection(loc);
+
+            }
+        }
     }
 
     private void startRecommendationsThread(final PlaceRequest request, final CountDownLatch
