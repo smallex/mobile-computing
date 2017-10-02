@@ -57,17 +57,19 @@
                     android:id="@+id/tripDuration"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
                     android:layout_gravity="fill_horizontal"
                     android:drawableLeft="@drawable/time"
                     android:drawablePadding="7dp"
-                    android:gravity="center"
+                    android:gravity="start"
                     android:padding="3dp"
-                    android:text="0 hours 0 minutes"
+                    android:text="0 minutes"
                     android:textSize="18sp"/>
 
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
                     android:layout_gravity="fill_horizontal"
                     android:orientation="horizontal"
                     android:paddingRight="10dp"
@@ -83,15 +85,24 @@
                         android:padding="3dp"
                         android:text=""
                         android:textSize="18sp"/>
-
-                    <ProgressBar
-                        android:id="@+id/energyLevel"
-                        style="?android:attr/progressBarStyleHorizontal"
+                    <GridLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_gravity="fill_horizontal"
-                        android:paddingTop="5dp"
-                        android:progress="0"/>
+                        android:columnCount="1">
+                        <TextView
+                            android:id="@+id/riskText"
+                            android:text="LOW RISK"
+                            android:textStyle="bold"
+                            android:layout_gravity="center"/>
+                        <ProgressBar
+                            android:id="@+id/energyLevel"
+                            style="?android:attr/progressBarStyleHorizontal"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="fill_horizontal"
+                            android:progress="0"/>
+                    </GridLayout>
                 </LinearLayout>
 
                 <TextView
@@ -135,20 +146,36 @@
                   android:layout_height="match_parent"/>
 
         <RelativeLayout
+            xmlns:app="http://schemas.android.com/apk/res-auto"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="20dp"
             android:clipChildren="false"
-            android:clipToPadding="false">
+            android:clipToPadding="false"
+            android:padding="10dp">
 
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/btnBreak"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
-                android:layout_alignParentRight="true"
-                android:enabled="false"
-                android:src="@drawable/ic_free_breakfast_white_48dp" />
+                android:orientation="vertical">
+
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/btnBreak"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:layout_margin="5dp"
+                    android:src="@drawable/ic_free_breakfast_white_48dp"/>
+
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/playButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:layout_margin="5dp"
+                    android:src="@drawable/ic_pause_white_24dp"
+                    app:backgroundTint="#9e9e9e"/>
+            </LinearLayout>
         </RelativeLayout>
     </RelativeLayout>
 

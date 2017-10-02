@@ -46,6 +46,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -72,6 +73,7 @@ import com.google.android.gms.vision.MultiProcessor;
 import com.google.android.gms.vision.Tracker;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
+import com.tapadoo.alerter.Alerter;
 
 import org.json.JSONObject;
 
@@ -134,9 +136,15 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
     private List<LatLng> userLocationList;
     private double distanceTraveledMeters = 0;
     private TextView distanceText;
+    private TextView stopsCountText;
     private FloatingActionButton btnBreak;
+    private FloatingActionButton playButton;
+    private boolean isDriving = true;
 
     private FatigueModel fatigue;
+    private int stopsCount;
+    private long currentStopStart;
+    private TextView riskText;
 
     //==============================================================================================
     // Activity Methods
@@ -155,13 +163,17 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
         tripDurationText = (TextView) findViewById(R.id.tripDuration);
         fatigueLevel = (ProgressBar) findViewById(R.id.energyLevel);
         distanceText = (TextView) findViewById(R.id.distanceText);
+        stopsCountText = (TextView) findViewById(R.id.stopsCount);
+        riskText = (TextView) findViewById(R.id.riskText);
         btnBreak = (FloatingActionButton) findViewById(R.id.btnBreak);
         btnBreak.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                openRecommendations(v, false);
+                openRecommendations(false);
             }
         });
+        playButton = (FloatingActionButton) findViewById(R.id.playButton);
+        playButton.setOnClickListener(new PlayButtonListener());
 
         // Show toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_facetracker);
@@ -219,7 +231,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
                         @Override
                         public void onDone(String s) {
                             if (s.equals(UTTERANCE_ID_BREAK)) {
-                                openRecommendations(null, true);
+                                openRecommendations(true);
                             }
                         }
 
@@ -500,7 +512,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
                 .show();
     }
 
-    public void openRecommendations(View view, boolean speech) {
+    public void openRecommendations(boolean speech) {
         Intent intent = new Intent(TripActivity.this, Recommendations.class);
         intent.putExtra("speech", speech);
         startActivity(intent);
@@ -534,10 +546,6 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
         }
     }
 
-    //==============================================================================================
-    // Camera Source Preview
-    //==============================================================================================
-
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
@@ -561,6 +569,10 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
             showAllMarkers();
         }
     }
+
+    //==============================================================================================
+    // Camera Source Preview
+    //==============================================================================================
 
     private void createStartLocationMarkers() {
         this.startLocationMarker = mMap.addMarker(new MarkerOptions().position
@@ -674,10 +686,6 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
         return url;
     }
 
-    //==============================================================================================
-    // Graphic Face Tracker
-    //==============================================================================================
-
     /**
      * A method to download json data from url
      */
@@ -710,6 +718,10 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
         return data;
     }
 
+    //==============================================================================================
+    // Graphic Face Tracker
+    //==============================================================================================
+
     private void drawRoute(LatLng from, LatLng to, int i) {
         // Getting URL to the Google Directions API
         String url = getDirectionsUrl(from, to);
@@ -740,9 +752,46 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
         }
     }
 
+    private class PlayButtonListener implements View.OnClickListener {
+
+        @Override
+        public void onClick(View view) {
+            String text;
+            int icon;
+            if (isDriving) {
+                text = "Starting your break now.";
+                icon = R.drawable.ic_free_breakfast_white_48dp;
+                playButton.setImageResource(R.drawable.ic_play_arrow_white_24dp);
+                stopsCount += 1;
+                stopsCountText.setText(stopsCount + " stops");
+                currentStopStart = new Date().getTime();
+            } else {
+                text = "Continuing your trip now.";
+                icon = R.drawable.ic_directions_car_white_24dp;
+                playButton.setImageResource(R.drawable.ic_pause_white_24dp);
+
+                long currentStopDuration = new Date().getTime() - currentStopStart;
+                fatigue.setCurrentStopDuration(currentStopDuration);
+            }
+            Context context = getApplicationContext();
+            int duration = Toast.LENGTH_SHORT;
+
+            Toast toast = Toast.makeText(context, text, duration);
+            //toast.show();
+
+            Alerter.create(TripActivity.this)
+                    .setBackgroundColorRes(R.color.accent)
+                    .setIcon(icon)
+                    .setText(text)
+                    .show();
+            isDriving = !isDriving;
+        }
+    }
+
     private class MyLocationListenerGPS implements LocationListener {
 
         private Polyline polyline;
+        private boolean insideDestinationRadius = false;
 
         @Override
         public void onLocationChanged(Location location) {
@@ -758,37 +807,62 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
                 Log.d("TripPal", "Location: " + startingLatLng);
             } else {
                 if (currentLocation != null) {
-                    if (polyline == null) {
-                        initUserPolyline();
-                        mMap.animateCamera(CameraUpdateFactory.zoomTo(15.0f));
-                    }
-                    LatLng locationLatLng = new LatLng(location.getLatitude(), location
-                            .getLongitude());
-                    userLocationList.add(locationLatLng);
-                    polyline.setPoints(userLocationList);
-
-                    CameraPosition currentPos = mMap.getCameraPosition();
-                    float newBearing = currentPos.bearing;
-                    float calculatedBearing = calculateBearing(currentLocation, locationLatLng);
-                    if (distance(calculatedBearing, currentPos.bearing) > 45) {
-                        newBearing = calculatedBearing;
-                    }
-                    CameraUpdate update = CameraUpdateFactory.newCameraPosition(new
-                            CameraPosition(locationLatLng, currentPos.zoom, currentPos.tilt,
-                            newBearing));
-                    mMap.animateCamera(update, 2000, null);
-                    float[] distance = new float[]{0};
-                    Location.distanceBetween(currentLocation.latitude,
-                            currentLocation.longitude, location.getLatitude(), location
-                                    .getLongitude(), distance);
-                    distanceTraveledMeters += distance[0];
-                    distanceText.setText(String.format("%.3f", distanceTraveledMeters / 1000.0) +
-                            " km");
+                    updateCurrentLocation(location);
+                    checkIfAtDestination(location);
                 }
                 currentLocation = new LatLng(location.getLatitude(),
                         location.getLongitude());
                 Log.d("TripPal", "Location: " + startingLatLng);
             }
+        }
+
+        private void checkIfAtDestination(Location location) {
+            float[] distance = new float[]{0};
+            Location.distanceBetween(location.getLatitude(),
+                    location.getLongitude(), destinationLatLng.latitude, destinationLatLng
+                            .longitude, distance);
+            if (distance[0] < 250.0f && !insideDestinationRadius) {
+                insideDestinationRadius = true;
+                AlertDialog.Builder builder = new AlertDialog.Builder(TripActivity
+                        .this);
+                builder.setTitle("You're there!")
+                        .setMessage("You have reached your destination!\nFinish this trip?")
+                        .setPositiveButton("Yes", null)
+                        .setNegativeButton("No", null)
+                        .setIcon(R.drawable.warning)
+                        .show();
+            } else if (distance[0] > 250.0f) {
+                insideDestinationRadius = false;
+            }
+        }
+
+        private void updateCurrentLocation(Location location) {
+            if (polyline == null) {
+                initUserPolyline();
+                mMap.animateCamera(CameraUpdateFactory.zoomTo(15.0f));
+            }
+            LatLng locationLatLng = new LatLng(location.getLatitude(), location
+                    .getLongitude());
+            userLocationList.add(locationLatLng);
+            polyline.setPoints(userLocationList);
+
+            CameraPosition currentPos = mMap.getCameraPosition();
+            float newBearing = currentPos.bearing;
+            float calculatedBearing = calculateBearing(currentLocation, locationLatLng);
+            if (distance(calculatedBearing, currentPos.bearing) > 45) {
+                newBearing = calculatedBearing;
+            }
+            CameraUpdate update = CameraUpdateFactory.newCameraPosition(new
+                    CameraPosition(locationLatLng, currentPos.zoom, currentPos.tilt,
+                    newBearing));
+            mMap.animateCamera(update, 2000, null);
+            float[] distance = new float[]{0};
+            Location.distanceBetween(currentLocation.latitude,
+                    currentLocation.longitude, location.getLatitude(), location
+                            .getLongitude(), distance);
+            distanceTraveledMeters += distance[0];
+            distanceText.setText(String.format("%.3f", distanceTraveledMeters / 1000.0) +
+                    " km");
         }
 
         private float distance(float alpha, float beta) {
@@ -919,8 +993,8 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
                                 .setIcon(R.drawable.warning)
                                 .show();
                         Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-                        // Vibrate for 500 milliseconds
                         v.vibrate(1000);
+                        fatigue.setMaximum();
                         try {
                             Uri notification = RingtoneManager.getDefaultUri(RingtoneManager
                                     .TYPE_ALARM);
@@ -984,7 +1058,11 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
             long hours = TimeUnit.MILLISECONDS.toHours(elapsed);
             long minutes = TimeUnit.MILLISECONDS.toMinutes(elapsed) % 60;
             if (tripDurationText != null) {
-                tripDurationText.setText(hours + " hours " + minutes + " minutes");
+                String text = minutes + " minutes";
+                if (hours > 0) {
+                    text = hours + " hours " + text;
+                }
+                tripDurationText.setText(text);
             }
             fatigue.setTimeElapsed(elapsed);
             if (fatigue.isHighRisk()) {
@@ -994,12 +1072,28 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
                         .setMessage("You have been driving for a while.\nDo you want to take a " +
                                 "break?")
                         .setPositiveButton(R
-                                .string.ok, null)
+                                .string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                openRecommendations(false);
+                            }
+                        })
                         .setIcon(R.drawable.warning)
                         .show();
             }
             fatigueLevel.setProgress((int) fatigue.getFatigueLevel());
-            timerHandler.postDelayed(this, TimeUnit.SECONDS.toMillis(30));
+            switch (fatigue.getCurrentRisk()) {
+                case LOW:
+                    riskText.setText("LOW RISK");
+                    break;
+                case MEDIUM:
+                    riskText.setText("MEDIUM RISK");
+                    break;
+                case HIGH:
+                    riskText.setText("HIGH RISK");
+                    break;
+            }
+            timerHandler.postDelayed(this, TimeUnit.SECONDS.toMillis(10));
         }
     }
 

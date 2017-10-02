@@ -177,6 +177,7 @@
     <orderEntry type="library" exported="" name="firebase-analytics-11.4.0" level="project" />
     <orderEntry type="library" exported="" name="firebase-analytics-impl-11.4.0" level="project" />
     <orderEntry type="library" exported="" name="support-media-compat-25.2.0" level="project" />
+    <orderEntry type="library" exported="" name="alerter-2.0.1" level="project" />
     <orderEntry type="library" exported="" name="support-annotations-25.2.0" level="project" />
     <orderEntry type="library" exported="" name="support-vector-drawable-25.2.0" level="project" />
     <orderEntry type="library" exported="" name="play-services-iid-11.4.0" level="project" />

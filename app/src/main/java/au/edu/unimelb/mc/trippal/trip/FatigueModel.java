@@ -31,6 +31,8 @@ public class FatigueModel {
         fatigueLevel = clamp(0.0f, 100.0f, fatigueLevel);
     }
 
+    ;
+
     // Clamp value between min and max
     private float clamp(float min, float max, float value) {
         return Math.min(max, Math.max(min, value));
@@ -46,6 +48,7 @@ public class FatigueModel {
     }
 
     private float computeNewFatigueLevel() {
+        // 4 hours driving => 100 units
         float fatigue = fatigueLevel + (TimeUnit.MILLISECONDS.toHours(timeElapsed) * 50.0f /
                 2.0f);
         float result = clamp(0.0f, 100.0f, fatigue);
@@ -60,5 +63,30 @@ public class FatigueModel {
 
     public void setTimeElapsed(long timeElapsed) {
         this.timeElapsed = timeElapsed;
+    }
+
+    public void setCurrentStopDuration(long currentStopDuration) {
+        // Substract 1.5 fatigue units per minute stopped => 30 min break => 45 points
+        long minutes = TimeUnit.MILLISECONDS.toMinutes(currentStopDuration);
+        this.fatigueLevel -= minutes * 1.5;
+        this.fatigueLevel = clamp(0.0f, 100.0f, this.fatigueLevel);
+    }
+
+    public FatigueRisk getCurrentRisk() {
+        if (fatigueLevel < 40) {
+            return FatigueRisk.LOW;
+        } else if (fatigueLevel < 80) {
+            return FatigueRisk.MEDIUM;
+        } else {
+            return FatigueRisk.HIGH;
+        }
+    }
+
+    public void setMaximum() {
+        this.fatigueLevel = 100.0f;
+    }
+
+    public enum FatigueRisk {
+        LOW, MEDIUM, HIGH
     }
 }
