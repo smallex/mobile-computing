@@ -13,6 +13,7 @@ android {
         targetSdkVersion 24
         versionCode 1
         versionName "1.0"
+        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -28,6 +29,7 @@ android {
 }
 
 dependencies {
+    compile 'com.android.support:multidex:1.0.0'
     compile group: 'info.debatty', name: 'java-string-similarity', version: '0.10'
     compile project(':pocketsphinx-android-5prealpha-release')
     compile fileTree(dir: 'libs', include: ['*.jar'])

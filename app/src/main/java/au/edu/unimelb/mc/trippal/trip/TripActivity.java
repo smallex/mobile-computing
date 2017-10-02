@@ -115,7 +115,6 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
     private CameraSource mCameraSource = null;
     private GoogleMap mMap;
     private LocationManager locationManager;
-    private Marker currentLocationMarker;
     private Marker startLocationMarker;
     private Marker destinationLocationMarker;
     private TextView blinkText;
@@ -542,6 +541,11 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            mMap.setMyLocationEnabled(true);
+        }
 
         this.destinationLocationMarker = mMap.addMarker(new MarkerOptions().position(this
                 .destinationLatLng).title(this
@@ -587,20 +591,6 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
         builder.include(stopLatLng);
         LatLngBounds bounds = builder.build();
         mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 250));
-    }
-
-    private void updateCurrentLocationMarker() {
-        if (mMap != null) {
-            if (currentLocationMarker == null) {
-                currentLocationMarker = mMap.addMarker(new MarkerOptions().position(this
-                        .currentLocation)
-                        .title("Current " +
-                                "Location").icon(BitmapDescriptorFactory.fromResource(R.drawable
-                                .car)));
-            } else {
-                currentLocationMarker.setPosition((this.currentLocation));
-            }
-        }
     }
 
     @Override
@@ -776,11 +766,16 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
                             .getLongitude());
                     userLocationList.add(locationLatLng);
                     polyline.setPoints(userLocationList);
-                    double bearing = calculateBearing(currentLocation, locationLatLng);
+
                     CameraPosition currentPos = mMap.getCameraPosition();
+                    float newBearing = currentPos.bearing;
+                    float calculatedBearing = calculateBearing(currentLocation, locationLatLng);
+                    if (distance(calculatedBearing, currentPos.bearing) > 45) {
+                        newBearing = calculatedBearing;
+                    }
                     CameraUpdate update = CameraUpdateFactory.newCameraPosition(new
                             CameraPosition(locationLatLng, currentPos.zoom, currentPos.tilt,
-                            (float) bearing));
+                            newBearing));
                     mMap.animateCamera(update, 2000, null);
                     float[] distance = new float[]{0};
                     Location.distanceBetween(currentLocation.latitude,
@@ -792,9 +787,15 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
                 }
                 currentLocation = new LatLng(location.getLatitude(),
                         location.getLongitude());
-                updateCurrentLocationMarker();
                 Log.d("TripPal", "Location: " + startingLatLng);
             }
+        }
+
+        private float distance(float alpha, float beta) {
+            float phi = Math.abs(beta - alpha) % 360;
+            // This is either the distance or 360 - distance
+            float distance = phi > 180 ? 360 - phi : phi;
+            return distance;
         }
 
         private void initUserPolyline() {
@@ -805,7 +806,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
                     .drawable.ic_navigation_black_24dp), 10));
         }
 
-        private double calculateBearing(LatLng currentLocation, LatLng locationLatLng) {
+        private float calculateBearing(LatLng currentLocation, LatLng locationLatLng) {
             double lon1 = degToRad(currentLocation.longitude);
             double lon2 = degToRad(locationLatLng.longitude);
             double lat1 = degToRad(currentLocation.latitude);
@@ -815,7 +816,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
             double b = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math
                     .cos(lon2 - lon1);
             double c = radToDeg(Math.atan2(a, b));
-            return c;
+            return (float) c;
         }
 
         public double degToRad(double deg) {
