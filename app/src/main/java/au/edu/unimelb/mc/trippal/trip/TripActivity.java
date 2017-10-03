@@ -46,7 +46,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -58,7 +57,6 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.CustomCap;
 import com.google.android.gms.maps.model.Dash;
 import com.google.android.gms.maps.model.Gap;
 import com.google.android.gms.maps.model.LatLng;
@@ -134,6 +132,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
     private SpeechRecognizer recognizer;
     private TextToSpeech tts;
     private List<LatLng> userLocationList;
+    private List<LatLng> stopsLocationList;
     private double distanceTraveledMeters = 0;
     private TextView distanceText;
     private TextView stopsCountText;
@@ -145,6 +144,10 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
     private int stopsCount;
     private long currentStopStart;
     private TextView riskText;
+    private Polyline routeLine;
+    private Polyline userRouteLine;
+    private Marker selectedStopMarker;
+    private boolean tripFinished = false;
 
     //==============================================================================================
     // Activity Methods
@@ -182,6 +185,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
         }
 
         this.userLocationList = new ArrayList<>();
+        this.stopsLocationList = new ArrayList<>();
 
         ActionBar ab = getSupportActionBar();
         Bundle extras = getIntent().getExtras();
@@ -558,7 +562,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
         this.destinationLocationMarker = mMap.addMarker(new MarkerOptions().position(this
                 .destinationLatLng).title(this
                 .destinationName).icon(BitmapDescriptorFactory.fromResource(R.drawable
-                .ic_place_black_24dp)));
+                .blue_marker)));
         this.destinationLocationMarker.showInfoWindow();
         mMap.moveCamera(CameraUpdateFactory.newLatLng(this.destinationLatLng));
         mMap.animateCamera(CameraUpdateFactory.zoomTo(10f));
@@ -578,7 +582,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
         this.startLocationMarker = mMap.addMarker(new MarkerOptions().position
                 (TripActivity.this
                         .startingLatLng).title("Start").icon(BitmapDescriptorFactory.fromResource(R
-                .drawable.ic_person_pin_circle_black_24dp)));
+                .drawable.red_marker)));
     }
 
     private void showAllMarkers() {
@@ -602,7 +606,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
         builder.include(this.currentLocation);
         builder.include(stopLatLng);
         LatLngBounds bounds = builder.build();
-        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 250));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 500));
     }
 
     @Override
@@ -744,11 +748,33 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
             if (currentLocation != null) {
                 drawRoute(currentLocation, stopLocation, 1);
             }
-            Marker marker = mMap.addMarker(new MarkerOptions().title(stopLocationName).position
+            selectedStopMarker = mMap.addMarker(new MarkerOptions().title(stopLocationName).position
                     (stopLocation).icon(BitmapDescriptorFactory
-                    .fromResource(R.drawable.ic_local_cafe_black_24dp)));
-            marker.showInfoWindow();
-            showCurrentStop(marker.getPosition());
+                    .fromResource(R.drawable.coffe_marker)));
+            selectedStopMarker.showInfoWindow();
+            showCurrentStop(selectedStopMarker.getPosition());
+        }
+    }
+
+    private void finishTrip() {
+        tripFinished = true;
+        if (routeLine != null) {
+            routeLine.setVisible(false);
+        }
+        if (userRouteLine != null) {
+            userRouteLine.setVisible(true);
+        }
+        if (selectedStopMarker != null) {
+            selectedStopMarker.remove();
+        }
+        drawStopMarkers();
+        showAllMarkers();
+    }
+
+    private void drawStopMarkers() {
+        for (LatLng stopLatLng : stopsLocationList) {
+            mMap.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R
+                    .drawable.coffe_marker)).position(stopLatLng));
         }
     }
 
@@ -765,6 +791,9 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
                 stopsCount += 1;
                 stopsCountText.setText(stopsCount + " stops");
                 currentStopStart = new Date().getTime();
+                if (currentLocation != null) {
+                    stopsLocationList.add(currentLocation);
+                }
             } else {
                 text = "Continuing your trip now.";
                 icon = R.drawable.ic_directions_car_white_24dp;
@@ -773,12 +802,6 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
                 long currentStopDuration = new Date().getTime() - currentStopStart;
                 fatigue.setCurrentStopDuration(currentStopDuration);
             }
-            Context context = getApplicationContext();
-            int duration = Toast.LENGTH_SHORT;
-
-            Toast toast = Toast.makeText(context, text, duration);
-            //toast.show();
-
             Alerter.create(TripActivity.this)
                     .setBackgroundColorRes(R.color.accent)
                     .setIcon(icon)
@@ -790,7 +813,6 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
 
     private class MyLocationListenerGPS implements LocationListener {
 
-        private Polyline polyline;
         private boolean insideDestinationRadius = false;
 
         @Override
@@ -809,42 +831,57 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
                 if (currentLocation != null) {
                     updateCurrentLocation(location);
                     checkIfAtDestination(location);
+                } else {
+                    currentLocation = new LatLng(location.getLatitude(),
+                            location.getLongitude());
                 }
-                currentLocation = new LatLng(location.getLatitude(),
-                        location.getLongitude());
+
                 Log.d("TripPal", "Location: " + startingLatLng);
             }
         }
 
         private void checkIfAtDestination(Location location) {
+            final float THRESHOLD_DISTANCE = 100.0f;
             float[] distance = new float[]{0};
             Location.distanceBetween(location.getLatitude(),
                     location.getLongitude(), destinationLatLng.latitude, destinationLatLng
                             .longitude, distance);
-            if (distance[0] < 250.0f && !insideDestinationRadius) {
+            if (distance[0] < THRESHOLD_DISTANCE && !insideDestinationRadius) {
                 insideDestinationRadius = true;
                 AlertDialog.Builder builder = new AlertDialog.Builder(TripActivity
                         .this);
                 builder.setTitle("You're there!")
                         .setMessage("You have reached your destination!\nFinish this trip?")
-                        .setPositiveButton("Yes", null)
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                finishTrip();
+                            }
+                        })
                         .setNegativeButton("No", null)
-                        .setIcon(R.drawable.warning)
                         .show();
-            } else if (distance[0] > 250.0f) {
+            } else if (distance[0] > THRESHOLD_DISTANCE) {
                 insideDestinationRadius = false;
             }
         }
 
         private void updateCurrentLocation(Location location) {
-            if (polyline == null) {
+            if (tripFinished) {
+                return;
+            }
+            if (userRouteLine == null) {
                 initUserPolyline();
                 mMap.animateCamera(CameraUpdateFactory.zoomTo(15.0f));
             }
             LatLng locationLatLng = new LatLng(location.getLatitude(), location
                     .getLongitude());
+            if (currentLocation != null && distance(currentLocation, locationLatLng) < 10) {
+                Log.d("Distance", distance(currentLocation, locationLatLng) + "");
+                return;
+            }
+
             userLocationList.add(locationLatLng);
-            polyline.setPoints(userLocationList);
+            userRouteLine.setPoints(userLocationList);
 
             CameraPosition currentPos = mMap.getCameraPosition();
             float newBearing = currentPos.bearing;
@@ -856,13 +893,19 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
                     CameraPosition(locationLatLng, currentPos.zoom, currentPos.tilt,
                     newBearing));
             mMap.animateCamera(update, 2000, null);
-            float[] distance = new float[]{0};
-            Location.distanceBetween(currentLocation.latitude,
-                    currentLocation.longitude, location.getLatitude(), location
-                            .getLongitude(), distance);
-            distanceTraveledMeters += distance[0];
+            distanceTraveledMeters += distance(currentLocation, new LatLng(location.getLatitude()
+                    , location.getLongitude()));
             distanceText.setText(String.format("%.3f", distanceTraveledMeters / 1000.0) +
                     " km");
+            currentLocation = new LatLng(location.getLatitude(),
+                    location.getLongitude());
+        }
+
+        private float distance(LatLng l1, LatLng l2) {
+            float[] distance = new float[]{0};
+            Location.distanceBetween(l1.latitude,
+                    l1.longitude, l2.latitude, l2.longitude, distance);
+            return distance[0];
         }
 
         private float distance(float alpha, float beta) {
@@ -873,11 +916,10 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
         }
 
         private void initUserPolyline() {
-            polyline = mMap.addPolyline(new PolylineOptions().width(5).color
-                    (Color.DKGRAY));
-            polyline.setVisible(false);
-            polyline.setEndCap(new CustomCap(BitmapDescriptorFactory.fromResource(R
-                    .drawable.ic_navigation_black_24dp), 10));
+            userRouteLine = mMap.addPolyline(new PolylineOptions().width(12).color(Color.argb(125,
+                    20, 20, 230)));
+            userRouteLine.setVisible(false);
+            ;
         }
 
         private float calculateBearing(LatLng currentLocation, LatLng locationLatLng) {
@@ -1160,7 +1202,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
 
                 lineOptions.addAll(points);
                 if (type == 0) {
-                    lineOptions.color(Color.RED);
+                    lineOptions.color(Color.argb(125, 230, 20, 20));
                     lineOptions.width(12);
                 } else if (type == 1) {
                     lineOptions.color(Color.BLUE);
@@ -1169,10 +1211,10 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
                 }
                 lineOptions.geodesic(true);
             }
-            // Drawing polyline in the Google Map for the i-th route
-            mMap.addPolyline(lineOptions);
+            // Drawing userRouteLine in the Google Map for the i-th route
+            routeLine = mMap.addPolyline(lineOptions);
 
-            LatLng halfwayLocation = points.get(points.size() / 2);
+            final LatLng halfwayLocation = points.get(points.size() / 2);
             int durationSeconds = parser.getDurationSeconds();
             int durationHours = durationSeconds / (60 * 60);
             int durationMinutes = (durationSeconds / 60) % 60;
@@ -1189,7 +1231,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
                     .title(parser.getDistanceKM() + " km")
                     .snippet(durationText)
                     .icon(transparent)
-                    .anchor((float) 0.5, (float) 0.5); //puts the info window on the polyline
+                    .anchor((float) 0.5, (float) 0.5); //puts the info window on the userRouteLine
 
             Marker marker = mMap.addMarker(options);
 

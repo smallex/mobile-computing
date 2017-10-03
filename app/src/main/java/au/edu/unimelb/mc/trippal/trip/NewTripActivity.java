@@ -36,11 +36,13 @@ import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.maps.model.LatLng;
+import com.tapadoo.alerter.Alerter;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -270,10 +272,11 @@ public class NewTripActivity extends AppCompatActivity {
         final String accessToken = bundle.getString("accessToken");
         String userID = bundle.getString("userID");
 
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-DD-mm");
         // Instantiate the RequestQueue.
         RequestQueue queue = Volley.newRequestQueue(this);
         String url = "https://api.fitbit.com/1.2/user/" + userID +
-                "/sleep/date/2017-08-17.json";
+                "/sleep/date/" + df.format(new Date()) + ".json";
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, new
                 Response.Listener<JSONObject>() {
@@ -290,12 +293,22 @@ public class NewTripActivity extends AppCompatActivity {
                             sleepQuality.setProgress(sleepQualityLevel);
                         } catch (JSONException e) {
                             Log.d("TripPal", e.toString());
+                            Alerter.create(NewTripActivity.this).setText("No sleep data " +
+                                    "available for last night!").setIcon(R.drawable.warning)
+                                    .enableIconPulse(false)
+                                    .setBackgroundColorRes(R.color.accent)
+                                    .show();
                         }
                     }
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Log.d("TripPal", error.toString());
+                Alerter.create(NewTripActivity.this).setText("No sleep data " +
+                        "available for last night!").setIcon(R.drawable.warning)
+                        .enableIconPulse(false)
+                        .setBackgroundColorRes(R.color.accent)
+                        .show();
             }
         }) {
             @Override
