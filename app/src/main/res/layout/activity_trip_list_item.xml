@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:columnCount="4"
+    >
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                  android:layout_width="wrap_content"
+                  android:layout_height="match_parent"
+                  android:orientation="vertical"
+                  android:paddingRight="5dp">
+
+        <TextView
+            android:id="@+id/trip_destination"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:maxWidth="150dp"
+            android:minWidth="150dp"
+            android:paddingBottom="3dp"
+            android:paddingLeft="15dp"
+            android:paddingTop="2dp"
+            android:text="83 Flemington Rd"
+            android:textSize="18dp"
+            android:textStyle="bold">
+
+        </TextView>
+
+        <TextView
+            android:id="@+id/trip_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingBottom="3dp"
+            android:paddingLeft="15dp"
+            android:text="23.09.2017"
+            android:textSize="15dp">
+
+        </TextView>
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/trip_distance"
+        android:layout_marginLeft="10dp"
+        android:paddingTop="5dp"
+        android:text="253.453 km"
+        android:textSize="15dp"
+        android:textStyle="bold"/>
+
+    <TextView
+        android:layout_marginLeft="20dp"
+        android:paddingTop="5dp"
+        android:text=" in "
+        android:textAlignment="center"
+        android:paddingRight="5dp"
+        android:textSize="15dp"/>
+
+    <TextView
+        android:id="@+id/trip_duration"
+        android:layout_marginLeft="10dp"
+        android:paddingRight="20dp"
+        android:paddingTop="5dp"
+        android:text="24h 7m"
+        android:textSize="15dp"
+        android:textStyle="bold"/>
+</GridLayout>

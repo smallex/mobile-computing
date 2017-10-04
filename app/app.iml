@@ -164,6 +164,7 @@
     <orderEntry type="library" exported="" name="appintro-4.1.0" level="project" />
     <orderEntry type="library" exported="" name="play-services-maps-11.4.0" level="project" />
     <orderEntry type="library" exported="" name="play-services-tagmanager-11.4.0" level="project" />
+    <orderEntry type="library" exported="" name="azure-storage-android-1.2.0" level="project" />
     <orderEntry type="library" exported="" name="constraint-layout-solver-1.0.2" level="project" />
     <orderEntry type="library" exported="" name="play-services-wearable-11.4.0" level="project" />
     <orderEntry type="library" exported="" name="play-services-cast-framework-11.4.0" level="project" />
