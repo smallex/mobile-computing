@@ -92,6 +92,9 @@ import java.util.concurrent.TimeUnit;
 
 import au.edu.unimelb.mc.trippal.R;
 import au.edu.unimelb.mc.trippal.recommendations.RecommendationsActivity;
+import au.edu.unimelb.mc.trippal.backend.CreateTripTask;
+import au.edu.unimelb.mc.trippal.backend.TripEntity;
+import au.edu.unimelb.mc.trippal.backend.UserUtils;
 import edu.cmu.pocketsphinx.Assets;
 import edu.cmu.pocketsphinx.Hypothesis;
 import edu.cmu.pocketsphinx.RecognitionListener;
@@ -769,6 +772,20 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
         }
         drawStopMarkers();
         showAllMarkers();
+        saveTrip();
+    }
+
+    private void saveTrip() {
+        TripEntity trip = new TripEntity(UserUtils.getUserId(this));
+        trip.setDestinationName(destinationName);
+        String duration = tripDurationText.getText().toString().replace("hours", "h").replace
+                ("minutes", "m");
+        trip.setDuration(duration);
+        String distance = distanceText.getText().toString();
+        trip.setDistance(distance);
+        trip.setTripDate(new Date());
+
+        new CreateTripTask(trip).execute();
     }
 
     private void drawStopMarkers() {

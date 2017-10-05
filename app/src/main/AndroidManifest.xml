@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="au.edu.unimelb.mc.trippal"
     android:installLocation="auto"
     android:versionCode="1"
@@ -21,7 +22,6 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
-
     <uses-feature android:name="android.hardware.camera" />
     <uses-feature android:name="android.hardware.location.gps" />
 
@@ -30,7 +30,8 @@
         android:hardwareAccelerated="true"
         android:icon="@drawable/icon"
         android:label="TripPal"
-        android:theme="@style/MyTheme">
+        android:theme="@style/MyTheme"
+        tools:replace="android:allowBackup">
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
@@ -39,7 +40,7 @@
             android:value="face" />
 
         <activity
-            android:name="IntroActivity"
+            android:name=".IntroActivity"
             android:label="TripPal" />
         <activity
             android:name=".trip.TripActivity"
@@ -54,7 +55,6 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".trip.TripActivity" />
         </activity>
-
         <activity
             android:name=".recommendations.RecommendationsDetailActivity"
             android:label="@string/title_activity_recommendations_detail"
@@ -62,6 +62,18 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".recommendations.RecommendationsActivity" />
+        </activity>
+        <activity android:name="com.microsoft.windowsazure.mobileservices.authentication.RedirectUrlActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="easyauth.callback"
+                    android:scheme="trippal" />
+            </intent-filter>
         </activity>
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -77,22 +89,26 @@
 
         <activity
             android:name=".trip.NewTripActivity"
-            android:label="TripPal">
-            <intent-filter android:label="TripPal">
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:label="TripPal"/>
         <activity android:name=".RedirectActivity">
             <intent-filter>
                 <data
                     android:host="success"
                     android:pathPattern=".*"
                     android:scheme="trippal" />
+
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".trip.TripListActivity"/>
+        <activity android:name=".LoginActivity">
+            <intent-filter android:label="TripPal">
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
     </application>
