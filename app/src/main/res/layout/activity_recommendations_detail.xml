@@ -8,9 +8,11 @@
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/appbar_recommendations_detail"
-        android:layout_width="match_parent"
+        android:layout_width="344dp"
         android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
+        android:theme="@style/AppTheme.AppBarOverlay"
+        tools:layout_editor_absoluteY="0dp"
+        tools:layout_editor_absoluteX="8dp">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar_recommendations_detail"
@@ -24,16 +26,17 @@
     </android.support.design.widget.AppBarLayout>
 
     <GridView xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/gridview_recommendations_detail"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:horizontalSpacing="10dp"
-        android:numColumns="2"
-        android:paddingBottom="?attr/actionBarSize"
-        android:stretchMode="columnWidth"
-        android:verticalSpacing="10dp"
-        app:layout_constraintTop_toBottomOf="@id/appbar_recommendations_detail" />
+              android:id="@+id/gridview_recommendations_detail"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:gravity="center"
+              android:horizontalSpacing="10dp"
+              android:numColumns="2"
+              android:paddingBottom="?attr/actionBarSize"
+              android:stretchMode="columnWidth"
+              android:verticalSpacing="10dp"
+              app:layout_constraintTop_toBottomOf="@+id/appbar_recommendations_detail"
+              tools:layout_editor_absoluteX="0dp"/>
 
     <ProgressBar
         android:id="@+id/progressbar_recommendations_detail"
@@ -46,6 +49,8 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/appbar_recommendations_detail" />
+        app:layout_constraintTop_toBottomOf="@+id/appbar_recommendations_detail"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"/>
 
 </android.support.constraint.ConstraintLayout>

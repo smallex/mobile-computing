@@ -48,7 +48,7 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         if (loadUserData(mClient)) {
-            showTripList();
+            showTripList(false);
         }
 
         googleButton.setOnClickListener(new View.OnClickListener() {
@@ -69,9 +69,9 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    private void showTripList() {
+    private void showTripList(boolean isNewLogin) {
         Intent intent = new Intent(this, TripListActivity.class);
-        intent.putExtra("loginSuccess", true);
+        intent.putExtra("loginSuccess", isNewLogin);
         startActivity(intent);
     }
 
@@ -101,7 +101,7 @@ public class LoginActivity extends AppCompatActivity {
                 if (result.isLoggedIn()) {
                     cacheUserData(mClient.getCurrentUser());
                     Log.d("USERID", mClient.getCurrentUser().getUserId());
-                    showTripList();
+                    showTripList(true);
                 } else {
                     Log.d("ERROR", "Error during login");
                     Alerter.create(this).enableIconPulse(false).setIcon(R.drawable.warning).show();
