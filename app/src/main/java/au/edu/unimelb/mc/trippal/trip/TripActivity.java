@@ -1071,7 +1071,6 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
                                 .show();
                         Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
                         v.vibrate(1000);
-                        fatigue.setMaximum();
                         try {
                             Uri notification = RingtoneManager.getDefaultUri(RingtoneManager
                                     .TYPE_ALARM);
