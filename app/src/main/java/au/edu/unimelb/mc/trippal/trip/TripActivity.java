@@ -1082,22 +1082,24 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
                                 public void run() {
                                     try {
                                         Thread.sleep(5000);
-                                        if (r.isPlaying())
-                                            r.stop();   // for stopping the ringtone
+                                        if (r.isPlaying()) {
+                                            r.stop();
+                                            tts.speak("Attention!", TextToSpeech.QUEUE_ADD,
+                                                    null, "1");
+                                            tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
+                                            tts.speak("Your eyes were closed for a while", TextToSpeech.QUEUE_ADD,
+                                                    null, "1");
+                                            tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
+                                            tts.speak("Please pull over and make a break", TextToSpeech.QUEUE_ADD,
+                                                    null, "1");// for stopping the ringtone
+                                        }
                                     } catch (InterruptedException e) {
                                         e.printStackTrace();
                                     }
                                 }
                             });
                             th.start();
-                            tts.speak("Attention!", TextToSpeech.QUEUE_ADD,
-                                    null, "1");
-                            tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
-                            tts.speak("Your eyes were closed for a while", TextToSpeech.QUEUE_ADD,
-                                    null, "1");
-                            tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
-                            tts.speak("Please pull over and make a break", TextToSpeech.QUEUE_ADD,
-                                    null, "1");
+
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
