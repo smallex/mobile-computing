@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -29,6 +30,7 @@ public class LoginActivity extends AppCompatActivity {
     private Button microsoftButton;
 
     private MobileServiceClient mClient;
+    private Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +39,8 @@ public class LoginActivity extends AppCompatActivity {
 
         googleButton = (GoogleSignInButton) findViewById(R.id.googleSignInButton);
         microsoftButton = (Button) findViewById(R.id.microsoftSigninButton);
+        toolbar = (Toolbar) findViewById(R.id.toolbar_login);
+        toolbar.setTitle("Login");
 
         try {
             mClient = new MobileServiceClient(AZURE_AUTHENTICATION_URL, this);

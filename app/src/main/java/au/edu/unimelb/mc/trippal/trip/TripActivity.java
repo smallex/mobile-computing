@@ -995,7 +995,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
      */
     private class GraphicFaceTracker extends Tracker<Face> {
         private final TextView blinkText;
-        private long EYES_CLOSED_THRESHOLD = TimeUnit.SECONDS.toMillis(1);
+        private long EYES_CLOSED_THRESHOLD = TimeUnit.SECONDS.toMillis(2);
         private boolean lastOpen = true;
 
         GraphicFaceTracker(TextView blinkText) {
