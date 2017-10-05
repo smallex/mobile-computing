@@ -55,6 +55,10 @@ import info.debatty.java.stringsimilarity.Levenshtein;
 
 import static android.graphics.Bitmap.createScaledBitmap;
 
+/**
+ * Created by alexandrafritzen on 12/09/2017.
+ */
+
 public class RecommendationsDetailActivity extends AppCompatActivity implements LocationListener {
     private static final String API_KEY = "AIzaSyBf0PRbW8zP5lHcGjfwbevS6CMQYfey20Q";
     private static final String GET_PLACE_ADDRESS = "https://maps.googleapis" +
@@ -158,6 +162,11 @@ public class RecommendationsDetailActivity extends AppCompatActivity implements 
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Starts the recommendation getting process:
+     * Gets the user's latest location or requests it,
+     * then calls startRecs()
+     */
     private void getRecommendations() {
         // Check if we have the location permission
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) ==
@@ -188,6 +197,12 @@ public class RecommendationsDetailActivity extends AppCompatActivity implements 
         }
     }
 
+    /**
+     * Waits for at least one not-null location update
+     * Then calls startRecs()
+     *
+     * @param location The location that has changed
+     */
     public void onLocationChanged(android.location.Location location) {
         if (location != null) {
             // Only ask for one location update
@@ -196,7 +211,7 @@ public class RecommendationsDetailActivity extends AppCompatActivity implements 
         }
     }
 
-    // Required functions
+    // Required functions for LocationListener
     public void onProviderDisabled(String arg0) {
     }
 
@@ -206,6 +221,13 @@ public class RecommendationsDetailActivity extends AppCompatActivity implements 
     public void onStatusChanged(String provider, int status, Bundle extras) {
     }
 
+    /**
+     * Gets recommendations for places matching the mapping in a given radius from the user's current location
+     * Starts a separate thread per mapping to run in background
+     *
+     * @param location The user's latest location
+     * @param radius   The radius in which to search for recommendations
+     */
     private void startRecs(final android.location.Location location, final int radius) {
         mDataSet = new ArrayList<>();
         final CountDownLatch latch = new CountDownLatch(mRecMapping.getTypes().length);
@@ -385,6 +407,15 @@ public class RecommendationsDetailActivity extends AppCompatActivity implements 
         }
     }
 
+    /**
+     * Starts a thread that executes a given PlaceRequest and adds all non-duplicate Place results
+     * that are open or have no opening hours to the data set. Adds the Place result's distance from
+     * the current location to the Place object.
+     *
+     * @param request  The request to be executed via the Google Places API
+     * @param latch    A CountdownLatch that the thread counts down on when done
+     * @param location The user's latest known location
+     */
     private void startRecommendationsThread(final PlaceRequest request, final CountDownLatch
             latch, final android.location.Location location) {
         AsyncTask.execute(new Runnable() {
@@ -429,6 +460,13 @@ public class RecommendationsDetailActivity extends AppCompatActivity implements 
         });
     }
 
+    /**
+     * Calculates the distance between a location and a Place's geometric location based on the
+     * Harversine distance
+     *
+     * @param location The location from which to calculate the distance from
+     * @param place    The place that acts as the second point in the distance calulation
+     */
     private void calculateHaversineDistance(android.location.Location location, Place place) {
         // Calculate Harversine distance between two points
         double lat1 = location.getLatitude();
@@ -436,7 +474,7 @@ public class RecommendationsDetailActivity extends AppCompatActivity implements 
         double lat2 = place.getGeometry().getLocation().getLatitude();
         double lon2 = place.getGeometry().getLocation().getLongitude();
 
-        double R = 6378.137; // Radius of earth in KM
+        double R = 6378.137;
         double dLat = lat2 * Math.PI / 180 - lat1 * Math.PI / 180;
         double dLon = lon2 * Math.PI / 180 - lon1 * Math.PI / 180;
         double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1 * Math.PI / 180) *
@@ -448,11 +486,17 @@ public class RecommendationsDetailActivity extends AppCompatActivity implements 
         place.setDistance(Double.valueOf(d * 1000).intValue());
     }
 
+    /**
+     * Helper class to recycle views with the RecommendationsDetailAdapter
+     */
     private static class ViewHolder {
         private TextView titleTextView;
         private ImageView imageView;
     }
 
+    /**
+     * The BaseAdapter that controls everything to do with the grid view
+     */
     private class RecommendationsDetailAdapter extends BaseAdapter {
         private final Context mContext;
         private final LayoutInflater mInflater;
@@ -531,6 +575,9 @@ public class RecommendationsDetailActivity extends AppCompatActivity implements 
         }
     }
 
+    /**
+     * A class that downloads an image at a given URL and resizes it to max 500x500
+     */
     private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
         Place mPlace;
 
@@ -538,6 +585,13 @@ public class RecommendationsDetailActivity extends AppCompatActivity implements 
             this.mPlace = place;
         }
 
+        /**
+         * This method is called when DownloadImageTask(place).execute(address) is called. It
+         * downloads an image in the background from the address.
+         *
+         * @param urls The URL the image shall be downloaded from
+         * @return The downloaded image as a Bitmap object
+         */
         protected Bitmap doInBackground(String... urls) {
             String url = urls[0];
             Bitmap mIcon11 = null;
@@ -561,6 +615,11 @@ public class RecommendationsDetailActivity extends AppCompatActivity implements 
             return mIcon11;
         }
 
+        /**
+         * Once the image is downloaded, it is resized to be max 500x500.
+         *
+         * @param result The Bitmap representation of the downloaded image
+         */
         protected void onPostExecute(Bitmap result) {
             if (result != null) {
                 // Resize image to be square-shaped, max 500x500
@@ -599,21 +658,25 @@ public class RecommendationsDetailActivity extends AppCompatActivity implements 
             }
         }
     }
-}
 
-class UriFormat {
-    private StringBuilder builder = new StringBuilder();
+    /**
+     * Transforms an object into a URI-readable format
+     */
+    private class UriFormat {
+        private StringBuilder builder = new StringBuilder();
 
-    @JsonAnySetter
-    public void addToUri(String name, Object property) {
-        if (builder.length() > 0) {
-            builder.append("&");
+        @JsonAnySetter
+        public void addToUri(String name, Object property) {
+            if (builder.length() > 0) {
+                builder.append("&");
+            }
+            builder.append(name).append("=").append(property);
         }
-        builder.append(name).append("=").append(property);
-    }
 
-    @Override
-    public String toString() {
-        return builder.toString();
+        @Override
+        public String toString() {
+            return builder.toString();
+        }
     }
 }
+

@@ -181,11 +181,17 @@ public class RecommendationsActivity extends AppCompatActivity {
         }
     };
 
+    /**
+     * Helper class to recycle views with the RecommendationsAdapter
+     */
     private static class ViewHolder {
         private TextView titleTextView;
         private ImageView imageView;
     }
 
+    /**
+     * The BaseAdapter that controls everything to do with the grid view
+     */
     private class RecommendationsAdapter extends BaseAdapter {
         private final Context mContext;
         private final LayoutInflater mInflater;
