@@ -48,6 +48,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import au.edu.unimelb.mc.trippal.Constants;
 import au.edu.unimelb.mc.trippal.R;
 import au.edu.unimelb.mc.trippal.trip.TripActivity;
 import info.debatty.java.stringsimilarity.Levenshtein;
@@ -85,10 +86,10 @@ public class RecommendationsDetailActivity extends AppCompatActivity implements 
 
         Intent redirectIntent = new Intent(RecommendationsDetailActivity.this, TripActivity
                 .class);
-        redirectIntent.putExtra("stopLocationName", place.getName());
-        redirectIntent.putExtra("stopLocationLat", place.getGeometry().getLocation()
+        redirectIntent.putExtra(Constants.extraStopLocationName, place.getName());
+        redirectIntent.putExtra(Constants.extraStopLocationLat, place.getGeometry().getLocation()
                 .getLatitude());
-        redirectIntent.putExtra("stopLocationLong", place.getGeometry().getLocation()
+        redirectIntent.putExtra(Constants.extraStopLocationLong, place.getGeometry().getLocation()
                 .getLongitude());
         redirectIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent
                 .FLAG_ACTIVITY_SINGLE_TOP);
@@ -105,7 +106,6 @@ public class RecommendationsDetailActivity extends AppCompatActivity implements 
         }
     };
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -114,7 +114,7 @@ public class RecommendationsDetailActivity extends AppCompatActivity implements 
         mActivity = this;
 
         // Get intent details
-        mRecMapping = (RecommendationMapping) getIntent().getSerializableExtra("MAPPING");
+        mRecMapping = (RecommendationMapping) getIntent().getSerializableExtra(Constants.extraMapping);
 
         // Show toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_recommendations_detail);
@@ -239,7 +239,7 @@ public class RecommendationsDetailActivity extends AppCompatActivity implements 
                                 // Display error message
                                 Toast.makeText(mActivity, String.format(getString(R.string.noPlacesInRadius)
                                         , MAX_RADIUS), Toast.LENGTH_LONG).show();
-                                if (getIntent().getExtras().getBoolean("speech")) {
+                                if (getIntent().getExtras().getBoolean(Constants.extraSpeech)) {
                                     tts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
                                         @Override
                                         public void onInit(int status) {
@@ -273,7 +273,7 @@ public class RecommendationsDetailActivity extends AppCompatActivity implements 
                         });
                     }
                 } else {
-                    if (getIntent().getExtras().getBoolean("speech")) {
+                    if (getIntent().getExtras().getBoolean(Constants.extraSpeech)) {
                         tts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
                             @Override
                             public void onInit(int status) {
@@ -293,7 +293,7 @@ public class RecommendationsDetailActivity extends AppCompatActivity implements 
                                                         RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
                                                 intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale
                                                         .getDefault());
-                                                intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Choose location?");
+                                                intent.putExtra(RecognizerIntent.EXTRA_PROMPT, Constants.extraChooseLocation);
 
                                                 try {
                                                     startActivityForResult(intent, REQ_CODE_SPEECH_INPUT_Location);

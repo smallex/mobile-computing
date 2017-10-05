@@ -54,6 +54,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import au.edu.unimelb.mc.trippal.AzureCall;
+import au.edu.unimelb.mc.trippal.Constants;
 import au.edu.unimelb.mc.trippal.IntroActivity;
 import au.edu.unimelb.mc.trippal.R;
 import info.debatty.java.stringsimilarity.Levenshtein;
@@ -69,6 +70,9 @@ public class NewTripActivity extends AppCompatActivity {
     private String UTTERANCE_ID_FEELINGS = "200";
     private String UTTERANCE_ID_TIME = "300";
     private String UTTERANCE_ID_SLEEP = "400";
+
+    private static final String LOG_ID = "NewTripActivity";
+
     private EditText destinationText;
     private TextInputLayout destinationLayout;
     private Place selectedPlace;
@@ -103,13 +107,13 @@ public class NewTripActivity extends AppCompatActivity {
         // Enable up navigation (back arrow)
         ActionBar ab = getSupportActionBar();
         if (ab != null) {
-            ab.setTitle("Start a New Trip");
+            ab.setTitle(R.string.startNewTrip);
         }
 
         // Open splash screen on first start
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences
                 (getBaseContext());
-        boolean isFirstStart = sharedPreferences.getBoolean("FIRST_START", true);
+        boolean isFirstStart = sharedPreferences.getBoolean(Constants.prefFirstStart, true);
 
         // If the activity has never started before...
         if (isFirstStart) {
@@ -121,7 +125,7 @@ public class NewTripActivity extends AppCompatActivity {
             SharedPreferences.Editor e = sharedPreferences.edit();
 
             // Edit preference to make it false because we don't want this to run again
-            e.putBoolean("FIRST_START", false);
+            e.putBoolean(Constants.prefFirstStart, false);
             e.apply();
         }
 
@@ -147,7 +151,7 @@ public class NewTripActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                startVoiceOutput("Hello, where do you wanna travel", UTTERANCE_ID_LOCATION);
+                startVoiceOutput(getString(R.string.whereTravel), UTTERANCE_ID_LOCATION);
             }
         });
 
@@ -171,8 +175,7 @@ public class NewTripActivity extends AppCompatActivity {
                                         RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
                                 intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale
                                         .getDefault());
-                                intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Hello, where do " +
-                                        "you wanna travel?");
+                                intent.putExtra(RecognizerIntent.EXTRA_PROMPT, getString(R.string.whereTravel));
 
                                 try {
                                     startActivityForResult(intent, REQ_CODE_SPEECH_INPUT_Location);
@@ -187,8 +190,7 @@ public class NewTripActivity extends AppCompatActivity {
                                         RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
                                 intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale
                                         .getDefault());
-                                intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "How tired are you" +
-                                        " feeling?");
+                                intent.putExtra(RecognizerIntent.EXTRA_PROMPT, getString(R.string.howTired));
 
                                 try {
                                     startActivityForResult(intent, REQ_CODE_SPEECH_INPUT_Feeling);
@@ -203,8 +205,7 @@ public class NewTripActivity extends AppCompatActivity {
                                         RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
                                 intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale
                                         .getDefault());
-                                intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "How long did you " +
-                                        "sleep last night?");
+                                intent.putExtra(RecognizerIntent.EXTRA_PROMPT, getString(R.string.howLongSleep));
 
                                 try {
                                     startActivityForResult(intent, REQ_CODE_SPEECH_INPUT_TIME);
@@ -220,8 +221,7 @@ public class NewTripActivity extends AppCompatActivity {
                                         RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
                                 intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale
                                         .getDefault());
-                                intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "How was your " +
-                                        "sleep last night?");
+                                intent.putExtra(RecognizerIntent.EXTRA_PROMPT, getString(R.string.howWasSleep));
 
                                 try {
                                     startActivityForResult(intent, REQ_CODE_SPEECH_INPUT_Sleep);
@@ -233,7 +233,6 @@ public class NewTripActivity extends AppCompatActivity {
 
                         @Override
                         public void onError(String s) {
-
                         }
                     });
                 }
@@ -339,10 +338,10 @@ public class NewTripActivity extends AppCompatActivity {
         if (selectedPlace != null) {
             String destinationName = selectedPlace.getName().toString();
             LatLng latLng = selectedPlace.getLatLng();
-            intent.putExtra("destinationName", destinationName);
-            intent.putExtra("destinationLat", latLng.latitude);
-            intent.putExtra("destinationLng", latLng.longitude);
-            intent.putExtra("tripStartingTime", new Date().getTime());
+            intent.putExtra(Constants.extraDestinationName, destinationName);
+            intent.putExtra(Constants.extraDestinationLat, latLng.latitude);
+            intent.putExtra(Constants.extraDestinationLng, latLng.longitude);
+            intent.putExtra(Constants.extraTripStartTime, new Date().getTime());
         } else {
             if (address == null) {
 
@@ -350,18 +349,18 @@ public class NewTripActivity extends AppCompatActivity {
                 Address location = address.get(0);
                 double lat = location.getLatitude();
                 double lng = location.getLongitude();
-                intent.putExtra("destinationName", location.getLocality());
-                intent.putExtra("destinationLat", lat);
-                intent.putExtra("destinationLng", lng);
-                intent.putExtra("tripStartingTime", new Date().getTime());
+                intent.putExtra(Constants.extraDestinationName, location.getLocality());
+                intent.putExtra(Constants.extraDestinationLat, lat);
+                intent.putExtra(Constants.extraDestinationLng, lng);
+                intent.putExtra(Constants.extraTripStartTime, new Date().getTime());
             }
         }
-        intent.putExtra("currentDrowsinessLevel", currentDrowsiness.getProgress());
-        intent.putExtra("lastSleepQuality", sleepQuality.getProgress());
+        intent.putExtra(Constants.extraCurrentDrowsyLvl, currentDrowsiness.getProgress());
+        intent.putExtra(Constants.extraLastSleepQual, sleepQuality.getProgress());
         if (!durationHours.getText().toString().isEmpty()) {
-            intent.putExtra("lastSleepHours", Integer.parseInt(durationHours.getText().toString()));
+            intent.putExtra(Constants.extraLastSleepHrs, Integer.parseInt(durationHours.getText().toString()));
         } else {
-            intent.putExtra("lastSleepHours", 8);
+            intent.putExtra(Constants.extraLastSleepHrs, 8);
         }
 
         startActivity(intent);
@@ -372,7 +371,7 @@ public class NewTripActivity extends AppCompatActivity {
         if (requestCode == PLACE_AUTOCOMPLETE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 Place place = PlaceAutocomplete.getPlace(this, data);
-                Log.i("APP", "Place: " + place.getName());
+                Log.i(LOG_ID, "Place: " + place.getName());
                 selectedPlace = place;
                 destinationText.setText(place.getName());
                 destinationText.clearFocus();
@@ -382,7 +381,7 @@ public class NewTripActivity extends AppCompatActivity {
             } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
                 Status status = PlaceAutocomplete.getStatus(this, data);
                 // TODO: Handle the error.
-                Log.i("APP", status.getStatusMessage());
+                Log.i(LOG_ID, status.getStatusMessage());
             } else if (resultCode == RESULT_CANCELED) {
                 // The user canceled the operation.
             }

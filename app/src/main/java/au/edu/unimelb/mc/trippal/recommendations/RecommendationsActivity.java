@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import au.edu.unimelb.mc.trippal.Constants;
 import au.edu.unimelb.mc.trippal.R;
 import info.debatty.java.stringsimilarity.Levenshtein;
 
@@ -41,7 +42,7 @@ public class RecommendationsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recommendations);
-        Log.d("take", String.valueOf(getIntent().getExtras().getBoolean("speech")));
+        Log.d("take", String.valueOf(getIntent().getExtras().getBoolean(Constants.extraSpeech)));
 
         // Show toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_recommendations);
@@ -71,14 +72,14 @@ public class RecommendationsActivity extends AppCompatActivity {
         gridView.setAdapter(adapter);
         gridView.setOnItemClickListener(onItemClickListener);
 
-        if (getIntent().getExtras().getBoolean("speech") == true) {
+        if (getIntent().getExtras().getBoolean(Constants.extraSpeech)) {
             Intent intent = new Intent(RecognizerIntent
                     .ACTION_RECOGNIZE_SPEECH);
             intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
                     RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
             intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale
                     .getDefault());
-            intent.putExtra(RecognizerIntent.EXTRA_PROMPT, getString(R.string.whichActivity));
+            intent.putExtra(RecognizerIntent.EXTRA_PROMPT, Constants.extraWhichActivity);
 
             try {
                 startActivityForResult(intent, REQ_CODE_SPEECH_INPUT_ACT);
@@ -86,7 +87,6 @@ public class RecommendationsActivity extends AppCompatActivity {
 
             }
         }
-
     }
 
     @Override
@@ -106,8 +106,8 @@ public class RecommendationsActivity extends AppCompatActivity {
 
         // Open RecommendationsDetailActivity page for the mapping
         Intent i = new Intent(RecommendationsActivity.this, RecommendationsDetailActivity.class);
-        i.putExtra("MAPPING", mapping);
-        i.putExtra("speech", speech);
+        i.putExtra(Constants.extraMapping, mapping);
+        i.putExtra(Constants.extraSpeech, speech);
         startActivity(i);
     }
 
@@ -119,27 +119,27 @@ public class RecommendationsActivity extends AppCompatActivity {
                         .EXTRA_RESULTS);
                 String res = result.get(0).toLowerCase();
                 Log.d("resultSleep", res);
-                if (res.contains("coffee")) {
+                if (res.contains(Constants.mappingCoffee)) {
                     goToSelection(0, true);
-                } else if (res.contains("food")) {
+                } else if (res.contains(Constants.mappingFood)) {
                     goToSelection(1, true);
-                } else if (res.contains("bathroom")) {
+                } else if (res.contains(Constants.mappingBathroom)) {
                     goToSelection(2, true);
-                } else if (res.contains("sleep")) {
+                } else if (res.contains(Constants.mappingSleep)) {
                     goToSelection(3, true);
-                } else if (res.contains("stretch legs")) {
+                } else if (res.contains(Constants.mappingStretchLegs)) {
                     goToSelection(4, true);
-                } else if (res.contains("switch driver")) {
+                } else if (res.contains(Constants.mappingSwitchDriver)) {
                     goToSelection(5, true);
                 } else {
                     Levenshtein l = new Levenshtein();
                     Map<String, Double> results = new HashMap<>();
-                    results.put("coffee", l.distance(res, "coffee"));
-                    results.put("food", l.distance(res, "food"));
-                    results.put("bathroom", l.distance(res, "bathroom"));
-                    results.put("sleep", l.distance(res, "sleep"));
-                    results.put("stretch legs", l.distance(res, "stretch legs"));
-                    results.put("switch driver", l.distance(res, "switch driver"));
+                    results.put(Constants.mappingCoffee, l.distance(res, Constants.mappingCoffee));
+                    results.put(Constants.mappingFood, l.distance(res, Constants.mappingFood));
+                    results.put(Constants.mappingBathroom, l.distance(res, Constants.mappingBathroom));
+                    results.put(Constants.mappingSleep, l.distance(res, Constants.mappingSleep));
+                    results.put(Constants.mappingStretchLegs, l.distance(res, Constants.mappingStretchLegs));
+                    results.put(Constants.mappingSwitchDriver, l.distance(res, Constants.mappingSwitchDriver));
 
                     Map.Entry<String, Double> min = null;
                     for (Map.Entry<String, Double> entry : results.entrySet()) {
@@ -148,17 +148,17 @@ public class RecommendationsActivity extends AppCompatActivity {
                         }
                     }
                     res = min.getKey();
-                    if (res.contains("coffee")) {
+                    if (res.contains(Constants.mappingCoffee)) {
                         goToSelection(0, true);
-                    } else if (res.contains("food")) {
+                    } else if (res.contains(Constants.mappingFood)) {
                         goToSelection(1, true);
-                    } else if (res.contains("bathroom")) {
+                    } else if (res.contains(Constants.mappingBathroom)) {
                         goToSelection(2, true);
-                    } else if (res.contains("sleep")) {
+                    } else if (res.contains(Constants.mappingSleep)) {
                         goToSelection(3, true);
-                    } else if (res.contains("stretch legs")) {
+                    } else if (res.contains(Constants.mappingStretchLegs)) {
                         goToSelection(4, true);
-                    } else if (res.contains("switch driver")) {
+                    } else if (res.contains(Constants.mappingSwitchDriver)) {
                         goToSelection(5, true);
                     }
                 }
@@ -175,7 +175,7 @@ public class RecommendationsActivity extends AppCompatActivity {
 
             // Open RecommendationsDetailActivity page for the mapping
             Intent i = new Intent(RecommendationsActivity.this, RecommendationsDetailActivity.class);
-            i.putExtra("MAPPING", mapping);
+            i.putExtra(Constants.extraMapping, mapping);
             startActivity(i);
         }
     };

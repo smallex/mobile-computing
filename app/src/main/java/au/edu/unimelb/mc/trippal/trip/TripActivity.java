@@ -90,6 +90,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+import au.edu.unimelb.mc.trippal.Constants;
 import au.edu.unimelb.mc.trippal.R;
 import au.edu.unimelb.mc.trippal.recommendations.RecommendationsActivity;
 import au.edu.unimelb.mc.trippal.backend.CreateTripTask;
@@ -106,7 +107,7 @@ import edu.cmu.pocketsphinx.SpeechRecognizerSetup;
  */
 public final class TripActivity extends AppCompatActivity implements OnMapReadyCallback,
         RecognitionListener {
-    private static final String TAG = "FaceTracker";
+    private static final String LOG_ID = "TripActivity";
     private static final int RC_HANDLE_GMS = 9001;
     // permission request codes need to be < 256
     private static final int RC_HANDLE_CAMERA_PERM = 2;
@@ -193,15 +194,15 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
         ActionBar ab = getSupportActionBar();
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
-            this.destinationName = extras.getString("destinationName");
+            this.destinationName = extras.getString(Constants.extraDestinationName);
             if (ab != null) {
-                ab.setTitle("Trip to " + this.destinationName);
+                ab.setTitle(String.format(getString(R.string.tripTo), this.destinationName));
             }
 
-            double lat = extras.getDouble("destinationLat");
-            double lng = extras.getDouble("destinationLng");
+            double lat = extras.getDouble(Constants.extraDestinationLat);
+            double lng = extras.getDouble(Constants.extraDestinationLng);
             this.destinationLatLng = new LatLng(lat, lng);
-            this.tripStartingTime = extras.getLong("tripStartingTime");
+            this.tripStartingTime = extras.getLong(Constants.extraTripStartTime);
 
             final Handler timerHandler = new Handler();
             final Runnable timeUpdater = new TimeUpdater(timerHandler);
@@ -255,9 +256,9 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
     }
 
     private void initFatigue(Bundle extras) {
-        int currentDrowsinessLevel = extras.getInt("currentDrowsinessLevel");
-        int lastSleepQuality = extras.getInt("lastSleepQuality");
-        int lastSleepHours = extras.getInt("lastSleepHours");
+        int currentDrowsinessLevel = extras.getInt(Constants.extraCurrentDrowsyLvl);
+        int lastSleepQuality = extras.getInt(Constants.extraLastSleepQual);
+        int lastSleepHours = extras.getInt(Constants.extraLastSleepHrs);
         this.fatigue = new FatigueModel(currentDrowsinessLevel, lastSleepHours, 0,
                 lastSleepQuality);
         this.fatigueLevel.setProgress((int) this.fatigue.getFatigueLevel());
@@ -328,7 +329,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
                 MyLocationListenerGPS());
         //locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 2000, 0, new
         //      MyLocationListenerGPS());
-        Log.d("TripPal", "Requesting current location");
+        Log.d(LOG_ID, "Requesting current location");
     }
 
     /**
@@ -337,7 +338,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
      * sending the request.
      */
     private void requestCameraPermission() {
-        Log.w(TAG, "Camera permission is not granted. Requesting permission");
+        Log.w(LOG_ID, "Camera permission is not granted. Requesting permission");
 
         final String[] permissions = new String[]{Manifest.permission.CAMERA};
 
@@ -383,7 +384,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
             // isOperational() can be used to check if the required native library is currently
             // available.  The detector will automatically become operational once the library
             // download completes on device.
-            Log.w(TAG, "Face detector dependencies are not yet available.");
+            Log.w(LOG_ID, "Face detector dependencies are not yet available.");
         }
 
         mCameraSource = new CameraSource.Builder(context, detector)
@@ -463,31 +464,31 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[]
             grantResults) {
-        Log.d("TripPal", "requestCode == " + requestCode);
+        Log.d(LOG_ID, "requestCode == " + requestCode);
         if (requestCode == MY_PERMISSIONS_REQUEST_LOCATION) {
-            Log.d("TripPal", "requestCode == 1");
+            Log.d(LOG_ID, "requestCode == 1");
 
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission
                     .ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat
                     .checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) !=
                     PackageManager.PERMISSION_GRANTED) {
-                Log.d("TripPal", "Location permission not granted");
+                Log.d(LOG_ID, "Location permission not granted");
                 return;
             }
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 0, new
                     MyLocationListenerGPS());
-            Log.d("TripPal", "requestLocationUpdates");
+            Log.d(LOG_ID, "requestLocationUpdates");
             return;
         }
 
         if (requestCode != RC_HANDLE_CAMERA_PERM) {
-            Log.d(TAG, "Got unexpected permission result: " + requestCode);
+            Log.d(LOG_ID, "Got unexpected permission result: " + requestCode);
             super.onRequestPermissionsResult(requestCode, permissions, grantResults);
             return;
         }
 
         if (grantResults.length != 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            Log.d(TAG, "Camera permission granted - initialize the camera source");
+            Log.d(LOG_ID, "Camera permission granted - initialize the camera source");
             // we have permission, so create the camerasource
             createCameraSource();
             return;
@@ -501,7 +502,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
             }
         }
 
-        Log.e(TAG, "Permission not granted: results len = " + grantResults.length +
+        Log.e(LOG_ID, "Permission not granted: results len = " + grantResults.length +
                 " Result code = " + (grantResults.length > 0 ? grantResults[0] : "(empty)"));
 
         DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
@@ -521,7 +522,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
 
     public void openRecommendations(boolean speech) {
         Intent intent = new Intent(TripActivity.this, RecommendationsActivity.class);
-        intent.putExtra("speech", speech);
+        intent.putExtra(Constants.extraSpeech, speech);
         startActivity(intent);
     }
 
@@ -643,19 +644,19 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
                     null, "1");
             tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
             tts.setSpeechRate((float) 0.8);
-            tts.speak("Coffee", TextToSpeech.QUEUE_ADD,
+            tts.speak(Constants.mappingCoffee, TextToSpeech.QUEUE_ADD,
                     null, "1");
-            tts.speak("Food", TextToSpeech.QUEUE_ADD,
+            tts.speak(Constants.mappingFood, TextToSpeech.QUEUE_ADD,
                     null, "1");
-            tts.speak("Bathroom", TextToSpeech.QUEUE_ADD,
+            tts.speak(Constants.mappingBathroom, TextToSpeech.QUEUE_ADD,
                     null, "1");
-            tts.speak("Sleep", TextToSpeech.QUEUE_ADD,
+            tts.speak(Constants.mappingSleep, TextToSpeech.QUEUE_ADD,
                     null, "1");
             tts.setSpeechRate((float) 1);
 
-            tts.speak("Stretch Legs", TextToSpeech.QUEUE_ADD,
+            tts.speak(Constants.mappingStretchLegs, TextToSpeech.QUEUE_ADD,
                     null, "1");
-            tts.speak("Switch Driver", TextToSpeech.QUEUE_ADD,
+            tts.speak(Constants.mappingSwitchDriver, TextToSpeech.QUEUE_ADD,
                     null, UTTERANCE_ID_BREAK);
         }
     }
@@ -743,9 +744,9 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         if (intent.getExtras() != null) {
-            String stopLocationName = intent.getExtras().getString("stopLocationName");
-            double stopLocationLong = intent.getExtras().getDouble("stopLocationLong");
-            double stopLocationLat = intent.getExtras().getDouble("stopLocationLat");
+            String stopLocationName = intent.getExtras().getString(Constants.extraStopLocationName);
+            double stopLocationLong = intent.getExtras().getDouble(Constants.extraStopLocationLong);
+            double stopLocationLat = intent.getExtras().getDouble(Constants.extraStopLocationLat);
 
             LatLng stopLocation = new LatLng(stopLocationLat, stopLocationLong);
             if (currentLocation != null) {
@@ -843,7 +844,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
                     showAllMarkers();
                     drawRoute(startingLatLng, destinationLatLng, 0);
                 }
-                Log.d("TripPal", "Location: " + startingLatLng);
+                Log.d(LOG_ID, "Location: " + startingLatLng);
             } else {
                 if (currentLocation != null) {
                     updateCurrentLocation(location);
@@ -853,7 +854,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
                             location.getLongitude());
                 }
 
-                Log.d("TripPal", "Location: " + startingLatLng);
+                Log.d(LOG_ID, "Location: " + startingLatLng);
             }
         }
 
