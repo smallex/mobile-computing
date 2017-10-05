@@ -1156,6 +1156,8 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
             if (fatigue.isHighRisk()) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(TripActivity
                         .this);
+                tts.speak("You have been driving for a while. Do you want to take a break?", TextToSpeech.QUEUE_ADD,
+                        null, "1");
                 builder.setTitle("Take a break?")
                         .setMessage("You have been driving for a while.\nDo you want to take a " +
                                 "break?")
