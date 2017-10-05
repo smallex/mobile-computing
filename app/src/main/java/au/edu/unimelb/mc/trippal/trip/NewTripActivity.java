@@ -19,6 +19,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.SeekBar;
@@ -108,6 +109,7 @@ public class NewTripActivity extends AppCompatActivity {
         ActionBar ab = getSupportActionBar();
         if (ab != null) {
             ab.setTitle(R.string.startNewTrip);
+            ab.setDisplayHomeAsUpEnabled(true);
         }
 
         // Open splash screen on first start
@@ -238,6 +240,17 @@ public class NewTripActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                finish();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void startVoiceOutput(String s, String id) {

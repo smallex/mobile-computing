@@ -43,6 +43,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -197,6 +198,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
             this.destinationName = extras.getString(Constants.extraDestinationName);
             if (ab != null) {
                 ab.setTitle(String.format(getString(R.string.tripTo), this.destinationName));
+                ab.setDisplayHomeAsUpEnabled(true);
             }
 
             double lat = extras.getDouble(Constants.extraDestinationLat);
@@ -253,6 +255,17 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
         });
 
         runRecognizerSetup();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                finish();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void initFatigue(Bundle extras) {

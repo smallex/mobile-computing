@@ -39,8 +39,6 @@ public class LoginActivity extends AppCompatActivity {
 
         googleButton = (GoogleSignInButton) findViewById(R.id.googleSignInButton);
         microsoftButton = (Button) findViewById(R.id.microsoftSigninButton);
-        toolbar = (Toolbar) findViewById(R.id.toolbar_login);
-        toolbar.setTitle("Login");
 
         try {
             mClient = new MobileServiceClient(AZURE_AUTHENTICATION_URL, this);

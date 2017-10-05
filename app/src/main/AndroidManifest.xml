@@ -40,27 +40,7 @@
         <activity
             android:name=".IntroActivity"
             android:label="TripPal" />
-        <activity
-            android:name=".trip.TripActivity"
-            android:icon="@drawable/icon"
-            android:label="TripPal"
-            android:screenOrientation="fullSensor" />
-        <activity
-            android:name=".recommendations.RecommendationsActivity"
-            android:label="@string/title_activity_recommendations"
-            android:parentActivityName=".trip.TripActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".trip.TripActivity" />
-        </activity>
-        <activity
-            android:name=".recommendations.RecommendationsDetailActivity"
-            android:label="@string/title_activity_recommendations_detail"
-            android:parentActivityName=".recommendations.RecommendationsActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".recommendations.RecommendationsActivity" />
-        </activity>
+
         <activity android:name="com.microsoft.windowsazure.mobileservices.authentication.RedirectUrlActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -73,9 +53,6 @@
                     android:scheme="trippal" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".trip.NewTripActivity"
-            android:label="TripPal" />
         <activity android:name=".RedirectActivity">
             <intent-filter>
                 <data
@@ -97,6 +74,41 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".trip.NewTripActivity"
+            android:label="TripPal"
+            android:parentActivityName=".trip.TripListActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".trip.TripListActivity" />
+        </activity>
+        <activity
+            android:name=".trip.TripActivity"
+            android:icon="@drawable/icon"
+            android:label="TripPal"
+            android:parentActivityName=".trip.NewTripActivity"
+            android:screenOrientation="fullSensor">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".trip.NewTripActivity" />
+        </activity>
+        <activity
+            android:name=".recommendations.RecommendationsActivity"
+            android:label="@string/title_activity_recommendations"
+            android:parentActivityName=".trip.TripActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".trip.TripActivity" />
+        </activity>
+        <activity
+            android:name=".recommendations.RecommendationsDetailActivity"
+            android:label="@string/title_activity_recommendations_detail"
+            android:parentActivityName=".recommendations.RecommendationsActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".recommendations.RecommendationsActivity" />
+        </activity>
+
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").

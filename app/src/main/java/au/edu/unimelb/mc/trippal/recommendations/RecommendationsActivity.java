@@ -166,7 +166,6 @@ public class RecommendationsActivity extends AppCompatActivity {
         }
     }
 
-
     private final AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> adapter, View v, int position, long arg3) {
