@@ -12,6 +12,7 @@ import android.preference.PreferenceManager;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.content.ContextCompat;
@@ -89,6 +90,22 @@ public class NewTripActivity extends AppCompatActivity {
     private EditText min;
     private SeekBar sleep;
 
+    private void startVoiceRecognitionIntent(int id, String label) {
+        Intent intent = new Intent(RecognizerIntent
+                .ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale
+                .getDefault());
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, label);
+
+        try {
+            startActivityForResult(intent, id);
+        } catch (ActivityNotFoundException a) {
+
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -155,6 +172,10 @@ public class NewTripActivity extends AppCompatActivity {
             }
         });
 
+        initializeTextToSpeech();
+    }
+
+    private void initializeTextToSpeech() {
         tts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
@@ -169,70 +190,23 @@ public class NewTripActivity extends AppCompatActivity {
                         @Override
                         public void onDone(String s) {
                             if (s.equals(UTTERANCE_ID_LOCATION)) {
-                                Intent intent = new Intent(RecognizerIntent
-                                        .ACTION_RECOGNIZE_SPEECH);
-                                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                                        RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-                                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale
-                                        .getDefault());
-                                intent.putExtra(RecognizerIntent.EXTRA_PROMPT, getString(R.string.whereTravel));
-
-                                try {
-                                    startActivityForResult(intent, REQ_CODE_SPEECH_INPUT_Location);
-                                } catch (ActivityNotFoundException a) {
-
-                                }
+                                startVoiceRecognitionIntent(REQ_CODE_SPEECH_INPUT_Location, getString(R.string.whereTravel));
                             }
                             if (s.equals(UTTERANCE_ID_FEELINGS)) {
-                                Intent intent = new Intent(RecognizerIntent
-                                        .ACTION_RECOGNIZE_SPEECH);
-                                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                                        RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-                                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale
-                                        .getDefault());
-                                intent.putExtra(RecognizerIntent.EXTRA_PROMPT, getString(R.string.howTired));
-
-                                try {
-                                    startActivityForResult(intent, REQ_CODE_SPEECH_INPUT_Feeling);
-                                } catch (ActivityNotFoundException a) {
-
-                                }
+                                startVoiceRecognitionIntent(REQ_CODE_SPEECH_INPUT_Feeling, getString(R.string.howTired));
                             }
                             if (s.equals(UTTERANCE_ID_TIME)) {
-                                Intent intent = new Intent(RecognizerIntent
-                                        .ACTION_RECOGNIZE_SPEECH);
-                                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                                        RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-                                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale
-                                        .getDefault());
-                                intent.putExtra(RecognizerIntent.EXTRA_PROMPT, getString(R.string.howLongSleep));
-
-                                try {
-                                    startActivityForResult(intent, REQ_CODE_SPEECH_INPUT_TIME);
-                                } catch (ActivityNotFoundException a) {
-
-                                }
+                                startVoiceRecognitionIntent(REQ_CODE_SPEECH_INPUT_TIME, getString(R.string.howLongSleep));
                             }
 
                             if (s.equals(UTTERANCE_ID_SLEEP)) {
-                                Intent intent = new Intent(RecognizerIntent
-                                        .ACTION_RECOGNIZE_SPEECH);
-                                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                                        RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-                                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale
-                                        .getDefault());
-                                intent.putExtra(RecognizerIntent.EXTRA_PROMPT, getString(R.string.howWasSleep));
-
-                                try {
-                                    startActivityForResult(intent, REQ_CODE_SPEECH_INPUT_Sleep);
-                                } catch (ActivityNotFoundException a) {
-
-                                }
+                                startVoiceRecognitionIntent(REQ_CODE_SPEECH_INPUT_Sleep, getString(R.string.howWasSleep));
                             }
                         }
 
                         @Override
                         public void onError(String s) {
+                            Log.d("error-tts", s);
                         }
                     });
                 }
@@ -387,67 +361,24 @@ public class NewTripActivity extends AppCompatActivity {
             }
         } else if (requestCode == REQ_CODE_SPEECH_INPUT_Location) {
             if (resultCode == RESULT_OK && null != data) {
+                // get output from speechrecognition and check the result
                 ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent
                         .EXTRA_RESULTS);
-
                 Log.d("resultLocation", result.get(0));
+
+                // check if result is only one word or consists of more than one word
                 Pattern pattern = Pattern.compile("\\s");
                 Matcher matcher = pattern.matcher(result.get(0));
                 boolean found = matcher.find();
+
+                // if more than one word make azure call to LUIS and extract Location from response
+                // otherwise just use the result as location
                 if (found) {
                     Uri builtUri = Uri.parse(AzureCall.url)
                             .buildUpon()
                             .appendQueryParameter("q", result.get(0))
                             .build();
-                    JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET,
-                            builtUri.toString(), null, new Response.Listener<JSONObject>() {
-                        @Override
-                        public void onResponse(JSONObject response) {
-                            try {
-                                JSONArray array = response.getJSONArray("entities");
-                                if (array.length() > 0) {
-                                    JSONObject location = array.getJSONObject(0);
-                                    String loc = location.getString("entity");
-                                    if (loc.isEmpty()) {
-                                        startVoiceOutput("I could not find the location", "1");
-                                        tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
-                                        startVoiceOutput("Please repeat your input", "1");
-                                    } else {
-                                        String output = loc.substring(0, 1).toUpperCase() + loc
-                                                .substring(1);
-                                        finalDestination = output;
-                                        address = getLatLongFromPlace(output);
-                                        destinationText.setText(output);
-
-                                        startVoiceOutput("How tired are you feeling right now",
-                                                "1");
-                                        tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
-                                        startVoiceOutput("Rate on a scale between 1 and 5", "1");
-                                        tts.playSilentUtterance(200, TextToSpeech.QUEUE_ADD, null);
-                                        startVoiceOutput("where one is not at all tired", "1");
-                                        tts.playSilentUtterance(100, TextToSpeech.QUEUE_ADD, null);
-                                        startVoiceOutput("and 5 is extremely tired",
-                                                UTTERANCE_ID_FEELINGS);
-                                    }
-                                } else {
-                                    startVoiceOutput("I could not find the location", "1");
-                                    tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
-                                    startVoiceOutput("Please repeat your input", "1");
-                                }
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }, new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            error.printStackTrace();
-                            Log.d("AzureCall", "Error: " + error.toString());
-                            startVoiceOutput("I could not find the location", "1");
-                            tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
-                            startVoiceOutput("Please repeat your input", "1");
-                        }
-                    });
+                    JsonObjectRequest jsObjRequest = getJsonObjectRequestForAzureCall(builtUri);
                     AzureCall azureCall = new AzureCall(this);
                     azureCall.sendRequest(jsObjRequest, result.get(0));
                 } else {
@@ -470,6 +401,9 @@ public class NewTripActivity extends AppCompatActivity {
                         .EXTRA_RESULTS);
                 Log.d("test", result.get(0));
 
+                // check result from speechrecognition if number between 1-5 set corresponding progress
+                // otherwise calculate levenshteindistance from result and number 1-5
+                // and choose to on with the smallest distance
                 if (result.get(0).equals("one") || result.get(0).equals("1")) {
                     currentDrowsiness.setProgress(0);
                 } else if (result.get(0).equals("two") || result.get(0).equals("2")) {
@@ -501,9 +435,12 @@ public class NewTripActivity extends AppCompatActivity {
             }
         } else if (requestCode == REQ_CODE_SPEECH_INPUT_TIME) {
             if (resultCode == RESULT_OK && null != data) {
+                // get result from speechrecognition of sleep time
                 ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent
                         .EXTRA_RESULTS);
                 String str = result.get(0);
+
+                // get only numbers of the result string
                 str = str.replaceAll("[^-?0-9]+", " ");
                 List<String> res = Arrays.asList(str.trim().split(" "));
                 if (!res.isEmpty()) {
@@ -514,6 +451,8 @@ public class NewTripActivity extends AppCompatActivity {
                         hours.setText(res.get(0).toString());
                         min.setText("00");
                     }
+
+                    // ask next question
                     startVoiceOutput("How was your sleep last night", "1");
                     tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
                     startVoiceOutput("Choose one of the following answers", "1");
@@ -525,7 +464,7 @@ public class NewTripActivity extends AppCompatActivity {
                     startVoiceOutput(" or Great", "1");
                     startVoiceOutput(" ", UTTERANCE_ID_SLEEP);
                 } else {
-                    //TODO No valid input
+
                 }
             }
         } else if (requestCode == REQ_CODE_SPEECH_INPUT_Sleep) {
@@ -534,6 +473,8 @@ public class NewTripActivity extends AppCompatActivity {
                         .EXTRA_RESULTS);
                 String res = result.get(0).toLowerCase();
                 Log.d("resultSleep", res);
+
+                // check if result was one of poor,normal or great if not choose closest on based on levensthein distance
                 if (res.contains("poor")) {
                     sleep.setProgress(0);
                 } else if (res.contains("normal")) {
@@ -562,11 +503,71 @@ public class NewTripActivity extends AppCompatActivity {
                         sleep.setProgress(100);
                     }
                 }
+
                 startNewTripButton.setEnabled(true);
                 startNewTripButton.setBackgroundTintList(ColorStateList.valueOf(ContextCompat
                         .getColor(this, R.color.primary)));
             }
         }
+    }
+
+    @NonNull
+    private JsonObjectRequest getJsonObjectRequestForAzureCall(Uri builtUri) {
+        return new JsonObjectRequest(Request.Method.GET,
+                builtUri.toString(), null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+                    JSONArray array = response.getJSONArray("entities");
+                    JSONObject location = array.getJSONObject(0);
+                    String loc = location.getString("entity");
+
+                    // if location is found ask next question
+                    // otherwise ask user to repat input
+                    if ((array.length() > 0) && !loc.isEmpty()) {
+
+
+                        String output = loc.substring(0, 1).toUpperCase() + loc
+                                .substring(1);
+                        finalDestination = output;
+                        address = getLatLongFromPlace(output);
+                        destinationText.setText(output);
+
+                        // destination was found now ask for next input
+                        startVoiceOutput("How tired are you feeling right now",
+                                "1");
+                        tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
+                        startVoiceOutput("Rate on a scale between 1 and 5", "1");
+                        tts.playSilentUtterance(200, TextToSpeech.QUEUE_ADD, null);
+                        startVoiceOutput("where one is not at all tired", "1");
+                        tts.playSilentUtterance(100, TextToSpeech.QUEUE_ADD, null);
+                        startVoiceOutput("and 5 is extremely tired",
+                                UTTERANCE_ID_FEELINGS);
+
+                    } else {
+                        startVoiceOutput("I could not find the location", "1");
+                        tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
+                        startVoiceOutput("Please repeat your input", "1");
+                    }
+                } catch (
+                        JSONException e)
+
+                {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener()
+
+        {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                error.printStackTrace();
+                Log.d("AzureCall", "Error: " + error.toString());
+                startVoiceOutput("I could not find the location", "1");
+                tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
+                startVoiceOutput("Please repeat your input", "1");
+            }
+        });
     }
 
     public void loadSleepData(View view) {

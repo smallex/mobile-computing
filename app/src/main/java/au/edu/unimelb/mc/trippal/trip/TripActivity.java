@@ -225,6 +225,12 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
             requestCameraPermission();
         }
 
+        initializeTextToSpeech();
+
+        runRecognizerSetup();
+    }
+
+    private void initializeTextToSpeech() {
         tts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
@@ -251,8 +257,6 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
                 }
             }
         });
-
-        runRecognizerSetup();
     }
 
     private void initFatigue(Bundle extras) {
@@ -636,6 +640,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
     @Override
     public void onResult(Hypothesis hypothesis) {
         if (hypothesis != null) {
+            // if keyword was spoken go to next activity and ask user what he wants to do
             String text = hypothesis.getHypstr().toLowerCase();
             tts.speak("What are you planning to do", TextToSpeech.QUEUE_ADD,
                     null, "1");
@@ -1058,11 +1063,22 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
                         try {
                             Uri notification = RingtoneManager.getDefaultUri(RingtoneManager
                                     .TYPE_ALARM);
-                            Ringtone r = RingtoneManager.getRingtone(getApplicationContext(),
+                            final Ringtone r = RingtoneManager.getRingtone(getApplicationContext(),
                                     notification);
                             r.play();
-                            wait(2000);
-                            r.stop();
+                            Thread th = new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        Thread.sleep(5000);
+                                        if (r.isPlaying())
+                                            r.stop();   // for stopping the ringtone
+                                    } catch (InterruptedException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            });
+                            th.start();
                             tts.speak("Attention!", TextToSpeech.QUEUE_ADD,
                                     null, "1");
                             tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
