@@ -240,6 +240,8 @@ public class RecommendationsDetailActivity extends AppCompatActivity implements 
                                 Toast.makeText(mActivity, String.format(getString(R.string.noPlacesInRadius)
                                         , MAX_RADIUS), Toast.LENGTH_LONG).show();
                                 if (getIntent().getExtras().getBoolean(Constants.extraSpeech)) {
+
+                                    // initialize text to speech if activity was opened because of speech input
                                     tts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
                                         @Override
                                         public void onInit(int status) {
@@ -287,6 +289,7 @@ public class RecommendationsDetailActivity extends AppCompatActivity implements 
                                         @Override
                                         public void onDone(String s) {
                                             if (s.equals(UTTERANCE_ID_LOC)) {
+                                                // open speech recognition intent
                                                 Intent intent = new Intent(RecognizerIntent
                                                         .ACTION_RECOGNIZE_SPEECH);
                                                 intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
@@ -306,6 +309,7 @@ public class RecommendationsDetailActivity extends AppCompatActivity implements 
                                         public void onError(String s) {
                                         }
                                     });
+                                    // read all available locations to user
                                     tts.speak(getString(R.string.TTSLocationsAvailable), TextToSpeech.QUEUE_ADD,
                                             null, "1");
                                     tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
@@ -319,7 +323,7 @@ public class RecommendationsDetailActivity extends AppCompatActivity implements 
                                             null, UTTERANCE_ID_LOC);
 
                                 } else {
-                                    Log.d("errorrrr", String.valueOf(status));
+                                    Log.d("error-tts", String.valueOf(status));
                                 }
                             }
                         });
@@ -351,13 +355,11 @@ public class RecommendationsDetailActivity extends AppCompatActivity implements 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQ_CODE_SPEECH_INPUT_Location) {
             if (resultCode == RESULT_OK && null != data) {
+
+                // get result from speechrecognition and choose the closest to the possibe answers one based on levensthein distance
                 ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent
                         .EXTRA_RESULTS);
                 String res = result.get(0).toLowerCase();
-                Pattern pattern = Pattern.compile("\\s");
-                Matcher matcher = pattern.matcher(res);
-                boolean found = matcher.find();
-
                 Levenshtein l = new Levenshtein();
                 Map<String, Double> results = new HashMap<>();
                 for (int i = 0; i < mDataSet.size(); i++) {

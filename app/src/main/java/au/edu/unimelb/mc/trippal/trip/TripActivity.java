@@ -93,10 +93,10 @@ import java.util.concurrent.TimeUnit;
 
 import au.edu.unimelb.mc.trippal.Constants;
 import au.edu.unimelb.mc.trippal.R;
-import au.edu.unimelb.mc.trippal.recommendations.RecommendationsActivity;
 import au.edu.unimelb.mc.trippal.backend.CreateTripTask;
 import au.edu.unimelb.mc.trippal.backend.TripEntity;
 import au.edu.unimelb.mc.trippal.backend.UserUtils;
+import au.edu.unimelb.mc.trippal.recommendations.RecommendationsActivity;
 import edu.cmu.pocketsphinx.Assets;
 import edu.cmu.pocketsphinx.Hypothesis;
 import edu.cmu.pocketsphinx.RecognitionListener;
@@ -227,6 +227,12 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
             requestCameraPermission();
         }
 
+        initializeTextToSpeech();
+
+        runRecognizerSetup();
+    }
+
+    private void initializeTextToSpeech() {
         tts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
@@ -253,8 +259,6 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
                 }
             }
         });
-
-        runRecognizerSetup();
     }
 
     @Override
@@ -340,8 +344,6 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
                 .LOCATION_SERVICE);
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 0, new
                 MyLocationListenerGPS());
-        //locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 2000, 0, new
-        //      MyLocationListenerGPS());
         Log.d(LOG_ID, "Requesting current location");
     }
 
@@ -649,6 +651,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
     @Override
     public void onResult(Hypothesis hypothesis) {
         if (hypothesis != null) {
+            // if keyword was spoken go to next activity and ask user what he wants to do
             String text = hypothesis.getHypstr().toLowerCase();
             tts.speak("What are you planning to do", TextToSpeech.QUEUE_ADD,
                     null, "1");
@@ -872,7 +875,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
         }
 
         private void checkIfAtDestination(Location location) {
-            final float THRESHOLD_DISTANCE = 100.0f;
+            final float THRESHOLD_DISTANCE = 50.0f;
             float[] distance = new float[]{0};
             Location.distanceBetween(location.getLatitude(),
                     location.getLongitude(), destinationLatLng.latitude, destinationLatLng
@@ -926,7 +929,8 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
             mMap.animateCamera(update, 2000, null);
             distanceTraveledMeters += distance(currentLocation, new LatLng(location.getLatitude()
                     , location.getLongitude()));
-            distanceText.setText(String.format("%.3f", distanceTraveledMeters / 1000.0) +
+            distanceText.setText(String.format("%.3f", distanceTraveledMeters / 1000.0).replace
+                    (",", ".") +
                     " km");
             currentLocation = new LatLng(location.getLatitude(),
                     location.getLongitude());
@@ -1071,11 +1075,22 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
                         try {
                             Uri notification = RingtoneManager.getDefaultUri(RingtoneManager
                                     .TYPE_ALARM);
-                            Ringtone r = RingtoneManager.getRingtone(getApplicationContext(),
+                            final Ringtone r = RingtoneManager.getRingtone(getApplicationContext(),
                                     notification);
                             r.play();
-                            wait(2000);
-                            r.stop();
+                            Thread th = new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        Thread.sleep(5000);
+                                        if (r.isPlaying())
+                                            r.stop();   // for stopping the ringtone
+                                    } catch (InterruptedException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            });
+                            th.start();
                             tts.speak("Attention!", TextToSpeech.QUEUE_ADD,
                                     null, "1");
                             tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);

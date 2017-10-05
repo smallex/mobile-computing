@@ -119,6 +119,8 @@ public class RecommendationsActivity extends AppCompatActivity {
                         .EXTRA_RESULTS);
                 String res = result.get(0).toLowerCase();
                 Log.d("resultSleep", res);
+
+                // check if speechrecognition result contains keywords if not choose closest one based on levensthein distance
                 if (res.contains(Constants.mappingCoffee)) {
                     goToSelection(0, true);
                 } else if (res.contains(Constants.mappingFood)) {
