@@ -6,7 +6,7 @@ import au.edu.unimelb.mc.trippal.R;
  * Created by alexandrafritzen on 14/09/2017.
  */
 
-public enum RecommendationMapping {
+enum RecommendationMapping {
     COFFEE("coffee", new PlaceType[]{PlaceType.BAKERY, PlaceType.CAFE}, R.drawable.coffee),
     FOOD("food", new PlaceType[]{PlaceType.BAKERY, PlaceType.CAFE, PlaceType.GAS_STATION, PlaceType.MEAL_TAKEAWAY, PlaceType.RESTAURANT}, R.drawable.food),
     BATHROOM("bathroom", new PlaceType[]{PlaceType.CAFE, PlaceType.GAS_STATION, PlaceType.RESTAURANT}, R.drawable.bathroom),

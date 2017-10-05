@@ -21,4 +21,6 @@
     <string name="TTSLocationsAvailable">The following locations are available</string>
     <string name="TTSChooseActivity">Choose one of these activities now!</string>
     <string name="recommendationName">%1$s (%2$d m)</string>
+    <string name="WhatToDo">What to Do?</string>
+    <string name="whichActivity">Which activity do you choose?</string>
 </resources>

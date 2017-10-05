@@ -33,7 +33,6 @@ import info.debatty.java.stringsimilarity.Levenshtein;
  */
 
 public class RecommendationsActivity extends AppCompatActivity {
-    private static final String LOG_ID = "RecommendationsActivity";
     private ArrayList<RecommendationMapping> mDataSet;
     private TextToSpeech tts;
     private static final String UTTERANCE_ID_ACT = "666";
@@ -43,7 +42,6 @@ public class RecommendationsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recommendations);
         Log.d("take", String.valueOf(getIntent().getExtras().getBoolean("speech")));
-
 
         // Show toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_recommendations);
@@ -55,7 +53,7 @@ public class RecommendationsActivity extends AppCompatActivity {
         ActionBar ab = getSupportActionBar();
         if (ab != null) {
             ab.setDisplayHomeAsUpEnabled(true);
-            ab.setTitle("WHAT TO DO?");
+            ab.setTitle(R.string.WhatToDo);
         }
 
         // Initialize mappings
@@ -80,7 +78,7 @@ public class RecommendationsActivity extends AppCompatActivity {
                     RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
             intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale
                     .getDefault());
-            intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Which activity do you choose");
+            intent.putExtra(RecognizerIntent.EXTRA_PROMPT, getString(R.string.whichActivity));
 
             try {
                 startActivityForResult(intent, REQ_CODE_SPEECH_INPUT_ACT);
@@ -103,8 +101,6 @@ public class RecommendationsActivity extends AppCompatActivity {
     }
 
     public void goToSelection(int position, boolean speech) {
-
-
         // Get corresponding RecommendationMapping item
         RecommendationMapping mapping = mDataSet.get(position);
 
@@ -145,7 +141,6 @@ public class RecommendationsActivity extends AppCompatActivity {
                     results.put("stretch legs", l.distance(res, "stretch legs"));
                     results.put("switch driver", l.distance(res, "switch driver"));
 
-
                     Map.Entry<String, Double> min = null;
                     for (Map.Entry<String, Double> entry : results.entrySet()) {
                         if (min == null || min.getValue() > entry.getValue()) {
@@ -185,7 +180,12 @@ public class RecommendationsActivity extends AppCompatActivity {
         }
     };
 
-    public class RecommendationsAdapter extends BaseAdapter {
+    private static class ViewHolder {
+        private TextView titleTextView;
+        private ImageView imageView;
+    }
+
+    private class RecommendationsAdapter extends BaseAdapter {
         private final Context mContext;
         private final LayoutInflater mInflater;
         private ArrayList<RecommendationMapping> mDataSource;
@@ -213,17 +213,28 @@ public class RecommendationsActivity extends AppCompatActivity {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            View rowView = mInflater.inflate(R.layout.item_recommendations, parent, false);
+            ViewHolder holder;
 
+            // Inflate new view or reuse old one
+            if (convertView == null) {
+                convertView = mInflater.inflate(R.layout.item_recommendations,
+                        parent, false);
+                holder = new ViewHolder();
+                holder.titleTextView = (TextView) convertView.findViewById(R.id.recommendation_label);
+                holder.imageView = (ImageView) convertView.findViewById(R.id.recommendation_icon);
+                convertView.setTag(holder);
+            } else {
+                holder = (ViewHolder) convertView.getTag();
+            }
+
+            // The mapping we're talking about
             RecommendationMapping mapping = mDataSource.get(position);
 
-            TextView titleTextView = (TextView) rowView.findViewById(R.id.recommendation_label);
-            titleTextView.setText(mapping.getActivity().toUpperCase());
+            // Set title and icon
+            holder.titleTextView.setText(mapping.getActivity().toUpperCase());
+            holder.imageView.setImageResource(mapping.getIcon());
 
-            ImageView imageView = (ImageView) rowView.findViewById(R.id.recommendation_icon);
-            imageView.setImageResource(mapping.getIcon());
-
-            return rowView;
+            return convertView;
         }
     }
 }
