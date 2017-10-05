@@ -16,4 +16,9 @@
     <string name="splash_screen_mic">Talk to the assistant to select options.</string>
     <string name="splash_screen_final_title">Safe Travels</string>
     <string name="splash_screen_final">Have fun!</string>
+    <string name="enableLocationServices">Please enable location services to use the break recommendation feature.</string>
+    <string name="noPlacesInRadius">There are no points of interest in a %1$d meter radius.</string>
+    <string name="TTSLocationsAvailable">The following locations are available</string>
+    <string name="TTSChooseActivity">Choose one of these activities now!</string>
+    <string name="recommendationName">%1$s (%2$d m)</string>
 </resources>

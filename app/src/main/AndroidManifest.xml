@@ -47,7 +47,7 @@
             android:label="TripPal"
             android:screenOrientation="fullSensor" />
         <activity
-            android:name=".recommendations.Recommendations"
+            android:name=".recommendations.RecommendationsActivity"
             android:label="@string/title_activity_recommendations"
             android:parentActivityName=".trip.TripActivity">
             <meta-data
@@ -56,12 +56,12 @@
         </activity>
 
         <activity
-            android:name=".recommendations.RecommendationsDetail"
+            android:name=".recommendations.RecommendationsDetailActivity"
             android:label="@string/title_activity_recommendations_detail"
-            android:parentActivityName=".recommendations.Recommendations">
+            android:parentActivityName=".recommendations.RecommendationsActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".recommendations.Recommendations" />
+                android:value=".recommendations.RecommendationsActivity" />
         </activity>
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.

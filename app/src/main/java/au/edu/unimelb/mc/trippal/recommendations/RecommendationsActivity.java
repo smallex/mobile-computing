@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
-import android.speech.tts.UtteranceProgressListener;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -33,14 +32,12 @@ import info.debatty.java.stringsimilarity.Levenshtein;
  * Created by alexandrafritzen on 12/09/2017.
  */
 
-public class Recommendations extends AppCompatActivity {
+public class RecommendationsActivity extends AppCompatActivity {
     private static final String LOG_ID = "RecommendationsActivity";
     private ArrayList<RecommendationMapping> mDataSet;
     private TextToSpeech tts;
     private static final String UTTERANCE_ID_ACT = "666";
     private int REQ_CODE_SPEECH_INPUT_ACT = 600;
-
-
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,7 +73,7 @@ public class Recommendations extends AppCompatActivity {
         gridView.setAdapter(adapter);
         gridView.setOnItemClickListener(onItemClickListener);
 
-        if (getIntent().getExtras().getBoolean("speech")==true) {
+        if (getIntent().getExtras().getBoolean("speech") == true) {
             Intent intent = new Intent(RecognizerIntent
                     .ACTION_RECOGNIZE_SPEECH);
             intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
@@ -93,9 +90,6 @@ public class Recommendations extends AppCompatActivity {
         }
 
     }
-
-
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -114,10 +108,10 @@ public class Recommendations extends AppCompatActivity {
         // Get corresponding RecommendationMapping item
         RecommendationMapping mapping = mDataSet.get(position);
 
-        // Open RecommendationsDetail page for the mapping
-        Intent i = new Intent(Recommendations.this, RecommendationsDetail.class);
+        // Open RecommendationsDetailActivity page for the mapping
+        Intent i = new Intent(RecommendationsActivity.this, RecommendationsDetailActivity.class);
         i.putExtra("MAPPING", mapping);
-        i.putExtra("speech",speech);
+        i.putExtra("speech", speech);
         startActivity(i);
     }
 
@@ -128,20 +122,20 @@ public class Recommendations extends AppCompatActivity {
                 ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent
                         .EXTRA_RESULTS);
                 String res = result.get(0).toLowerCase();
-                Log.d("resultSleep",res);
+                Log.d("resultSleep", res);
                 if (res.contains("coffee")) {
-                    goToSelection(0,true);
-                } else if(res.contains("food")){
-                   goToSelection(1,true);
-                } else if(res.contains("bathroom")){
-                    goToSelection(2,true);
-                }else if(res.contains("sleep")){
-                    goToSelection(3,true);
-                } else if(res.contains("stretch legs")){
-                    goToSelection(4,true);
-                }else if(res.contains("switch driver")){
-                    goToSelection(5,true);
-                }else {
+                    goToSelection(0, true);
+                } else if (res.contains("food")) {
+                    goToSelection(1, true);
+                } else if (res.contains("bathroom")) {
+                    goToSelection(2, true);
+                } else if (res.contains("sleep")) {
+                    goToSelection(3, true);
+                } else if (res.contains("stretch legs")) {
+                    goToSelection(4, true);
+                } else if (res.contains("switch driver")) {
+                    goToSelection(5, true);
+                } else {
                     Levenshtein l = new Levenshtein();
                     Map<String, Double> results = new HashMap<>();
                     results.put("coffee", l.distance(res, "coffee"));
@@ -160,17 +154,17 @@ public class Recommendations extends AppCompatActivity {
                     }
                     res = min.getKey();
                     if (res.contains("coffee")) {
-                        goToSelection(0,true);
-                    } else if(res.contains("food")){
-                        goToSelection(1,true);
-                    } else if(res.contains("bathroom")){
-                        goToSelection(2,true);
-                    }else if(res.contains("sleep")){
-                        goToSelection(3,true);
-                    } else if(res.contains("stretch legs")){
-                        goToSelection(4,true);
-                    }else if(res.contains("switch driver")){
-                        goToSelection(5,true);
+                        goToSelection(0, true);
+                    } else if (res.contains("food")) {
+                        goToSelection(1, true);
+                    } else if (res.contains("bathroom")) {
+                        goToSelection(2, true);
+                    } else if (res.contains("sleep")) {
+                        goToSelection(3, true);
+                    } else if (res.contains("stretch legs")) {
+                        goToSelection(4, true);
+                    } else if (res.contains("switch driver")) {
+                        goToSelection(5, true);
                     }
                 }
             }
@@ -184,8 +178,8 @@ public class Recommendations extends AppCompatActivity {
             // Get corresponding RecommendationMapping item
             RecommendationMapping mapping = mDataSet.get(position);
 
-            // Open RecommendationsDetail page for the mapping
-            Intent i = new Intent(Recommendations.this, RecommendationsDetail.class);
+            // Open RecommendationsDetailActivity page for the mapping
+            Intent i = new Intent(RecommendationsActivity.this, RecommendationsDetailActivity.class);
             i.putExtra("MAPPING", mapping);
             startActivity(i);
         }

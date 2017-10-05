@@ -91,7 +91,7 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import au.edu.unimelb.mc.trippal.R;
-import au.edu.unimelb.mc.trippal.recommendations.Recommendations;
+import au.edu.unimelb.mc.trippal.recommendations.RecommendationsActivity;
 import edu.cmu.pocketsphinx.Assets;
 import edu.cmu.pocketsphinx.Hypothesis;
 import edu.cmu.pocketsphinx.RecognitionListener;
@@ -517,7 +517,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
     }
 
     public void openRecommendations(boolean speech) {
-        Intent intent = new Intent(TripActivity.this, Recommendations.class);
+        Intent intent = new Intent(TripActivity.this, RecommendationsActivity.class);
         intent.putExtra("speech", speech);
         startActivity(intent);
     }
