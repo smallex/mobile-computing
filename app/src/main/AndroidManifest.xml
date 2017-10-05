@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:tools="http://schemas.android.com/tools"
           package="au.edu.unimelb.mc.trippal"
           android:installLocation="auto"
           android:versionCode="1"
@@ -29,7 +30,8 @@
         android:hardwareAccelerated="true"
         android:icon="@drawable/icon"
         android:label="TripPal"
-        android:theme="@style/MyTheme">
+        android:theme="@style/MyTheme"
+        tools:replace="android:allowBackup">
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version"/>
@@ -61,6 +63,18 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".recommendations.Recommendations"/>
         </activity>
+        <activity android:name="com.microsoft.windowsazure.mobileservices.authentication.RedirectUrlActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+
+                <data
+                    android:host="easyauth.callback"
+                    android:scheme="trippal"/>
+            </intent-filter>
+        </activity>
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -91,6 +105,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".trip.TripListActivity">
+        </activity>
+        <activity android:name=".LoginActivity">
             <intent-filter android:label="TripPal">
                 <action android:name="android.intent.action.MAIN"/>
 

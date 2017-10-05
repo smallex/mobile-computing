@@ -7,6 +7,9 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ListView;
 
+import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
+import com.tapadoo.alerter.Alerter;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +22,7 @@ public class TripListActivity extends AppCompatActivity {
     private ListView tripListView;
     private Toolbar toolbar;
     private TripListAdapter adapter;
+    private MobileServiceClient mClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +36,12 @@ public class TripListActivity extends AppCompatActivity {
 
         tripListView = (ListView) findViewById(R.id.trip_list_view);
         tripListView.setAdapter(adapter);
+
+        Intent intent = getIntent();
+        if (intent != null && intent.getBooleanExtra("loginSuccess", false)) {
+            Alerter.create(this).setText("Login successful!").setBackgroundColorRes(R.color
+                    .accent).show();
+        }
 
         new QueryTask(this).execute();
     }

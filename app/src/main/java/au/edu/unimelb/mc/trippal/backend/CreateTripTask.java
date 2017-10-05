@@ -14,9 +14,8 @@ import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 
 /**
- * Created by Paul Kuznecov on 03.10.2017.
+ * AsyncTask for creating a TripEntity in Azure Table Storage
  */
-
 public class CreateTripTask extends AsyncTask<String, Void, Void> {
     public static final String storageConnectionString = "DefaultEndpointsProtocol=https;" +
             "AccountName=trippal;AccountKey=TwfLw2eTaBCJ6gKTRsWOhWZRtFnkSQpjxR6/MCvd+ANNtHMg" +

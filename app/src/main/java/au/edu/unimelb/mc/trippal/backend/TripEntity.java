@@ -17,9 +17,12 @@ public class TripEntity extends TableServiceEntity {
     private String duration;
     private String distance;
 
-    public TripEntity() {
-        this.partitionKey = "test";
+    public TripEntity(String userId) {
+        this.partitionKey = userId;
         this.rowKey = UUID.randomUUID().toString();
+    }
+
+    public TripEntity() {
     }
 
     public void setStartLocation(LatLng location) {

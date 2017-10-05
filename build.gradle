@@ -21,3 +21,7 @@ allprojects {
         }
     }
 }
+
+configurations.all {
+    resolutionStrategy.force 'com.google.guava:guava:20.0'
+}

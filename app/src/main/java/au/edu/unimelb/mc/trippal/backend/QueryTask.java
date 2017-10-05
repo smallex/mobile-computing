@@ -33,7 +33,10 @@ public class QueryTask extends AsyncTask<String, Void, List<TripEntity>> {
             CloudTable table = tableClient.getTableReference("trips");
             table.createIfNotExists();
 
-            TableQuery<TripEntity> query = TableQuery.from(TripEntity.class);
+            String userId = UserUtils.getUserId(tripListActivity);
+            String partitionFilter = TableQuery.generateFilterCondition(
+                    "PartitionKey", TableQuery.QueryComparisons.EQUAL, userId);
+            TableQuery<TripEntity> query = TableQuery.from(TripEntity.class).where(partitionFilter);
             for (TripEntity tripEntity : table.execute(query)) {
                 tripEntities.add(tripEntity);
             }
