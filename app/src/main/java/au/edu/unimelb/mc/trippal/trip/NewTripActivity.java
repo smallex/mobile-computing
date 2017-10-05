@@ -271,7 +271,7 @@ public class NewTripActivity extends AppCompatActivity {
         final String accessToken = bundle.getString("accessToken");
         String userID = bundle.getString("userID");
 
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-DD-mm");
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         // Instantiate the RequestQueue.
         RequestQueue queue = Volley.newRequestQueue(this);
         String url = "https://api.fitbit.com/1.2/user/" + userID +

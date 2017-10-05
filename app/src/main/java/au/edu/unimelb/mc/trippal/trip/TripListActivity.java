@@ -6,6 +6,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.tapadoo.alerter.Alerter;
@@ -21,6 +23,8 @@ public class TripListActivity extends AppCompatActivity {
 
     private ListView tripListView;
     private Toolbar toolbar;
+    private TextView noTripsText;
+    private ProgressBar progress;
     private TripListAdapter adapter;
     private MobileServiceClient mClient;
 
@@ -29,6 +33,8 @@ public class TripListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_trip_list);
 
+        noTripsText = (TextView) findViewById(R.id.no_trip_text);
+        progress = (ProgressBar) findViewById(R.id.trip_list_progress);
         toolbar = (Toolbar) findViewById(R.id.toolbar_trip_list);
         toolbar.setTitle("Your Trips");
         adapter = new TripListAdapter(this, R.layout
@@ -40,7 +46,7 @@ public class TripListActivity extends AppCompatActivity {
         Intent intent = getIntent();
         if (intent != null && intent.getBooleanExtra("loginSuccess", false)) {
             Alerter.create(this).setText("Login successful!").setBackgroundColorRes(R.color
-                    .accent).show();
+                    .accent).enableIconPulse(false).setDuration(500).show();
         }
 
         new QueryTask(this).execute();
@@ -49,6 +55,10 @@ public class TripListActivity extends AppCompatActivity {
     public void loadTrips(List<TripEntity> tripEntities) {
         adapter.clear();
         adapter.addAll(tripEntities);
+        progress.setVisibility(View.GONE);
+        if (tripEntities.isEmpty()) {
+            noTripsText.setVisibility(View.VISIBLE);
+        }
     }
 
     public void addTrip(View view) {
