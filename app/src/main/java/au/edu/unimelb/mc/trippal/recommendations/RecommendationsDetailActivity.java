@@ -313,7 +313,7 @@ public class RecommendationsDetailActivity extends AppCompatActivity implements 
                                     tts.speak(getString(R.string.TTSLocationsAvailable), TextToSpeech.QUEUE_ADD,
                                             null, "1");
                                     tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
-                                    for (int i = 0; i < 5; i++) {
+                                    for (int i = 0; i < mDataSet.size(); i++) {
                                         tts.speak(mDataSet.get(i).getName(), TextToSpeech.QUEUE_ADD,
                                                 null, "1");
                                         tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
@@ -360,9 +360,15 @@ public class RecommendationsDetailActivity extends AppCompatActivity implements 
                 ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent
                         .EXTRA_RESULTS);
                 String res = result.get(0).toLowerCase();
+
+                int countItems = mDataSet.size();
+                if (countItems>5) {
+                    countItems = 5;
+                }
+
                 Levenshtein l = new Levenshtein();
                 Map<String, Double> results = new HashMap<>();
-                for (int i = 0; i < 5; i++) {
+                for (int i = 0; i < countItems; i++) {
                     results.put(mDataSet.get(i).getName().toLowerCase(), l.distance(res, mDataSet.get(i).getName().toLowerCase()));
                 }
 
@@ -375,7 +381,7 @@ public class RecommendationsDetailActivity extends AppCompatActivity implements 
 
                 res = min.getKey();
                 int loc = 0;
-                for (int i = 0; i < 5; i++) {
+                for (int i = 0; i < countItems; i++) {
                     if (res.equals(mDataSet.get(i).getName().toLowerCase())) {
                         loc = i;
                     }
