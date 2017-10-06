@@ -916,7 +916,6 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
             }
             if (userRouteLine == null) {
                 initUserPolyline();
-                mMap.animateCamera(CameraUpdateFactory.zoomTo(15.0f));
             }
             LatLng locationLatLng = new LatLng(location.getLatitude(), location
                     .getLongitude());
