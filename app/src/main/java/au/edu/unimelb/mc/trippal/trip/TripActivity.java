@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
@@ -790,6 +791,16 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
         drawStopMarkers();
         showAllMarkers();
         saveTrip();
+        playButton.setImageResource(R.drawable.ic_check_white_48dp);
+        playButton.setBackgroundTintList(ColorStateList.valueOf(ContextCompat
+                .getColor(this, R.color.primary)));
+        playButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(TripActivity.this, TripListActivity.class);
+                TripActivity.this.startActivity(intent);
+            }
+        });
     }
 
     private void saveTrip() {
@@ -1086,11 +1097,15 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
                                             r.stop();
                                             tts.speak("Attention!", TextToSpeech.QUEUE_ADD,
                                                     null, "1");
-                                            tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
-                                            tts.speak("Your eyes were closed for a while", TextToSpeech.QUEUE_ADD,
+                                            tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD,
+                                                    null);
+                                            tts.speak("Your eyes were closed for a while",
+                                                    TextToSpeech.QUEUE_ADD,
                                                     null, "1");
-                                            tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
-                                            tts.speak("Please pull over and make a break", TextToSpeech.QUEUE_ADD,
+                                            tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD,
+                                                    null);
+                                            tts.speak("Please pull over and make a break",
+                                                    TextToSpeech.QUEUE_ADD,
                                                     null, "1");// for stopping the ringtone
                                         }
                                     } catch (InterruptedException e) {
@@ -1099,7 +1114,6 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
                                 }
                             });
                             th.start();
-
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -1157,7 +1171,8 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
             if (fatigue.isHighRisk()) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(TripActivity
                         .this);
-                tts.speak("You have been driving for a while. Do you want to take a break?", TextToSpeech.QUEUE_ADD,
+                tts.speak("You have been driving for a while. Do you want to take a break?",
+                        TextToSpeech.QUEUE_ADD,
                         null, "1");
                 builder.setTitle("Take a break?")
                         .setMessage("You have been driving for a while.\nDo you want to take a " +
