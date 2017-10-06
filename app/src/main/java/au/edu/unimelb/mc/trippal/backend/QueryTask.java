@@ -10,7 +10,10 @@ import com.microsoft.azure.storage.table.TableQuery;
 
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import au.edu.unimelb.mc.trippal.trip.TripListActivity;
@@ -40,6 +43,12 @@ public class QueryTask extends AsyncTask<String, Void, List<TripEntity>> {
             for (TripEntity tripEntity : table.execute(query)) {
                 tripEntities.add(tripEntity);
             }
+            Collections.sort(tripEntities, new Comparator<TripEntity>() {
+                @Override
+                public int compare(TripEntity t1, TripEntity t2) {
+                    return t2.getTripDate().compareTo(t1.getTripDate());
+                }
+            });
         } catch (URISyntaxException e) {
             e.printStackTrace();
         } catch (InvalidKeyException e) {
