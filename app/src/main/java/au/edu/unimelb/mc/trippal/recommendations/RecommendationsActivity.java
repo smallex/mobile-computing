@@ -35,8 +35,6 @@ import info.debatty.java.stringsimilarity.Levenshtein;
 
 public class RecommendationsActivity extends AppCompatActivity {
     private ArrayList<RecommendationMapping> mDataSet;
-    private TextToSpeech tts;
-    private static final String UTTERANCE_ID_ACT = "666";
     private int REQ_CODE_SPEECH_INPUT_ACT = 600;
 
     protected void onCreate(Bundle savedInstanceState) {

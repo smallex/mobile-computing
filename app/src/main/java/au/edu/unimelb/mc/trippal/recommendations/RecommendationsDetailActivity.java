@@ -309,11 +309,15 @@ public class RecommendationsDetailActivity extends AppCompatActivity implements 
                                         public void onError(String s) {
                                         }
                                     });
+                                    int countItems = mDataSet.size();
+                                    if (countItems>6) {
+                                        countItems = 6;
+                                    }
                                     // read all available locations to user
                                     tts.speak(getString(R.string.TTSLocationsAvailable), TextToSpeech.QUEUE_ADD,
                                             null, "1");
                                     tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
-                                    for (int i = 0; i < mDataSet.size(); i++) {
+                                    for (int i = 0; i <countItems; i++) {
                                         tts.speak(mDataSet.get(i).getName(), TextToSpeech.QUEUE_ADD,
                                                 null, "1");
                                         tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
@@ -362,8 +366,8 @@ public class RecommendationsDetailActivity extends AppCompatActivity implements 
                 String res = result.get(0).toLowerCase();
 
                 int countItems = mDataSet.size();
-                if (countItems>5) {
-                    countItems = 5;
+                if (countItems>6) {
+                    countItems = 6;
                 }
 
                 Levenshtein l = new Levenshtein();
@@ -605,7 +609,15 @@ public class RecommendationsDetailActivity extends AppCompatActivity implements 
             }
         }
     }
+
+    @Override
+    protected void onDestroy() {
+        tts.stop();
+        super.onDestroy();
+    }
 }
+
+
 
 class UriFormat {
     private StringBuilder builder = new StringBuilder();

@@ -598,6 +598,7 @@ public class NewTripActivity extends AppCompatActivity {
 
     @Override
     public void onDestroy() {
+        tts.stop();
         super.onDestroy();
     }
 }

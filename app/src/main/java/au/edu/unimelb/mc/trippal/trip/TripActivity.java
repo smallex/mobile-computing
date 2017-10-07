@@ -451,6 +451,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
      */
     @Override
     protected void onDestroy() {
+        tts.stop();
         super.onDestroy();
         if (mCameraSource != null) {
             mCameraSource.release();
