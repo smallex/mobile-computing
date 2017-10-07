@@ -14,14 +14,13 @@
         android:layout_height="wrap_content"
         android:background="?attr/colorPrimary"
         android:minHeight="?attr/actionBarSize"
-        android:theme="?attr/actionBarTheme"/>
+        android:theme="@style/MyActionBarStyle"/>
 
     <android.support.v7.widget.CardView
         android:id="@+id/cv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="5dp"
-        >
+        android:layout_margin="5dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -34,7 +33,7 @@
                 android:layout_height="match_parent"
                 android:background="#FFFFFF"
                 android:orientation="vertical"
-                android:paddingLeft="6dp"
+                android:paddingLeft="8dp"
                 android:paddingTop="4dp">
 
                 <TextView
@@ -58,7 +57,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_columnWeight="1"
-                    android:layout_gravity="fill_horizontal"
+                    android:layout_gravity="fill"
                     android:drawableLeft="@drawable/time"
                     android:drawablePadding="7dp"
                     android:gravity="start"
@@ -85,16 +84,19 @@
                         android:padding="3dp"
                         android:text=""
                         android:textSize="18sp"/>
+
                     <GridLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_gravity="fill_horizontal"
                         android:columnCount="1">
+
                         <TextView
                             android:id="@+id/riskText"
+                            android:layout_gravity="center"
                             android:text="LOW RISK"
-                            android:textStyle="bold"
-                            android:layout_gravity="center"/>
+                            android:textStyle="bold"/>
+
                         <ProgressBar
                             android:id="@+id/energyLevel"
                             style="?android:attr/progressBarStyleHorizontal"
@@ -105,6 +107,7 @@
                     </GridLayout>
                 </LinearLayout>
 
+                <!--
                 <TextView
                     android:id="@+id/stopsCount"
                     android:layout_width="wrap_content"
@@ -115,19 +118,44 @@
                     android:gravity="start"
                     android:padding="3dp"
                     android:text="0 stops"
-                    android:textSize="18sp"/>
+                    android:textSize="18sp"/>-->
 
                 <TextView
                     android:id="@+id/distanceText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="fill_horizontal"
-                    android:layout_marginLeft="15dp"
+                    android:layout_marginLeft="5dp"
                     android:drawableLeft="@drawable/distance"
                     android:drawablePadding="7dp"
                     android:padding="3dp"
                     android:text="0 km"
                     android:textSize="18sp"/>
+
+                <LinearLayout
+                    xmlns:android="http://schemas.android.com/apk/res/android"
+                    android:layout_width="170dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingRight="10dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="fill_horizontal"
+                        android:drawableLeft="@drawable/eye"
+                        android:drawablePadding="7dp"
+                        android:padding="3dp"
+                        android:text=""
+                        android:textSize="18sp"/>
+
+
+                    <com.robinhood.spark.SparkView
+                        android:id="@+id/sparkview"
+                        android:layout_width="wrap_content"
+                        android:paddingRight="7dp"
+                        android:paddingTop="5dp"
+                        android:layout_height="25dp"/>
+                </LinearLayout>
             </GridLayout>
 
         </LinearLayout>

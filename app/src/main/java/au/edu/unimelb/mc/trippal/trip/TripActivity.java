@@ -73,6 +73,7 @@ import com.google.android.gms.vision.MultiProcessor;
 import com.google.android.gms.vision.Tracker;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
+import com.robinhood.spark.SparkView;
 import com.tapadoo.alerter.Alerter;
 
 import org.json.JSONObject;
@@ -127,7 +128,10 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
     private TextView eyeStatus;
     private TextView tripDurationText;
     private ProgressBar fatigueLevel;
+
     private int blinkCount = 0;
+    private List<Long> blinkTimes;
+
     private LatLng destinationLatLng;
     private String destinationName;
     private LatLng startingLatLng;
@@ -154,6 +158,8 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
     private Polyline userRouteLine;
     private Marker selectedStopMarker;
     private boolean tripFinished = false;
+    private SparkView blinkLine;
+    private BlinkAdapter blinkAdapter;
 
     //==============================================================================================
     // Activity Methods
@@ -172,7 +178,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
         tripDurationText = (TextView) findViewById(R.id.tripDuration);
         fatigueLevel = (ProgressBar) findViewById(R.id.energyLevel);
         distanceText = (TextView) findViewById(R.id.distanceText);
-        stopsCountText = (TextView) findViewById(R.id.stopsCount);
+        //stopsCountText = (TextView) findViewById(R.id.stopsCount);
         riskText = (TextView) findViewById(R.id.riskText);
         btnBreak = (FloatingActionButton) findViewById(R.id.btnBreak);
         btnBreak.setOnClickListener(new View.OnClickListener() {
@@ -181,8 +187,13 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
                 openRecommendations(false);
             }
         });
+        blinkLine = (SparkView) findViewById(R.id.sparkview);
+        blinkLine.setLineColor(ContextCompat.getColor(this, R.color.accent));
         playButton = (FloatingActionButton) findViewById(R.id.playButton);
         playButton.setOnClickListener(new PlayButtonListener());
+        blinkTimes = new ArrayList<>();
+        blinkAdapter = new BlinkAdapter();
+        blinkLine.setAdapter(blinkAdapter);
 
         // Show toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_facetracker);
@@ -835,7 +846,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
                 icon = R.drawable.ic_free_breakfast_white_48dp;
                 playButton.setImageResource(R.drawable.ic_play_arrow_white_24dp);
                 stopsCount += 1;
-                stopsCountText.setText(stopsCount + " stops");
+                //stopsCountText.setText(stopsCount + " stops");
                 currentStopStart = new Date().getTime();
                 if (currentLocation != null) {
                     stopsLocationList.add(currentLocation);
@@ -892,7 +903,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
             Location.distanceBetween(location.getLatitude(),
                     location.getLongitude(), destinationLatLng.latitude, destinationLatLng
                             .longitude, distance);
-            if (distance[0] < THRESHOLD_DISTANCE && !insideDestinationRadius) {
+            if (distance[0] < THRESHOLD_DISTANCE && !insideDestinationRadius && !tripFinished) {
                 insideDestinationRadius = true;
                 AlertDialog.Builder builder = new AlertDialog.Builder(TripActivity
                         .this);
@@ -1053,6 +1064,13 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
                     0.5;
             if (closed && lastOpen) {
                 blinkCount++;
+                blinkTimes.add(System.currentTimeMillis());
+                TripActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        blinkAdapter.update(blinkTimes);
+                    }
+                });
             }
             if (!closed) {
                 TripActivity.this.lastEyesOpenTime = new Date().getTime();
@@ -1074,7 +1092,8 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
                         AlertDialog.Builder builder = new AlertDialog.Builder(TripActivity
                                 .this);
                         builder.setTitle("Attention")
-                                .setMessage("Your eyes were closed for awhile!\nPlease pull over " +
+                                .setMessage("Your eyes were closed for awhile!\nPlease pull " +
+                                        "over " +
                                         "and take a break.")
                                 .setPositiveButton(R
                                         .string.ok, listener)
@@ -1085,8 +1104,9 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
                         try {
                             Uri notification = RingtoneManager.getDefaultUri(RingtoneManager
                                     .TYPE_ALARM);
-                            final Ringtone r = RingtoneManager.getRingtone(getApplicationContext(),
-                                    notification);
+                            final Ringtone r = RingtoneManager.getRingtone
+                                    (getApplicationContext(),
+                                            notification);
                             r.play();
                             Thread th = new Thread(new Runnable() {
                                 @Override
@@ -1139,7 +1159,8 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
         }
 
         /**
-         * Called when the face is assumed to be gone for good. Remove the graphic annotation from
+         * Called when the face is assumed to be gone for good. Remove the graphic annotation
+         * from
          * the overlay.
          */
         @Override
@@ -1175,7 +1196,8 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
                         TextToSpeech.QUEUE_ADD,
                         null, "1");
                 builder.setTitle("Take a break?")
-                        .setMessage("You have been driving for a while.\nDo you want to take a " +
+                        .setMessage("You have been driving for a while.\nDo you want to take " +
+                                "a " +
                                 "break?")
                         .setPositiveButton(R
                                 .string.ok, new DialogInterface.OnClickListener() {
@@ -1199,7 +1221,8 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
                     riskText.setText("HIGH RISK");
                     break;
             }
-            timerHandler.postDelayed(this, TimeUnit.SECONDS.toMillis(10));
+            blinkAdapter.update(blinkTimes);
+            timerHandler.postDelayed(this, TimeUnit.SECONDS.toMillis(5));
         }
     }
 
@@ -1283,7 +1306,10 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
             int durationHours = durationSeconds / (60 * 60);
             int durationMinutes = (durationSeconds / 60) % 60;
 
-            String durationText = durationMinutes + " minutes";
+            String durationText = durationMinutes + " minute";
+            if (durationMinutes != 1) {
+                durationText += "s";
+            }
             if (durationHours > 0) {
                 durationText = durationHours + " hours " + durationText;
             }
@@ -1295,7 +1321,8 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
                     .title(parser.getDistanceKM() + " km")
                     .snippet(durationText)
                     .icon(transparent)
-                    .anchor((float) 0.5, (float) 0.5); //puts the info window on the userRouteLine
+                    .anchor((float) 0.5, (float) 0.5); //puts the info window on the
+            // userRouteLine
 
             Marker marker = mMap.addMarker(options);
 
