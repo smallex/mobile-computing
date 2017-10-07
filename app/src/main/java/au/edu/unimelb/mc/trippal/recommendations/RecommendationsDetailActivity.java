@@ -612,7 +612,9 @@ public class RecommendationsDetailActivity extends AppCompatActivity implements 
 
     @Override
     protected void onDestroy() {
-        tts.stop();
+        if (tts != null) {
+            tts.stop();
+        }
         super.onDestroy();
     }
 }
