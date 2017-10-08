@@ -1,7 +1,6 @@
 package au.edu.unimelb.mc.trippal.backend;
 
 import android.os.AsyncTask;
-import android.util.Log;
 
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
@@ -14,7 +13,7 @@ import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 
 /**
- * AsyncTask for creating a TripEntity in Azure Table Storage
+ * AsyncTask for creating a new TripEntity in Azure Table Storage.
  */
 public class CreateTripTask extends AsyncTask<String, Void, Void> {
     public static final String storageConnectionString = "DefaultEndpointsProtocol=https;" +
@@ -39,7 +38,6 @@ public class CreateTripTask extends AsyncTask<String, Void, Void> {
 
             TableOperation insert = TableOperation.insert(trip);
             TableResult result = table.execute(insert);
-            Log.d("AZURE", result.getResult().toString());
         } catch (URISyntaxException e) {
             e.printStackTrace();
         } catch (InvalidKeyException e) {

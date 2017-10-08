@@ -55,25 +55,27 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import au.edu.unimelb.mc.trippal.AzureCall;
+import au.edu.unimelb.mc.trippal.backend.AzureCall;
 import au.edu.unimelb.mc.trippal.Constants;
 import au.edu.unimelb.mc.trippal.IntroActivity;
 import au.edu.unimelb.mc.trippal.R;
 import info.debatty.java.stringsimilarity.Levenshtein;
 
+/**
+ * Activity for creating a new trip.
+ */
 public class NewTripActivity extends AppCompatActivity {
     private static final int REQ_CODE_SPEECH_INPUT_Location = 1000;
     private static final int REQ_CODE_SPEECH_INPUT_Feeling = 2000;
     private static final int REQ_CODE_SPEECH_INPUT_TIME = 3000;
     private static final int REQ_CODE_SPEECH_INPUT_Sleep = 4000;
 
+    private static final String LOG_ID = "NewTripActivity";
     private int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
     private String UTTERANCE_ID_LOCATION = "100";
     private String UTTERANCE_ID_FEELINGS = "200";
     private String UTTERANCE_ID_TIME = "300";
     private String UTTERANCE_ID_SLEEP = "400";
-
-    private static final String LOG_ID = "NewTripActivity";
 
     private EditText destinationText;
     private TextInputLayout destinationLayout;
@@ -192,17 +194,21 @@ public class NewTripActivity extends AppCompatActivity {
                         @Override
                         public void onDone(String s) {
                             if (s.equals(UTTERANCE_ID_LOCATION)) {
-                                startVoiceRecognitionIntent(REQ_CODE_SPEECH_INPUT_Location, getString(R.string.whereTravel));
+                                startVoiceRecognitionIntent(REQ_CODE_SPEECH_INPUT_Location,
+                                        getString(R.string.whereTravel));
                             }
                             if (s.equals(UTTERANCE_ID_FEELINGS)) {
-                                startVoiceRecognitionIntent(REQ_CODE_SPEECH_INPUT_Feeling, getString(R.string.howTired));
+                                startVoiceRecognitionIntent(REQ_CODE_SPEECH_INPUT_Feeling,
+                                        getString(R.string.howTired));
                             }
                             if (s.equals(UTTERANCE_ID_TIME)) {
-                                startVoiceRecognitionIntent(REQ_CODE_SPEECH_INPUT_TIME, getString(R.string.howLongSleep));
+                                startVoiceRecognitionIntent(REQ_CODE_SPEECH_INPUT_TIME, getString
+                                        (R.string.howLongSleep));
                             }
 
                             if (s.equals(UTTERANCE_ID_SLEEP)) {
-                                startVoiceRecognitionIntent(REQ_CODE_SPEECH_INPUT_Sleep, getString(R.string.howWasSleep));
+                                startVoiceRecognitionIntent(REQ_CODE_SPEECH_INPUT_Sleep,
+                                        getString(R.string.howWasSleep));
                             }
                         }
 
@@ -345,7 +351,8 @@ public class NewTripActivity extends AppCompatActivity {
         intent.putExtra(Constants.extraCurrentDrowsyLvl, currentDrowsiness.getProgress());
         intent.putExtra(Constants.extraLastSleepQual, sleepQuality.getProgress());
         if (!durationHours.getText().toString().isEmpty()) {
-            intent.putExtra(Constants.extraLastSleepHrs, Integer.parseInt(durationHours.getText().toString()));
+            intent.putExtra(Constants.extraLastSleepHrs, Integer.parseInt(durationHours.getText()
+                    .toString()));
         } else {
             intent.putExtra(Constants.extraLastSleepHrs, 8);
         }
@@ -414,7 +421,8 @@ public class NewTripActivity extends AppCompatActivity {
                         .EXTRA_RESULTS);
                 Log.d("test", result.get(0));
 
-                // check result from speechrecognition if number between 1-5 set corresponding progress
+                // check result from speechrecognition if number between 1-5 set corresponding
+                // progress
                 // otherwise calculate levenshteindistance from result and number 1-5
                 // and choose to on with the smallest distance
                 if (result.get(0).equals("one") || result.get(0).equals("1")) {
@@ -487,7 +495,8 @@ public class NewTripActivity extends AppCompatActivity {
                 String res = result.get(0).toLowerCase();
                 Log.d("resultSleep", res);
 
-                // check if result was one of poor,normal or great if not choose closest on based on levensthein distance
+                // check if result was one of poor,normal or great if not choose closest on based
+                // on levensthein distance
                 if (res.contains("poor")) {
                     sleep.setProgress(0);
                 } else if (res.contains("normal")) {
@@ -539,7 +548,6 @@ public class NewTripActivity extends AppCompatActivity {
                     // otherwise ask user to repat input
                     if ((array.length() > 0) && !loc.isEmpty()) {
 
-
                         String output = loc.substring(0, 1).toUpperCase() + loc
                                 .substring(1);
                         finalDestination = output;
@@ -556,7 +564,6 @@ public class NewTripActivity extends AppCompatActivity {
                         tts.playSilentUtterance(100, TextToSpeech.QUEUE_ADD, null);
                         startVoiceOutput("and 5 is extremely tired",
                                 UTTERANCE_ID_FEELINGS);
-
                     } else {
                         startVoiceOutput("I could not find the location", "1");
                         tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);

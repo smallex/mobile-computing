@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Custom SparkAdapter for showing blinking frequency.
+ */
 public class BlinkAdapter extends SparkAdapter {
 
     private List<Integer> blinkFrequencies;

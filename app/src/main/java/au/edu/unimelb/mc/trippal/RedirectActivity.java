@@ -7,6 +7,9 @@ import android.support.v7.app.AppCompatActivity;
 
 import au.edu.unimelb.mc.trippal.trip.NewTripActivity;
 
+/**
+ * Redirects to NewTripActivity after Fitbit data synchronization.
+ */
 public class RedirectActivity extends AppCompatActivity {
 
     @Override

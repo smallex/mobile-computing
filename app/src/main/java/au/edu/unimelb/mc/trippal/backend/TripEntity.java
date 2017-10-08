@@ -6,6 +6,9 @@ import com.microsoft.azure.storage.table.TableServiceEntity;
 import java.util.Date;
 import java.util.UUID;
 
+/**
+ * Domain model that represents a single trip of a user.
+ */
 public class TripEntity extends TableServiceEntity {
 
     private String destinationName;
@@ -22,6 +25,7 @@ public class TripEntity extends TableServiceEntity {
         this.rowKey = UUID.randomUUID().toString();
     }
 
+    // Default constructor needed for Azure
     public TripEntity() {
     }
 

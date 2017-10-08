@@ -11,9 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * Created by anupamchugh on 27/11/15.
+ * Parses the JSON returned by the Directions API and returns route data.
  */
-
 public class DirectionsJSONParser {
 
     private final JSONObject jObject;

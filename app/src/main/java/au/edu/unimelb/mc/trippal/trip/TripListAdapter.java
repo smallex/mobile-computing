@@ -17,6 +17,9 @@ import java.util.List;
 import au.edu.unimelb.mc.trippal.R;
 import au.edu.unimelb.mc.trippal.backend.TripEntity;
 
+/**
+ * Custom ArrayAdapter for TripEntities for display inside a ListView.
+ */
 public class TripListAdapter extends ArrayAdapter<TripEntity> {
     public TripListAdapter(@NonNull Context context, @LayoutRes int resource, @NonNull
             List<TripEntity> objects) {

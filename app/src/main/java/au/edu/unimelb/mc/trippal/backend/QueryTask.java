@@ -10,7 +10,6 @@ import com.microsoft.azure.storage.table.TableQuery;
 
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -18,6 +17,9 @@ import java.util.List;
 
 import au.edu.unimelb.mc.trippal.trip.TripListActivity;
 
+/**
+ * AsyncTask for querying the Azure Table Storage for all trips of the current user.
+ */
 public class QueryTask extends AsyncTask<String, Void, List<TripEntity>> {
     private final TripListActivity tripListActivity;
 
@@ -29,7 +31,7 @@ public class QueryTask extends AsyncTask<String, Void, List<TripEntity>> {
     protected List<TripEntity> doInBackground(String... strings) {
         ArrayList<TripEntity> tripEntities = new ArrayList<>();
         try {
-            CloudStorageAccount account = CloudStorageAccount.parse(StorageConfiguration
+            CloudStorageAccount account = CloudStorageAccount.parse(AzureStorageConfiguration
                     .storageConnectionString);
             CloudTableClient tableClient = account
                     .createCloudTableClient();

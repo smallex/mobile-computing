@@ -9,6 +9,9 @@ import android.support.v4.content.ContextCompat;
 import com.github.paolorotolo.appintro.AppIntro2;
 import com.github.paolorotolo.appintro.AppIntroFragment;
 
+/**
+ * Activity that introduces the app and asks for required permissions.
+ */
 public class IntroActivity extends AppIntro2 {
 
     @Override
@@ -16,10 +19,24 @@ public class IntroActivity extends AppIntro2 {
         super.onCreate(savedInstanceState);
 
         // Each Intro slide
-        AppIntroFragment fragment = AppIntroFragment.newInstance(getString(R.string.splash_screen_location_title), getString(R.string.splash_screen_location), R.drawable.map_colored, ContextCompat.getColor(this, R.color.primary), ContextCompat.getColor(this, R.color.icons), ContextCompat.getColor(this, R.color.icons));
-        AppIntroFragment fragment2 = AppIntroFragment.newInstance(getString(R.string.splash_screen_camera_title), getString(R.string.splash_screen_camera), R.drawable.tired_colored, ContextCompat.getColor(this, R.color.primary_dark), ContextCompat.getColor(this, R.color.icons), ContextCompat.getColor(this, R.color.icons));
-        AppIntroFragment fragment3 = AppIntroFragment.newInstance(getString(R.string.splash_screen_mic_title), getString(R.string.splash_screen_mic), R.drawable.microphone_colored, ContextCompat.getColor(this, R.color.primary), ContextCompat.getColor(this, R.color.icons), ContextCompat.getColor(this, R.color.icons));
-        AppIntroFragment fragment4 = AppIntroFragment.newInstance(getString(R.string.splash_screen_final_title), getString(R.string.splash_screen_final), R.drawable.car_2_colored, ContextCompat.getColor(this, R.color.primary_dark), ContextCompat.getColor(this, R.color.icons), ContextCompat.getColor(this, R.color.icons));
+        AppIntroFragment fragment = AppIntroFragment.newInstance(getString(R.string
+                .splash_screen_location_title), getString(R.string.splash_screen_location), R
+                .drawable.map_colored, ContextCompat.getColor(this, R.color.primary),
+                ContextCompat.getColor(this, R.color.icons), ContextCompat.getColor(this, R.color
+                        .icons));
+        AppIntroFragment fragment2 = AppIntroFragment.newInstance(getString(R.string
+                .splash_screen_camera_title), getString(R.string.splash_screen_camera), R
+                .drawable.tired_colored, ContextCompat.getColor(this, R.color.primary_dark),
+                ContextCompat.getColor(this, R.color.icons), ContextCompat.getColor(this, R.color
+                        .icons));
+        AppIntroFragment fragment3 = AppIntroFragment.newInstance(getString(R.string
+                .splash_screen_mic_title), getString(R.string.splash_screen_mic), R.drawable
+                .microphone_colored, ContextCompat.getColor(this, R.color.primary), ContextCompat
+                .getColor(this, R.color.icons), ContextCompat.getColor(this, R.color.icons));
+        AppIntroFragment fragment4 = AppIntroFragment.newInstance(getString(R.string
+                .splash_screen_final_title), getString(R.string.splash_screen_final), R.drawable
+                .car_2_colored, ContextCompat.getColor(this, R.color.primary_dark), ContextCompat
+                .getColor(this, R.color.icons), ContextCompat.getColor(this, R.color.icons));
 
         // Add slides to collection
         addSlide(fragment);

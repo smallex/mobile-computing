@@ -112,20 +112,19 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
         RecognitionListener {
     private static final String LOG_ID = "TripActivity";
     private static final int RC_HANDLE_GMS = 9001;
-    // permission request codes need to be < 256
     private static final int RC_HANDLE_CAMERA_PERM = 2;
     private static final int MY_PERMISSIONS_REQUEST_LOCATION = 1;
     private static final String KWS_SEARCH = "wakeup";
     private static final String KEYPHRASE = "take a break";
     private static final int PERMISSIONS_REQUEST_RECORD_AUDIO = 134;
     private static final String UTTERANCE_ID_BREAK = "111";
+
     private CameraSource mCameraSource = null;
     private GoogleMap mMap;
     private LocationManager locationManager;
     private Marker startLocationMarker;
     private Marker destinationLocationMarker;
     private TextView blinkText;
-    private TextView eyeStatus;
     private TextView tripDurationText;
     private ProgressBar fatigueLevel;
 
@@ -174,11 +173,9 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
         setContentView(R.layout.main);
 
         blinkText = (TextView) findViewById(R.id.blinkText);
-        eyeStatus = (TextView) findViewById(R.id.eyeStatus);
         tripDurationText = (TextView) findViewById(R.id.tripDuration);
         fatigueLevel = (ProgressBar) findViewById(R.id.energyLevel);
         distanceText = (TextView) findViewById(R.id.distanceText);
-        //stopsCountText = (TextView) findViewById(R.id.stopsCount);
         riskText = (TextView) findViewById(R.id.riskText);
         btnBreak = (FloatingActionButton) findViewById(R.id.btnBreak);
         btnBreak.setOnClickListener(new View.OnClickListener() {
@@ -606,10 +603,6 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
         }
     }
 
-    //==============================================================================================
-    // Camera Source Preview
-    //==============================================================================================
-
     private void createStartLocationMarkers() {
         this.startLocationMarker = mMap.addMarker(new MarkerOptions().position
                 (TripActivity.this
@@ -1025,7 +1018,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
     private class GraphicFaceTrackerFactory implements MultiProcessor.Factory<Face> {
         @Override
         public Tracker<Face> create(Face face) {
-            return new GraphicFaceTracker(blinkText);
+            return new GraphicFaceTracker();
         }
     }
 
@@ -1034,13 +1027,8 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
      * associated face overlay.
      */
     private class GraphicFaceTracker extends Tracker<Face> {
-        private final TextView blinkText;
         private long EYES_CLOSED_THRESHOLD = TimeUnit.SECONDS.toMillis(2);
         private boolean lastOpen = true;
-
-        GraphicFaceTracker(TextView blinkText) {
-            this.blinkText = blinkText;
-        }
 
         /**
          * Start tracking the detected face instance within the face overlay.
@@ -1140,12 +1128,6 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
                     }
                 });
             }
-            TripActivity.this.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    // TODO: Do something with blink count here
-                }
-            });
             lastOpen = !closed;
         }
 
@@ -1226,6 +1208,9 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
         }
     }
 
+    /**
+     * Handles parsing route data returned from Directions API and drawing it on the map.
+     */
     private class ParserTask extends AsyncTask<String, Integer, DirectionsJSONParser> {
 
         // Create a stroke pattern of a gap followed by a dash.
@@ -1333,6 +1318,9 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
         }
     }
 
+    /**
+     * Handles downloading route data.
+     */
     private class DownloadTask extends AsyncTask<String, Void, String> {
 
         private final int type;

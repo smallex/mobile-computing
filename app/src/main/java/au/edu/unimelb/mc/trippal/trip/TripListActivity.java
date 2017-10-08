@@ -19,6 +19,9 @@ import au.edu.unimelb.mc.trippal.R;
 import au.edu.unimelb.mc.trippal.backend.QueryTask;
 import au.edu.unimelb.mc.trippal.backend.TripEntity;
 
+/**
+ * Activity that shows all past trips of the current user.
+ */
 public class TripListActivity extends AppCompatActivity {
 
     private ListView tripListView;
@@ -52,6 +55,11 @@ public class TripListActivity extends AppCompatActivity {
         new QueryTask(this).execute();
     }
 
+    /**
+     * Load the given trips and display them as a list.
+     *
+     * @param tripEntities the trips to be loaded
+     */
     public void loadTrips(List<TripEntity> tripEntities) {
         adapter.clear();
         adapter.addAll(tripEntities);
@@ -61,6 +69,11 @@ public class TripListActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Start the NewTripActivity.
+     *
+     * @param view
+     */
     public void addTrip(View view) {
         Intent intent = new Intent(this, NewTripActivity.class);
         startActivity(intent);
