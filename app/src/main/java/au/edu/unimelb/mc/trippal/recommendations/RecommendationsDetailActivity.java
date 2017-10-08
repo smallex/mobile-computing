@@ -234,47 +234,41 @@ public class RecommendationsDetailActivity extends AppCompatActivity implements 
                     if (radius < MAX_RADIUS) {
                         // Recursively call this function until MAX_RADIUS is reached
                         startRecs(location, radius + MIN_RADIUS);
-                    } else {
-                        runOnUiThread(new Runnable() {
+                    } else if (getIntent().getExtras().getBoolean(extraSpeech)) {
+                        // initialize text to speech if activity was opened because of speech input
+                        tts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
                             @Override
-                            public void run() {
-                                // Display error message
-                                Toast.makeText(mActivity, String.format(getString(R.string.noPlacesInRadius)
-                                        , MAX_RADIUS), Toast.LENGTH_LONG).show();
-                                if (getIntent().getExtras().getBoolean(extraSpeech)) {
-
-                                    // initialize text to speech if activity was opened because of speech input
-                                    tts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+                            public void onInit(int status) {
+                                if (status != TextToSpeech.ERROR) {
+                                    tts.setLanguage(Locale.US);
+                                    tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
                                         @Override
-                                        public void onInit(int status) {
-                                            if (status != TextToSpeech.ERROR) {
-                                                tts.setLanguage(Locale.US);
-                                                tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
-                                                    @Override
-                                                    public void onStart(String s) {
-                                                    }
+                                        public void onStart(String s) {
+                                        }
 
-                                                    @Override
-                                                    public void onDone(String s) {
-                                                        if (s.equals(UTTERANCE_ID_LOC)) {
-                                                        }
-                                                    }
-
-                                                    @Override
-                                                    public void onError(String s) {
-                                                    }
-                                                });
-                                                tts.speak(String.format(getString(R.string.noPlacesInRadius)
-                                                        , MAX_RADIUS), TextToSpeech.QUEUE_ADD,
-                                                        null, "1");
-                                            } else {
+                                        @Override
+                                        public void onDone(String s) {
+                                            if (s.equals(UTTERANCE_ID_LOC)) {
                                             }
+
+                                            // Show error message and go back
+                                            closeEmptyActivity();
+                                        }
+
+                                        @Override
+                                        public void onError(String s) {
                                         }
                                     });
+                                    tts.speak(String.format(getString(R.string.noPlacesInRadius)
+                                            , MAX_RADIUS), TextToSpeech.QUEUE_ADD,
+                                            null, "1");
+                                } else {
                                 }
-                                finish();
                             }
                         });
+                    } else {
+                        // Show error message and go back
+                        closeEmptyActivity();
                     }
                 } else {
                     if (getIntent().getExtras().getBoolean(extraSpeech)) {
@@ -355,6 +349,19 @@ public class RecommendationsDetailActivity extends AppCompatActivity implements 
                         }
                     });
                 }
+            }
+        });
+    }
+
+    private void closeEmptyActivity () {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // Display error message
+                Toast.makeText(mActivity, String.format(getString(R.string.noPlacesInRadius)
+                        , MAX_RADIUS), Toast.LENGTH_LONG).show();
+                finish();
+
             }
         });
     }
