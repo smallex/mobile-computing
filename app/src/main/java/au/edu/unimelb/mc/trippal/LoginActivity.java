@@ -20,7 +20,13 @@ import java.net.MalformedURLException;
 
 import au.edu.unimelb.mc.trippal.trip.TripListActivity;
 
+import static au.edu.unimelb.mc.trippal.Constants.extraLoginSuccess;
+import static au.edu.unimelb.mc.trippal.Constants.prefToken;
+import static au.edu.unimelb.mc.trippal.Constants.prefUserId;
+import static au.edu.unimelb.mc.trippal.Constants.prefUserInfo;
+
 public class LoginActivity extends AppCompatActivity {
+    private final String LOG_ID = "LoginActivity";
 
     private final String AZURE_AUTHENTICATION_URL = "https://trippal.azurewebsites.net";
     private final int GOOGLE_SIGNIN_CODE = 1;
@@ -69,16 +75,16 @@ public class LoginActivity extends AppCompatActivity {
 
     private void showTripList(boolean isNewLogin) {
         Intent intent = new Intent(this, TripListActivity.class);
-        intent.putExtra("loginSuccess", isNewLogin);
+        intent.putExtra(extraLoginSuccess, isNewLogin);
         startActivity(intent);
     }
 
     private boolean loadUserData(MobileServiceClient mClient) {
-        SharedPreferences prefs = getSharedPreferences("userinfo", Context.MODE_PRIVATE);
-        String userId = prefs.getString("userid", null);
+        SharedPreferences prefs = getSharedPreferences(prefUserInfo, Context.MODE_PRIVATE);
+        String userId = prefs.getString(prefUserId, null);
         if (userId == null)
             return false;
-        String token = prefs.getString("token", null);
+        String token = prefs.getString(prefToken, null);
         if (token == null)
             return false;
 
@@ -98,10 +104,10 @@ public class LoginActivity extends AppCompatActivity {
                 MobileServiceActivityResult result = mClient.onActivityResult(data);
                 if (result.isLoggedIn()) {
                     cacheUserData(mClient.getCurrentUser());
-                    Log.d("USERID", mClient.getCurrentUser().getUserId());
+                    Log.d(LOG_ID, "USERID: " + mClient.getCurrentUser().getUserId());
                     showTripList(true);
                 } else {
-                    Log.d("ERROR", "Error during login");
+                    Log.d(LOG_ID, "ERROR: Error during login");
                     Alerter.create(this).enableIconPulse(false).setIcon(R.drawable.warning).show();
                 }
             }
@@ -109,10 +115,10 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void cacheUserData(MobileServiceUser user) {
-        SharedPreferences prefs = getSharedPreferences("userinfo", Context.MODE_PRIVATE);
+        SharedPreferences prefs = getSharedPreferences(prefUserInfo, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putString("userid", user.getUserId());
-        editor.putString("token", user.getAuthenticationToken());
+        editor.putString(prefUserId, user.getUserId());
+        editor.putString(prefToken, user.getAuthenticationToken());
         editor.commit();
     }
 }

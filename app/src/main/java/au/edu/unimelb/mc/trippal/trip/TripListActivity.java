@@ -19,6 +19,8 @@ import au.edu.unimelb.mc.trippal.R;
 import au.edu.unimelb.mc.trippal.backend.QueryTask;
 import au.edu.unimelb.mc.trippal.backend.TripEntity;
 
+import static au.edu.unimelb.mc.trippal.Constants.extraLoginSuccess;
+
 /**
  * Activity that shows all past trips of the current user.
  */
@@ -39,7 +41,7 @@ public class TripListActivity extends AppCompatActivity {
         noTripsText = (TextView) findViewById(R.id.no_trip_text);
         progress = (ProgressBar) findViewById(R.id.trip_list_progress);
         toolbar = (Toolbar) findViewById(R.id.toolbar_trip_list);
-        toolbar.setTitle("Your Trips");
+        toolbar.setTitle(R.string.yourTrips);
         adapter = new TripListAdapter(this, R.layout
                 .activity_trip_list_item, new ArrayList<TripEntity>());
 
@@ -47,8 +49,8 @@ public class TripListActivity extends AppCompatActivity {
         tripListView.setAdapter(adapter);
 
         Intent intent = getIntent();
-        if (intent != null && intent.getBooleanExtra("loginSuccess", false)) {
-            Alerter.create(this).setText("Login successful!").setBackgroundColorRes(R.color
+        if (intent != null && intent.getBooleanExtra(extraLoginSuccess, false)) {
+            Alerter.create(this).setText(R.string.loginSuccessful).setBackgroundColorRes(R.color
                     .accent).enableIconPulse(false).setDuration(500).show();
         }
 

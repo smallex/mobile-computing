@@ -26,6 +26,12 @@ public class Constants {
     public final static String extraCurrentDrowsyLvl = "currentDrowsinessLevel";
     public final static String extraLastSleepQual = "lastSleepQuality";
     public final static String extraLastSleepHrs = "lastSleepHours";
+    public final static String extraLoginSuccess = "loginSuccess";
+    public final static String extraUserId = "userID";
+    public final static String extraAccessToken = "accessToken";
 
     public final static String prefFirstStart = "FIRST_START";
+    public final static String prefUserInfo = "userinfo";
+    public final static String prefUserId = "userid";
+    public final static String prefToken = "token";
 }

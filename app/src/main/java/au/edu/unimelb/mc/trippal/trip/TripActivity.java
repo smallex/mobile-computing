@@ -105,6 +105,24 @@ import edu.cmu.pocketsphinx.RecognitionListener;
 import edu.cmu.pocketsphinx.SpeechRecognizer;
 import edu.cmu.pocketsphinx.SpeechRecognizerSetup;
 
+import static au.edu.unimelb.mc.trippal.Constants.extraCurrentDrowsyLvl;
+import static au.edu.unimelb.mc.trippal.Constants.extraDestinationLat;
+import static au.edu.unimelb.mc.trippal.Constants.extraDestinationLng;
+import static au.edu.unimelb.mc.trippal.Constants.extraDestinationName;
+import static au.edu.unimelb.mc.trippal.Constants.extraLastSleepHrs;
+import static au.edu.unimelb.mc.trippal.Constants.extraLastSleepQual;
+import static au.edu.unimelb.mc.trippal.Constants.extraSpeech;
+import static au.edu.unimelb.mc.trippal.Constants.extraStopLocationLat;
+import static au.edu.unimelb.mc.trippal.Constants.extraStopLocationLong;
+import static au.edu.unimelb.mc.trippal.Constants.extraStopLocationName;
+import static au.edu.unimelb.mc.trippal.Constants.extraTripStartTime;
+import static au.edu.unimelb.mc.trippal.Constants.mappingBathroom;
+import static au.edu.unimelb.mc.trippal.Constants.mappingCoffee;
+import static au.edu.unimelb.mc.trippal.Constants.mappingFood;
+import static au.edu.unimelb.mc.trippal.Constants.mappingSleep;
+import static au.edu.unimelb.mc.trippal.Constants.mappingStretchLegs;
+import static au.edu.unimelb.mc.trippal.Constants.mappingSwitchDriver;
+
 /**
  * Activity that is displayed during a trip, showing a map and current trip status.
  */
@@ -115,7 +133,6 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
     private static final int RC_HANDLE_CAMERA_PERM = 2;
     private static final int MY_PERMISSIONS_REQUEST_LOCATION = 1;
     private static final String KWS_SEARCH = "wakeup";
-    private static final String KEYPHRASE = "take a break";
     private static final int PERMISSIONS_REQUEST_RECORD_AUDIO = 134;
     private static final String UTTERANCE_ID_BREAK = "111";
 
@@ -204,16 +221,16 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
         ActionBar ab = getSupportActionBar();
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
-            this.destinationName = extras.getString(Constants.extraDestinationName);
+            this.destinationName = extras.getString(extraDestinationName);
             if (ab != null) {
                 ab.setTitle(String.format(getString(R.string.tripTo), this.destinationName));
                 ab.setDisplayHomeAsUpEnabled(true);
             }
 
-            double lat = extras.getDouble(Constants.extraDestinationLat);
-            double lng = extras.getDouble(Constants.extraDestinationLng);
+            double lat = extras.getDouble(extraDestinationLat);
+            double lng = extras.getDouble(extraDestinationLng);
             this.destinationLatLng = new LatLng(lat, lng);
-            this.tripStartingTime = extras.getLong(Constants.extraTripStartTime);
+            this.tripStartingTime = extras.getLong(extraTripStartTime);
 
             final Handler timerHandler = new Handler();
             final Runnable timeUpdater = new TimeUpdater(timerHandler);
@@ -282,9 +299,9 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
     }
 
     private void initFatigue(Bundle extras) {
-        int currentDrowsinessLevel = extras.getInt(Constants.extraCurrentDrowsyLvl);
-        int lastSleepQuality = extras.getInt(Constants.extraLastSleepQual);
-        int lastSleepHours = extras.getInt(Constants.extraLastSleepHrs);
+        int currentDrowsinessLevel = extras.getInt(extraCurrentDrowsyLvl);
+        int lastSleepQuality = extras.getInt(extraLastSleepQual);
+        int lastSleepHours = extras.getInt(extraLastSleepHrs);
         this.fatigue = new FatigueModel(currentDrowsinessLevel, lastSleepHours, 0,
                 lastSleepQuality);
         this.fatigueLevel.setProgress((int) this.fatigue.getFatigueLevel());
@@ -301,7 +318,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
         recognizer.addListener(this);
 
         // Create keyword-activation search.
-        recognizer.addKeyphraseSearch(KWS_SEARCH, KEYPHRASE);
+        recognizer.addKeyphraseSearch(KWS_SEARCH, getString(R.string.takeABreak));
     }
 
     private void runRecognizerSetup() {
@@ -322,7 +339,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
                         File assetDir = assets.syncAssets();
                         setupRecognizer(assetDir);
                     } catch (IOException e) {
-                        Log.d("errorvoice", e.toString());
+                        Log.d(LOG_ID, "errorvoice: " + e.toString());
                         return e;
                     }
                     return null;
@@ -331,7 +348,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
                 @Override
                 protected void onPostExecute(Exception result) {
                     if (result != null) {
-                        Log.d("errorvoiceregocnition", result.getMessage());
+                        Log.d(LOG_ID, "errorvoicerecognition: " + result.getMessage());
                     } else {
                         recognizer.stop();
                         recognizer.startListening(KWS_SEARCH);
@@ -537,7 +554,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
         };
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Face Tracker sample")
+        builder.setTitle(R.string.tripPal)
                 .setMessage(R.string
                         .no_camera_permission)
                 .setPositiveButton(R
@@ -547,7 +564,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
 
     public void openRecommendations(boolean speech) {
         Intent intent = new Intent(TripActivity.this, RecommendationsActivity.class);
-        intent.putExtra(Constants.extraSpeech, speech);
+        intent.putExtra(extraSpeech, speech);
         startActivity(intent);
     }
 
@@ -606,7 +623,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
     private void createStartLocationMarkers() {
         this.startLocationMarker = mMap.addMarker(new MarkerOptions().position
                 (TripActivity.this
-                        .startingLatLng).title("Start").icon(BitmapDescriptorFactory.fromResource(R
+                        .startingLatLng).title(getString(R.string.start)).icon(BitmapDescriptorFactory.fromResource(R
                 .drawable.red_marker)));
     }
 
@@ -649,7 +666,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
         if (hypothesis == null)
             return;
         String text = hypothesis.getHypstr().toLowerCase();
-        if (text.equals(KEYPHRASE)) {
+        if (text.equals(getString(R.string.takeABreak))) {
             recognizer.stop();
         }
     }
@@ -659,26 +676,26 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
         if (hypothesis != null) {
             // if keyword was spoken go to next activity and ask user what he wants to do
             String text = hypothesis.getHypstr().toLowerCase();
-            tts.speak("What are you planning to do", TextToSpeech.QUEUE_ADD,
+            tts.speak(getString(R.string.whatPlanningToDo), TextToSpeech.QUEUE_ADD,
                     null, "1");
             tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
-            tts.speak("Choose one of the following activities", TextToSpeech.QUEUE_ADD,
+            tts.speak(getString(R.string.chooseActivity), TextToSpeech.QUEUE_ADD,
                     null, "1");
             tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
             tts.setSpeechRate((float) 0.8);
-            tts.speak(Constants.mappingCoffee, TextToSpeech.QUEUE_ADD,
+            tts.speak(mappingCoffee, TextToSpeech.QUEUE_ADD,
                     null, "1");
-            tts.speak(Constants.mappingFood, TextToSpeech.QUEUE_ADD,
+            tts.speak(mappingFood, TextToSpeech.QUEUE_ADD,
                     null, "1");
-            tts.speak(Constants.mappingBathroom, TextToSpeech.QUEUE_ADD,
+            tts.speak(mappingBathroom, TextToSpeech.QUEUE_ADD,
                     null, "1");
-            tts.speak(Constants.mappingSleep, TextToSpeech.QUEUE_ADD,
+            tts.speak(mappingSleep, TextToSpeech.QUEUE_ADD,
                     null, "1");
             tts.setSpeechRate((float) 1);
 
-            tts.speak(Constants.mappingStretchLegs, TextToSpeech.QUEUE_ADD,
+            tts.speak(mappingStretchLegs, TextToSpeech.QUEUE_ADD,
                     null, "1");
-            tts.speak(Constants.mappingSwitchDriver, TextToSpeech.QUEUE_ADD,
+            tts.speak(mappingSwitchDriver, TextToSpeech.QUEUE_ADD,
                     null, UTTERANCE_ID_BREAK);
         }
     }
@@ -693,7 +710,6 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
     }
 
     private String getDirectionsUrl(LatLng origin, LatLng dest) {
-
         // Origin of route
         String str_origin = "origin=" + origin.latitude + "," + origin.longitude;
 
@@ -740,7 +756,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
 
             br.close();
         } catch (Exception e) {
-            Log.d("Exception", e.toString());
+            Log.d(LOG_ID, "Exception: " + e.toString());
         } finally {
             iStream.close();
             urlConnection.disconnect();
@@ -766,9 +782,9 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         if (intent.getExtras() != null) {
-            String stopLocationName = intent.getExtras().getString(Constants.extraStopLocationName);
-            double stopLocationLong = intent.getExtras().getDouble(Constants.extraStopLocationLong);
-            double stopLocationLat = intent.getExtras().getDouble(Constants.extraStopLocationLat);
+            String stopLocationName = intent.getExtras().getString(extraStopLocationName);
+            double stopLocationLong = intent.getExtras().getDouble(extraStopLocationLong);
+            double stopLocationLat = intent.getExtras().getDouble(extraStopLocationLat);
 
             LatLng stopLocation = new LatLng(stopLocationLat, stopLocationLong);
             if (currentLocation != null) {
@@ -835,7 +851,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
             String text;
             int icon;
             if (isDriving) {
-                text = "Starting your break now.";
+                text = getString(R.string.startingBreakNow);
                 icon = R.drawable.ic_free_breakfast_white_48dp;
                 playButton.setImageResource(R.drawable.ic_play_arrow_white_24dp);
                 stopsCount += 1;
@@ -845,7 +861,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
                     stopsLocationList.add(currentLocation);
                 }
             } else {
-                text = "Continuing your trip now.";
+                text = getString(R.string.continuingTripNow);
                 icon = R.drawable.ic_directions_car_white_24dp;
                 playButton.setImageResource(R.drawable.ic_pause_white_24dp);
 
@@ -900,15 +916,15 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
                 insideDestinationRadius = true;
                 AlertDialog.Builder builder = new AlertDialog.Builder(TripActivity
                         .this);
-                builder.setTitle("You're there!")
-                        .setMessage("You have reached your destination!\nFinish this trip?")
-                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                builder.setTitle(R.string.youreThere)
+                        .setMessage(R.string.reachedDestination)
+                        .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 finishTrip();
                             }
                         })
-                        .setNegativeButton("No", null)
+                        .setNegativeButton(R.string.no, null)
                         .show();
             } else if (distance[0] > THRESHOLD_DISTANCE) {
                 insideDestinationRadius = false;
@@ -925,7 +941,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
             LatLng locationLatLng = new LatLng(location.getLatitude(), location
                     .getLongitude());
             if (currentLocation != null && distance(currentLocation, locationLatLng) < 10) {
-                Log.d("Distance", distance(currentLocation, locationLatLng) + "");
+                Log.d(LOG_ID, "Distance: " + distance(currentLocation, locationLatLng));
                 return;
             }
 
@@ -985,11 +1001,11 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
             return (float) c;
         }
 
-        public double degToRad(double deg) {
+        double degToRad(double deg) {
             return deg * Math.PI / 180.0;
         }
 
-        public double radToDeg(double rad) {
+        double radToDeg(double rad) {
             rad = rad * (180.0 / Math.PI);
             if (rad < 0) rad = 360.0 + rad;
             return rad;
@@ -1079,12 +1095,9 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
 
                         AlertDialog.Builder builder = new AlertDialog.Builder(TripActivity
                                 .this);
-                        builder.setTitle("Attention")
-                                .setMessage("Your eyes were closed for awhile!\nPlease pull " +
-                                        "over " +
-                                        "and take a break.")
-                                .setPositiveButton(R
-                                        .string.ok, listener)
+                        builder.setTitle(R.string.attention)
+                                .setMessage(R.string.eyesClosed)
+                                .setPositiveButton(R.string.ok, listener)
                                 .setIcon(R.drawable.warning)
                                 .show();
                         Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
@@ -1103,18 +1116,13 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
                                         Thread.sleep(5000);
                                         if (r.isPlaying()) {
                                             r.stop();
-                                            tts.speak("Attention!", TextToSpeech.QUEUE_ADD,
+                                            tts.speak(getString(R.string.attention), TextToSpeech.QUEUE_ADD,
                                                     null, "1");
                                             tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD,
                                                     null);
-                                            tts.speak("Your eyes were closed for a while",
+                                            tts.speak(getString(R.string.eyesClosed),
                                                     TextToSpeech.QUEUE_ADD,
-                                                    null, "1");
-                                            tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD,
-                                                    null);
-                                            tts.speak("Please pull over and make a break",
-                                                    TextToSpeech.QUEUE_ADD,
-                                                    null, "1");// for stopping the ringtone
+                                                    null, "1"); // for stopping the ringtone
                                         }
                                     } catch (InterruptedException e) {
                                         e.printStackTrace();
@@ -1174,13 +1182,11 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
             if (fatigue.isHighRisk()) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(TripActivity
                         .this);
-                tts.speak("You have been driving for a while. Do you want to take a break?",
+                tts.speak(getString(R.string.drivingForWhile),
                         TextToSpeech.QUEUE_ADD,
                         null, "1");
-                builder.setTitle("Take a break?")
-                        .setMessage("You have been driving for a while.\nDo you want to take " +
-                                "a " +
-                                "break?")
+                builder.setTitle(R.string.takeBreak)
+                        .setMessage(R.string.drivingForWhile)
                         .setPositiveButton(R
                                 .string.ok, new DialogInterface.OnClickListener() {
                             @Override
@@ -1194,13 +1200,13 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
             fatigueLevel.setProgress((int) fatigue.getFatigueLevel());
             switch (fatigue.getCurrentRisk()) {
                 case LOW:
-                    riskText.setText("LOW RISK");
+                    riskText.setText(R.string.lowRisk);
                     break;
                 case MEDIUM:
-                    riskText.setText("MEDIUM RISK");
+                    riskText.setText(R.string.mediumRisk);
                     break;
                 case HIGH:
-                    riskText.setText("HIGH RISK");
+                    riskText.setText(R.string.highRisk);
                     break;
             }
             blinkAdapter.update(blinkTimes);
@@ -1221,7 +1227,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
         private final PatternItem GAP = new Gap(PATTERN_GAP_LENGTH_PX);
         private final List<PatternItem> PATTERN_POLYGON_ALPHA = Arrays.asList(GAP, DASH);
 
-        public ParserTask(int type) {
+        ParserTask(int type) {
             this.type = type;
         }
 
@@ -1325,7 +1331,7 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
 
         private final int type;
 
-        public DownloadTask(int i) {
+        DownloadTask(int i) {
             this.type = i;
         }
 
@@ -1335,10 +1341,10 @@ public final class TripActivity extends AppCompatActivity implements OnMapReadyC
             String data = "";
 
             try {
-                Log.d("URL", url[0]);
+                Log.d(LOG_ID, "URL: " + url[0]);
                 data = downloadUrl(url[0]);
             } catch (Exception e) {
-                Log.d("Background Task", e.toString());
+                Log.d(LOG_ID, "Background Task: " + e.toString());
             }
             return data;
         }

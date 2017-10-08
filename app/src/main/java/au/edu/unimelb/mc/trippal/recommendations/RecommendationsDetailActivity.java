@@ -54,6 +54,12 @@ import au.edu.unimelb.mc.trippal.trip.TripActivity;
 import info.debatty.java.stringsimilarity.Levenshtein;
 
 import static android.graphics.Bitmap.createScaledBitmap;
+import static au.edu.unimelb.mc.trippal.Constants.extraChooseLocation;
+import static au.edu.unimelb.mc.trippal.Constants.extraMapping;
+import static au.edu.unimelb.mc.trippal.Constants.extraSpeech;
+import static au.edu.unimelb.mc.trippal.Constants.extraStopLocationLat;
+import static au.edu.unimelb.mc.trippal.Constants.extraStopLocationLong;
+import static au.edu.unimelb.mc.trippal.Constants.extraStopLocationName;
 
 public class RecommendationsDetailActivity extends AppCompatActivity implements LocationListener {
     private static final String API_KEY = "AIzaSyBf0PRbW8zP5lHcGjfwbevS6CMQYfey20Q";
@@ -86,10 +92,10 @@ public class RecommendationsDetailActivity extends AppCompatActivity implements 
 
         Intent redirectIntent = new Intent(RecommendationsDetailActivity.this, TripActivity
                 .class);
-        redirectIntent.putExtra(Constants.extraStopLocationName, place.getName());
-        redirectIntent.putExtra(Constants.extraStopLocationLat, place.getGeometry().getLocation()
+        redirectIntent.putExtra(extraStopLocationName, place.getName());
+        redirectIntent.putExtra(extraStopLocationLat, place.getGeometry().getLocation()
                 .getLatitude());
-        redirectIntent.putExtra(Constants.extraStopLocationLong, place.getGeometry().getLocation()
+        redirectIntent.putExtra(extraStopLocationLong, place.getGeometry().getLocation()
                 .getLongitude());
         redirectIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent
                 .FLAG_ACTIVITY_SINGLE_TOP);
@@ -114,7 +120,7 @@ public class RecommendationsDetailActivity extends AppCompatActivity implements 
         mActivity = this;
 
         // Get intent details
-        mRecMapping = (RecommendationMapping) getIntent().getSerializableExtra(Constants.extraMapping);
+        mRecMapping = (RecommendationMapping) getIntent().getSerializableExtra(extraMapping);
 
         // Show toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_recommendations_detail);
@@ -239,7 +245,7 @@ public class RecommendationsDetailActivity extends AppCompatActivity implements 
                                 // Display error message
                                 Toast.makeText(mActivity, String.format(getString(R.string.noPlacesInRadius)
                                         , MAX_RADIUS), Toast.LENGTH_LONG).show();
-                                if (getIntent().getExtras().getBoolean(Constants.extraSpeech)) {
+                                if (getIntent().getExtras().getBoolean(extraSpeech)) {
 
                                     // initialize text to speech if activity was opened because of speech input
                                     tts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
@@ -275,7 +281,7 @@ public class RecommendationsDetailActivity extends AppCompatActivity implements 
                         });
                     }
                 } else {
-                    if (getIntent().getExtras().getBoolean(Constants.extraSpeech)) {
+                    if (getIntent().getExtras().getBoolean(extraSpeech)) {
                         tts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
                             @Override
                             public void onInit(int status) {
@@ -296,7 +302,7 @@ public class RecommendationsDetailActivity extends AppCompatActivity implements 
                                                         RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
                                                 intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale
                                                         .getDefault());
-                                                intent.putExtra(RecognizerIntent.EXTRA_PROMPT, Constants.extraChooseLocation);
+                                                intent.putExtra(RecognizerIntent.EXTRA_PROMPT, extraChooseLocation);
 
                                                 try {
                                                     startActivityForResult(intent, REQ_CODE_SPEECH_INPUT_Location);
