@@ -1,8 +1,10 @@
 package au.edu.unimelb.mc.trippal.trip;
 
+import android.Manifest;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.location.Address;
 import android.location.Geocoder;
@@ -15,6 +17,7 @@ import android.speech.tts.UtteranceProgressListener;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputLayout;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -115,7 +118,8 @@ public class NewTripActivity extends AppCompatActivity {
         try {
             startActivityForResult(intent, id);
         } catch (ActivityNotFoundException a) {
-
+            Log.d(LOG_ID, a.getLocalizedMessage());
+            a.printStackTrace();
         }
     }
 
@@ -145,19 +149,20 @@ public class NewTripActivity extends AppCompatActivity {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences
                 (getBaseContext());
         boolean isFirstStart = sharedPreferences.getBoolean(prefFirstStart, true);
+        boolean missingPermission = false;
+        String[] neededPermissions = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.RECORD_AUDIO, Manifest.permission.CAMERA};
+        for (String permission : neededPermissions) {
+            if (ActivityCompat.checkSelfPermission(getApplicationContext(), permission) != PackageManager.PERMISSION_GRANTED) {
+                missingPermission = true;
+                break;
+            }
+        }
 
         // If the activity has never started before...
-        if (isFirstStart) {
+        if (isFirstStart || missingPermission) {
             // Open 'Welcome' screens
             Intent i = new Intent(this, IntroActivity.class);
             startActivity(i);
-
-            // Make a new preferences editor
-            SharedPreferences.Editor e = sharedPreferences.edit();
-
-            // Edit preference to make it false because we don't want this to run again
-            e.putBoolean(prefFirstStart, false);
-            e.apply();
         }
 
         startNewTripButton = (FloatingActionButton) findViewById(R.id.startNewTripButton);
