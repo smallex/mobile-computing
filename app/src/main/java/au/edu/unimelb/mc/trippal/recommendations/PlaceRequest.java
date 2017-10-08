@@ -6,7 +6,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * Created by alexandrafritzen on 9/09/2017.
  */
 
-public class PlaceRequest {
+@SuppressWarnings("unused")
+class PlaceRequest {
     @JsonProperty("key")
     private String key;
 
@@ -20,42 +21,42 @@ public class PlaceRequest {
     @JsonProperty("type")
     private String type;
 
-    public PlaceRequest(String key, double latitude, double longitude, int radius, String type) {
+    PlaceRequest(String key, double latitude, double longitude, int radius, String type) {
         this.key = key;
         this.location = latitude + "," + longitude;
         this.radius = radius;
         this.type = type;
     }
 
-    public String getKey() {
+    String getKey() {
         return key;
     }
 
-    public void setKey(String key) {
+    void setKey(String key) {
         this.key = key;
     }
 
-    public String getLocation() {
+    String getLocation() {
         return location;
     }
 
-    public void setLocation(String location) {
+    void setLocation(String location) {
         this.location = location;
     }
 
-    public int getRadius() {
+    int getRadius() {
         return radius;
     }
 
-    public void setRadius(int radius) {
+    void setRadius(int radius) {
         this.radius = radius;
     }
 
-    public String getType() {
+    String getType() {
         return type;
     }
 
-    public void setType(String type) {
+    void setType(String type) {
         this.type = type;
     }
 }

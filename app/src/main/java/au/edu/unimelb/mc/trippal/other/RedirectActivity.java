@@ -1,4 +1,4 @@
-package au.edu.unimelb.mc.trippal;
+package au.edu.unimelb.mc.trippal.other;
 
 import android.content.Intent;
 import android.net.Uri;

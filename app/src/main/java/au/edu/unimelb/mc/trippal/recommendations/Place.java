@@ -11,7 +11,8 @@ import java.util.ArrayList;
  * Created by alexandrafritzen on 9/09/2017.
  */
 
-public class Place {
+@SuppressWarnings("unused")
+class Place {
     @JsonProperty("geometry")
     private Geometry geometry;
 
@@ -58,131 +59,131 @@ public class Place {
     @JsonProperty("vicinity")
     private String vicinity;
 
-    public Geometry getGeometry() {
+    Geometry getGeometry() {
         return geometry;
     }
 
-    public void setGeometry(Geometry geometry) {
+    void setGeometry(Geometry geometry) {
         this.geometry = geometry;
     }
 
-    public int getDistance() {
+    int getDistance() {
         return distance;
     }
 
-    public void setDistance(int distance) {
+    void setDistance(int distance) {
         this.distance = distance;
     }
 
-    public String getIcon() {
+    String getIcon() {
         return icon;
     }
 
-    public void setIcon(String icon) {
+    void setIcon(String icon) {
         this.icon = icon;
     }
 
-    public String getId() {
+    String getId() {
         return id;
     }
 
-    public void setId(String id) {
+    void setId(String id) {
         this.id = id;
     }
 
-    public String getName() {
+    String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    void setName(String name) {
         this.name = name;
     }
 
-    public OpeningHours getOpeningHours() {
+    OpeningHours getOpeningHours() {
         return openingHours;
     }
 
-    public void setOpeningHours(OpeningHours openingHours) {
+    void setOpeningHours(OpeningHours openingHours) {
         this.openingHours = openingHours;
     }
 
-    public ArrayList<Photo> getPhotos() {
+    ArrayList<Photo> getPhotos() {
         return photos;
     }
 
-    public void setPhotos(ArrayList<Photo> photos) {
+    void setPhotos(ArrayList<Photo> photos) {
         this.photos = photos;
     }
 
-    public Bitmap getImage() {
+    Bitmap getImage() {
         return image;
     }
 
-    public void setImage(Bitmap image) {
+    void setImage(Bitmap image) {
         this.image = image;
     }
 
-    public String getPlaceId() {
+    String getPlaceId() {
         return placeId;
     }
 
-    public void setPlaceId(String placeId) {
+    void setPlaceId(String placeId) {
         this.placeId = placeId;
     }
 
-    public int getPriceLevel() {
+    int getPriceLevel() {
         return priceLevel;
     }
 
-    public void setPriceLevel(int priceLevel) {
+    void setPriceLevel(int priceLevel) {
         this.priceLevel = priceLevel;
     }
 
-    public double getRating() {
+    double getRating() {
         return rating;
     }
 
-    public void setRating(double rating) {
+    void setRating(double rating) {
         this.rating = rating;
     }
 
-    public String getScope() {
+    String getScope() {
         return scope;
     }
 
-    public void setScope(String scope) {
+    void setScope(String scope) {
         this.scope = scope;
     }
 
-    public ArrayList<AltId> getAltIds() {
+    ArrayList<AltId> getAltIds() {
         return altIds;
     }
 
-    public void setAltIds(ArrayList<AltId> altIds) {
+    void setAltIds(ArrayList<AltId> altIds) {
         this.altIds = altIds;
     }
 
-    public String getReference() {
+    String getReference() {
         return reference;
     }
 
-    public void setReference(String reference) {
+    void setReference(String reference) {
         this.reference = reference;
     }
 
-    public ArrayList<String> getTypes() {
+    ArrayList<String> getTypes() {
         return types;
     }
 
-    public void setTypes(ArrayList<String> types) {
+    void setTypes(ArrayList<String> types) {
         this.types = types;
     }
 
-    public String getVicinity() {
+    String getVicinity() {
         return vicinity;
     }
 
-    public void setVicinity(String vicinity) {
+    void setVicinity(String vicinity) {
         this.vicinity = vicinity;
     }
 
@@ -212,15 +213,16 @@ class Geometry {
     @JsonProperty("location")
     private Location location;
 
-    public Location getLocation() {
+    Location getLocation() {
         return location;
     }
 
-    public void setLocation(Location location) {
+    void setLocation(Location location) {
         this.location = location;
     }
 }
 
+@SuppressWarnings("unused")
 class Location {
     @JsonProperty("lat")
     private double latitude;
@@ -228,37 +230,39 @@ class Location {
     @JsonProperty("lng")
     private double longitude;
 
-    public double getLatitude() {
+    double getLatitude() {
         return latitude;
     }
 
-    public void setLatitude(double latitude) {
+    void setLatitude(double latitude) {
         this.latitude = latitude;
     }
 
-    public double getLongitude() {
+    double getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(double longitude) {
+    void setLongitude(double longitude) {
         this.longitude = longitude;
     }
 }
 
+@SuppressWarnings("unused")
 @JsonIgnoreProperties(value = {"weekday_text"})
 class OpeningHours {
     @JsonProperty("open_now")
     private boolean openNow;
 
-    public boolean isOpenNow() {
+    boolean isOpenNow() {
         return openNow;
     }
 
-    public void setOpenNow(boolean openNow) {
+    void setOpenNow(boolean openNow) {
         this.openNow = openNow;
     }
 }
 
+@SuppressWarnings("unused")
 class Photo {
     @JsonProperty("height")
     private int height;
@@ -272,39 +276,40 @@ class Photo {
     @JsonProperty("width")
     private int width;
 
-    public int getHeight() {
+    int getHeight() {
         return height;
     }
 
-    public void setHeight(int height) {
+    void setHeight(int height) {
         this.height = height;
     }
 
-    public ArrayList<String> getHtmlAttributions() {
+    ArrayList<String> getHtmlAttributions() {
         return htmlAttributions;
     }
 
-    public void setHtmlAttributions(ArrayList<String> htmlAttributions) {
+    void setHtmlAttributions(ArrayList<String> htmlAttributions) {
         this.htmlAttributions = htmlAttributions;
     }
 
-    public String getPhotoReference() {
+    String getPhotoReference() {
         return photoReference;
     }
 
-    public void setPhotoReference(String photoReference) {
+    void setPhotoReference(String photoReference) {
         this.photoReference = photoReference;
     }
 
-    public int getWidth() {
+    int getWidth() {
         return width;
     }
 
-    public void setWidth(int width) {
+    void setWidth(int width) {
         this.width = width;
     }
 }
 
+@SuppressWarnings("unused")
 class AltId {
     @JsonProperty("place_id")
     private String placeId;
@@ -312,19 +317,19 @@ class AltId {
     @JsonProperty("scope")
     private String scope;
 
-    public String getPlaceId() {
+    String getPlaceId() {
         return placeId;
     }
 
-    public void setPlaceId(String placeId) {
+    void setPlaceId(String placeId) {
         this.placeId = placeId;
     }
 
-    public String getScope() {
+    String getScope() {
         return scope;
     }
 
-    public void setScope(String scope) {
+    void setScope(String scope) {
         this.scope = scope;
     }
 }

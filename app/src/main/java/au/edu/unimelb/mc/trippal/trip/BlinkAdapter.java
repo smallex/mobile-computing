@@ -9,15 +9,15 @@ import java.util.concurrent.TimeUnit;
 /**
  * Custom SparkAdapter for showing blinking frequency.
  */
-public class BlinkAdapter extends SparkAdapter {
+class BlinkAdapter extends SparkAdapter {
 
     private List<Integer> blinkFrequencies;
 
-    public BlinkAdapter() {
+    BlinkAdapter() {
         this.blinkFrequencies = new ArrayList<>();
     }
 
-    public void update(List<Long> blinkTimes) {
+    void update(List<Long> blinkTimes) {
 
         long currentTime = System.currentTimeMillis();
 

@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
  * This class models the fatigue of a driver during a trip, based on certain trip data.
  * Uses very naive assumptions, useful only as proof of concept.
  */
-public class FatigueModel {
+class FatigueModel {
     private final int MEAN_SLEEP_DURATION_HOURS = 8;
     // The fatigue level assumed by the model from 0 - 100, where 0 = completely rested and 100 =
     // must take a break immediately
@@ -14,9 +14,8 @@ public class FatigueModel {
     private long timeElapsed = 0;
     private float lastFatigueLevel = 0;
 
-    public FatigueModel(int currentDrowsinessLevel, int lastSleepHours, int lastSleepMinutes, int
+    FatigueModel(int currentDrowsinessLevel, int lastSleepHours, int lastSleepMinutes, int
             lastSleepQuality) {
-
         currentDrowsinessLevel = (int) clamp(0.0f, 5.0f, currentDrowsinessLevel);
         lastSleepQuality = (int) clamp(0.0f, 100.0f, lastSleepQuality);
 
@@ -31,8 +30,6 @@ public class FatigueModel {
         fatigueLevel = clamp(0.0f, 100.0f, fatigueLevel);
     }
 
-    ;
-
     // Clamp value between min and max
     private float clamp(float min, float max, float value) {
         return Math.min(max, Math.max(min, value));
@@ -41,7 +38,7 @@ public class FatigueModel {
     /**
      * @return The current estimated fatigue level of the driver, from 0 - 100
      */
-    public float getFatigueLevel() {
+    float getFatigueLevel() {
         float result = computeNewFatigueLevel();
         lastFatigueLevel = result;
         return result;
@@ -55,24 +52,24 @@ public class FatigueModel {
         return result;
     }
 
-    public boolean isHighRisk() {
+    boolean isHighRisk() {
         return lastFatigueLevel < 80.0f && computeNewFatigueLevel() >= 80.0f
                 || lastFatigueLevel < 90.0f && computeNewFatigueLevel() >= 90.0f
                 || lastFatigueLevel < 100.0f && computeNewFatigueLevel() == 100.0f;
     }
 
-    public void setTimeElapsed(long timeElapsed) {
+    void setTimeElapsed(long timeElapsed) {
         this.timeElapsed = timeElapsed;
     }
 
-    public void setCurrentStopDuration(long currentStopDuration) {
+    void setCurrentStopDuration(long currentStopDuration) {
         // Substract 1.5 fatigue units per minute stopped => 30 min break => 45 points
         long minutes = TimeUnit.MILLISECONDS.toMinutes(currentStopDuration);
         this.fatigueLevel -= minutes * 1.5;
         this.fatigueLevel = clamp(0.0f, 100.0f, this.fatigueLevel);
     }
 
-    public FatigueRisk getCurrentRisk() {
+    FatigueRisk getCurrentRisk() {
         if (fatigueLevel < 40) {
             return FatigueRisk.LOW;
         } else if (fatigueLevel < 80) {
@@ -86,7 +83,7 @@ public class FatigueModel {
         this.fatigueLevel = 100.0f;
     }
 
-    public enum FatigueRisk {
+    enum FatigueRisk {
         LOW, MEDIUM, HIGH
     }
 }

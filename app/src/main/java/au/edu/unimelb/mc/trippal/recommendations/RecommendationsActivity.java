@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
-import android.speech.tts.TextToSpeech;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -25,7 +24,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import au.edu.unimelb.mc.trippal.Constants;
 import au.edu.unimelb.mc.trippal.R;
 import info.debatty.java.stringsimilarity.Levenshtein;
 
@@ -46,6 +44,7 @@ import static au.edu.unimelb.mc.trippal.Constants.mappingSwitchDriver;
 public class RecommendationsActivity extends AppCompatActivity {
     private ArrayList<RecommendationMapping> mDataSet;
     private int REQ_CODE_SPEECH_INPUT_ACT = 600;
+    private final String LOG_ID = "RecommendationsActivity";
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,7 +91,8 @@ public class RecommendationsActivity extends AppCompatActivity {
             try {
                 startActivityForResult(intent, REQ_CODE_SPEECH_INPUT_ACT);
             } catch (ActivityNotFoundException a) {
-
+                Log.d(LOG_ID, a.getLocalizedMessage());
+                a.printStackTrace();
             }
         }
     }
@@ -126,7 +126,7 @@ public class RecommendationsActivity extends AppCompatActivity {
                 ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent
                         .EXTRA_RESULTS);
                 String res = result.get(0).toLowerCase();
-                Log.d("resultSleep", res);
+                Log.d(LOG_ID, "resultSleep: " + res);
 
                 // check if speechrecognition result contains keywords if not choose closest one based on levensthein distance
                 if (res.contains(mappingCoffee)) {

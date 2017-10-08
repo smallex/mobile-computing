@@ -55,10 +55,9 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import au.edu.unimelb.mc.trippal.Constants;
-import au.edu.unimelb.mc.trippal.IntroActivity;
 import au.edu.unimelb.mc.trippal.R;
 import au.edu.unimelb.mc.trippal.backend.AzureCall;
+import au.edu.unimelb.mc.trippal.other.IntroActivity;
 import info.debatty.java.stringsimilarity.Levenshtein;
 
 import static au.edu.unimelb.mc.trippal.Constants.extraAccessToken;

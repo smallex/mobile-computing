@@ -45,10 +45,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import au.edu.unimelb.mc.trippal.Constants;
 import au.edu.unimelb.mc.trippal.R;
 import au.edu.unimelb.mc.trippal.trip.TripActivity;
 import info.debatty.java.stringsimilarity.Levenshtein;
@@ -236,8 +233,7 @@ public class RecommendationsDetailActivity extends AppCompatActivity implements 
                 if (mDataSet.isEmpty()) {
                     if (radius < MAX_RADIUS) {
                         // Recursively call this function until MAX_RADIUS is reached
-                        int r = radius;
-                        startRecs(location, r += MIN_RADIUS);
+                        startRecs(location, radius + MIN_RADIUS);
                     } else {
                         runOnUiThread(new Runnable() {
                             @Override
@@ -307,6 +303,8 @@ public class RecommendationsDetailActivity extends AppCompatActivity implements 
                                                 try {
                                                     startActivityForResult(intent, REQ_CODE_SPEECH_INPUT_Location);
                                                 } catch (ActivityNotFoundException a) {
+                                                    Log.d(LOG_ID, a.getLocalizedMessage());
+                                                    a.printStackTrace();
                                                 }
                                             }
                                         }
@@ -316,14 +314,14 @@ public class RecommendationsDetailActivity extends AppCompatActivity implements 
                                         }
                                     });
                                     int countItems = mDataSet.size();
-                                    if (countItems>6) {
+                                    if (countItems > 6) {
                                         countItems = 6;
                                     }
                                     // read all available locations to user
                                     tts.speak(getString(R.string.TTSLocationsAvailable), TextToSpeech.QUEUE_ADD,
                                             null, "1");
                                     tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
-                                    for (int i = 0; i <countItems; i++) {
+                                    for (int i = 0; i < countItems; i++) {
                                         tts.speak(mDataSet.get(i).getName(), TextToSpeech.QUEUE_ADD,
                                                 null, "1");
                                         tts.playSilentUtterance(300, TextToSpeech.QUEUE_ADD, null);
@@ -372,7 +370,7 @@ public class RecommendationsDetailActivity extends AppCompatActivity implements 
                 String res = result.get(0).toLowerCase();
 
                 int countItems = mDataSet.size();
-                if (countItems>6) {
+                if (countItems > 6) {
                     countItems = 6;
                 }
 
@@ -586,10 +584,12 @@ public class RecommendationsDetailActivity extends AppCompatActivity implements 
                 Bitmap resizedBitmap;
                 if (height > width) {
                     int y = (height - width) / 2;
+                    //noinspection SuspiciousNameCombination
                     resizedBitmap = Bitmap.createBitmap(result, 0, y, width, width);
                     resizedBitmap = createScaledBitmap(resizedBitmap, MAX_WIDTH, MAX_HEIGHT, false);
                 } else {
                     int x = (width - height) / 2;
+                    //noinspection SuspiciousNameCombination
                     resizedBitmap = Bitmap.createBitmap(result, x, 0, height, height);
                     resizedBitmap = createScaledBitmap(resizedBitmap, MAX_WIDTH, MAX_HEIGHT, false);
                 }
@@ -624,7 +624,6 @@ public class RecommendationsDetailActivity extends AppCompatActivity implements 
         super.onDestroy();
     }
 }
-
 
 
 class UriFormat {

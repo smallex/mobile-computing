@@ -1,4 +1,4 @@
-package au.edu.unimelb.mc.trippal;
+package au.edu.unimelb.mc.trippal.other;
 
 import android.content.Context;
 import android.content.Intent;
@@ -18,6 +18,7 @@ import com.tapadoo.alerter.Alerter;
 
 import java.net.MalformedURLException;
 
+import au.edu.unimelb.mc.trippal.R;
 import au.edu.unimelb.mc.trippal.trip.TripListActivity;
 
 import static au.edu.unimelb.mc.trippal.Constants.extraLoginSuccess;
@@ -27,13 +28,9 @@ import static au.edu.unimelb.mc.trippal.Constants.prefUserInfo;
 
 public class LoginActivity extends AppCompatActivity {
     private final String LOG_ID = "LoginActivity";
-
     private final String AZURE_AUTHENTICATION_URL = "https://trippal.azurewebsites.net";
     private final int GOOGLE_SIGNIN_CODE = 1;
     private final int MICROSOFT_SIGNIN_CODE = 2;
-
-    private GoogleSignInButton googleButton;
-    private Button microsoftButton;
 
     private MobileServiceClient mClient;
     private Toolbar toolbar;
@@ -43,12 +40,14 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        googleButton = (GoogleSignInButton) findViewById(R.id.googleSignInButton);
-        microsoftButton = (Button) findViewById(R.id.microsoftSigninButton);
+        GoogleSignInButton googleButton = (GoogleSignInButton) findViewById(R.id.googleSignInButton);
+        Button microsoftButton = (Button) findViewById(R.id.microsoftSigninButton);
 
         try {
             mClient = new MobileServiceClient(AZURE_AUTHENTICATION_URL, this);
         } catch (MalformedURLException e) {
+            Log.d(LOG_ID, e.getLocalizedMessage());
+            e.printStackTrace();
         }
 
         if (loadUserData(mClient)) {

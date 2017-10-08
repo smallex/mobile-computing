@@ -8,7 +8,8 @@ import java.util.ArrayList;
  * Created by alexandrafritzen on 9/09/2017.
  */
 
-public class PlaceResponse {
+@SuppressWarnings("unused")
+class PlaceResponse {
 
     @JsonProperty("html_attributions")
     private ArrayList<String> attributions;
@@ -28,51 +29,51 @@ public class PlaceResponse {
     @JsonProperty("error_message")
     private String errorMessage;
 
-    public ArrayList<String> getAttributions() {
+    ArrayList<String> getAttributions() {
         return attributions;
     }
 
-    public void setAttributions(ArrayList<String> attributions) {
+    void setAttributions(ArrayList<String> attributions) {
         this.attributions = attributions;
     }
 
-    public String getNextPageToken() {
+    String getNextPageToken() {
         return nextPageToken;
     }
 
-    public void setNextPageToken(String nextPageToken) {
+    void setNextPageToken(String nextPageToken) {
         this.nextPageToken = nextPageToken;
     }
 
-    public ArrayList<Place> getResults() {
+    ArrayList<Place> getResults() {
         return results;
     }
 
-    public void setResults(ArrayList<Place> results) {
+    void setResults(ArrayList<Place> results) {
         this.results = results;
     }
 
-    public int getRadius() {
+    int getRadius() {
         return radius;
     }
 
-    public void setRadius(int radius) {
+    void setRadius(int radius) {
         this.radius = radius;
     }
 
-    public String getStatus() {
+    String getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    void setStatus(String status) {
         this.status = status;
     }
 
-    public String getErrorMessage() {
+    String getErrorMessage() {
         return errorMessage;
     }
 
-    public void setErrorMessage(String errorMessage) {
+    void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
     }
 }

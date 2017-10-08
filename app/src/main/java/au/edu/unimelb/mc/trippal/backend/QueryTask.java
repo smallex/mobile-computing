@@ -51,11 +51,7 @@ public class QueryTask extends AsyncTask<String, Void, List<TripEntity>> {
                     return t2.getTripDate().compareTo(t1.getTripDate());
                 }
             });
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        } catch (InvalidKeyException e) {
-            e.printStackTrace();
-        } catch (StorageException e) {
+        } catch (URISyntaxException | InvalidKeyException | StorageException e) {
             e.printStackTrace();
         }
 

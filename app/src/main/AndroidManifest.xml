@@ -39,7 +39,7 @@
             android:value="face" />
 
         <activity
-            android:name=".IntroActivity"
+            android:name=".other.IntroActivity"
             android:label="TripPal" />
 
         <activity android:name="com.microsoft.windowsazure.mobileservices.authentication.RedirectUrlActivity">
@@ -54,7 +54,7 @@
                     android:scheme="trippal" />
             </intent-filter>
         </activity>
-        <activity android:name=".RedirectActivity">
+        <activity android:name=".other.RedirectActivity">
             <intent-filter>
                 <data
                     android:host="success"
@@ -68,7 +68,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".trip.TripListActivity" />
-        <activity android:name=".LoginActivity">
+        <activity android:name=".other.LoginActivity">
             <intent-filter android:label="TripPal">
                 <action android:name="android.intent.action.MAIN" />
 

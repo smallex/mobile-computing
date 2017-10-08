@@ -9,7 +9,6 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.tapadoo.alerter.Alerter;
 
 import java.util.ArrayList;
@@ -26,12 +25,9 @@ import static au.edu.unimelb.mc.trippal.Constants.extraLoginSuccess;
  */
 public class TripListActivity extends AppCompatActivity {
 
-    private ListView tripListView;
-    private Toolbar toolbar;
     private TextView noTripsText;
     private ProgressBar progress;
     private TripListAdapter adapter;
-    private MobileServiceClient mClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,12 +36,12 @@ public class TripListActivity extends AppCompatActivity {
 
         noTripsText = (TextView) findViewById(R.id.no_trip_text);
         progress = (ProgressBar) findViewById(R.id.trip_list_progress);
-        toolbar = (Toolbar) findViewById(R.id.toolbar_trip_list);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_trip_list);
         toolbar.setTitle(R.string.yourTrips);
         adapter = new TripListAdapter(this, R.layout
                 .activity_trip_list_item, new ArrayList<TripEntity>());
 
-        tripListView = (ListView) findViewById(R.id.trip_list_view);
+        ListView tripListView = (ListView) findViewById(R.id.trip_list_view);
         tripListView.setAdapter(adapter);
 
         Intent intent = getIntent();
@@ -74,7 +70,7 @@ public class TripListActivity extends AppCompatActivity {
     /**
      * Start the NewTripActivity.
      *
-     * @param view
+     * @param view Is ignored
      */
     public void addTrip(View view) {
         Intent intent = new Intent(this, NewTripActivity.class);

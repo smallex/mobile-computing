@@ -4,7 +4,7 @@ package au.edu.unimelb.mc.trippal.recommendations;
  * Created by alexandrafritzen on 14/09/2017.
  */
 
-public enum PlaceType {
+enum PlaceType {
     BAKERY("bakery"),
     CAFE("cafe"),
     GAS_STATION("gas_station"),
