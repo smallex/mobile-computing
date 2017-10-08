@@ -33,7 +33,6 @@ public class LoginActivity extends AppCompatActivity {
     private final int MICROSOFT_SIGNIN_CODE = 2;
 
     private MobileServiceClient mClient;
-    private Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,7 +106,7 @@ public class LoginActivity extends AppCompatActivity {
                     showTripList(true);
                 } else {
                     Log.d(LOG_ID, "ERROR: Error during login");
-                    Alerter.create(this).enableIconPulse(false).setIcon(R.drawable.warning).show();
+                    Alerter.create(this).setText(R.string.unableToLogIn).setBackgroundColorRes(R.color.accent).enableIconPulse(false).setIcon(R.drawable.warning).show();
                 }
             }
         }

@@ -66,4 +66,5 @@
     <string name="takeABreak">take a break</string>
     <string name="tripPal">TripPal</string>
     <string name="start">Start</string>
+    <string name="unableToLogIn">We were unable to log you in. Please try again.</string>
 </resources>
